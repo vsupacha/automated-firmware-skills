@@ -1,6 +1,7 @@
 # Workflow contract for every skill
 
-Every skill in `skills/` drives one dev tool for one MCU family (`<devtool>-<mcu>`, hyphens only).
+Every skill in `skills/` drives one dev tool for one MCU family or board (`<devtool>-<mcu>`, or
+`<devtool>-<framework>-<board>` when the framework matters, hyphens only).
 All skills follow the same milestones, stage numbers, script names, gate lines and exit codes, so
 an agent (or a developer) can drive any board the same way and a port to another MCU/toolchain is
 proven by the **same tests**.
@@ -12,6 +13,8 @@ Reference implementations:
 | [modus-psoc-e84](../skills/modus-psoc-e84/SKILL.md) | ModusToolbox, make, OpenOCD | Edgi-Talk, TESAIoT | vendor IDE toolchain, external probe |
 | [cubemx-stm32c5](../skills/cubemx-stm32c5/SKILL.md) | STM32CubeMX2 CLI, CMake, STM32CubeProgrammer | NUCLEO-C562RE | code generator, on-board ST-LINK |
 | [pio-rpi-pico-2w](../skills/pio-rpi-pico-2w/SKILL.md) | PlatformIO, picotool | Pico 2 W | native USB, no probe |
+| [pio-espidf-esp32s3box](../skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF, esptool | ESP32-S3-BOX | USB Serial/JTAG, no probe; shares `lib/func` |
+| [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
 
 ## Milestones and stages
 
@@ -21,8 +24,8 @@ Reference implementations:
 | | 1 | setup | `check_tools.sh <board>` | `missing/bad=0` | no |
 | | 2 | create | `new_app.sh <board> <app> [ws] [template]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
 | | 3 | build | `build.sh <app>` | `BUILD: PASS` + manifest | no |
-| **M2 layering** - BSP/drivers > logic > execution | 4 | layer check | `check_layers.py` *(planned)* | `LAYERS: PASS` | no |
-| | 5 | host test | `host_test.sh` *(planned)*: `lib/func` with a fake `board.h` on the PC | `HOST: PASS` | no |
+| **M2 layering** - BSP/drivers > logic > execution | 4 | layer check | `python lib/check_layers.py <app>` | `LAYERS: PASS` | no |
+| | 5 | host test | `bash lib/host_test.sh [<app>]`: `func/` with a fake `board.h` on the PC | `HOST: PASS` | no |
 | **M3 hardware** - test and debug on the real board, with the HW/tools available | 6 | connect | `discover.sh <board>` | `IDENTITY: PASS` | yes |
 | | 7 | flash | `flash.sh <app> --yes` | `FLASH: PASS` | yes |
 | | 8 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]` | `RESULT: PASS` | yes |
@@ -43,7 +46,7 @@ is the developer's decision, never the agent's.
 | --- | --- | --- |
 | 0 | gate passed | next stage |
 | 1 | failed | read the log, fix, re-run (never skip the gate) |
-| 2 | passed with warnings (build) | fix the warnings in `src/`/`board`/`func`/`main` |
+| 2 | passed with warnings (build, layer check) | fix the warnings in `src/`/`board`/`func`/`main` |
 | **10** | **developer action needed** - the script printed `ACTION: <TYPE> <what to do>` | relay the action word for word, wait for the developer's OK, re-run the same command |
 
 `ACTION` types (helper `need_user` in `lib/common.sh`):
@@ -74,10 +77,16 @@ board       board/  (board.h API)     the port boundary: one API, one implementa
 BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico core (never edit)
 ```
 
-- `lib/func` is shared unchanged by modus-psoc-e84 and cubemx-stm32c5 (pio-rpi-pico-2w: C++ copy,
-  to be merged). It may include only `board.h` and the C library.
+- `lib/func` is shared unchanged by modus-psoc-e84, cubemx-stm32c5 and pio-espidf-esp32s3box.
+  Arduino skills (pio-rpi-pico-2w, pio-arduino-esp32s3box) keep an Arduino-style C++ func/ in their
+  templates (`<Arduino.h>`, Print/Stream, millis) - same console protocol and tests. It may include only `board.h` and the C library.
 - `board.h` is the same API on every board: init, millis/delay, LEDs (write/read/name), buttons
-  (read/name/pin), console getc/flush, printf to the console.
+  (read/name/pin), console getc/flush, printf to the console - the contract is
+  [board-api.md](board-api.md).
+- Checks: `check_layers.py` (includes, vendor calls, `#if BOARD_*` per layer) and `host_test.sh`
+  (the func services against `lib/host`'s fake board: console line editing and dispatch, LED
+  numbering and read-back, button debounce and events). The host test needs a host C compiler
+  (gcc, clang or Visual Studio C++ with the Windows SDK).
 - Services expose init/poll functions; the execution layer decides how they run (a superloop calls
   `*_poll()`, an RTOS wraps them in tasks) - this is what makes M4 OS ports mechanical.
 - Console protocol (test contract): `READY`, `INFO app=.. v=.. board=<id> ...`, `OK ...`,
@@ -91,6 +100,14 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
 - Tests skip what the board lacks (`requires_re` on the INFO line) and what needs a human
   (`interactive`); planned: `requires_bench` for bench capabilities (debug probe, loopback wires,
   attached sensors) so a missing tool is reported as *skipped*, not *failed*.
+- **One run per board:** discover, flash, test (and backup / identity check) take a lock
+  `<ws>/.bench/<id>.lock/` (owner: host, pid, tool, time) for their whole run; a second session gets
+  `board '<id>' is in use` (exit 1: wait, re-run). Scripts called by a lock holder inherit it; a lock
+  whose process is gone, or that arrived from another PC through a synced folder, is replaced.
+- **Flash approval:** `flash.sh` needs `--yes` (the agent asked the developer) unless the
+  developer wrote `FLASH_POLICY=auto` into `<ws>/.bench/<id>.env` for a dedicated lab board
+  (default `ask`; discover.sh keeps the line when it rewrites the file). Only the file counts - an
+  environment variable cannot switch approval off - and an agent never writes it.
 - Report verification levels separately: source → generated → built → flashed → booted (READY) →
   tested (PASS n/m) → observed by a human. Add a dated line to `boards/<id>/<skill>/README.md`.
 
@@ -101,6 +118,9 @@ skills/<skill>/SKILL.md, scripts/, reference/, templates/   one skill per toolch
 lib/common.sh, lib/fwtest.py, lib/func/                      shared by all skills
 boards/<id>/README.md                                        board hardware, tool-independent
 boards/<id>/<skill>/                                         that skill's board profile + log
+boards/index.json                                            board ids, aliases, MCU, evidence level per profile
+lib/host/, host_test.sh, check_layers.py                     M2 checks: fake board + unit tests, layer rules
+tools/validate_skills.py                                     repo validator (run before every commit)
 apps/<app>/                                                  generated projects
 apps/.bench/<id>.env                                         per-PC instance data (git-ignored)
 ```
@@ -113,4 +133,5 @@ apps/.bench/<id>.env                                         per-PC instance dat
 3. A `board.h` implementation per board under `templates/_common`, reusing `lib/func`.
 4. For each board: `boards/<id>/<skill>/` profile + verification log (`boards/_template/`).
 5. hello-world and uart-btn-led templates with the shared test specs; run M1 and M3 on hardware.
-6. Add the skill to the tables in the top-level `README.md`.
+6. Add the skill to the tables in the top-level `README.md` and its boards to `boards/index.json`.
+7. `python tools/validate_skills.py` until `VALIDATE: PASS`.

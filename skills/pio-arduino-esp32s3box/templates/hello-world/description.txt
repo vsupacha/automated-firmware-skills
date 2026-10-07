@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the USB Serial/JTAG console (esp_timer time base)

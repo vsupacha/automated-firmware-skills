@@ -1,0 +1,1 @@
+UART console over USB (led/btn commands) + BOOT toggles the LCD backlight (LED1) - full I/O demo

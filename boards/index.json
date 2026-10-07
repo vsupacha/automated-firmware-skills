@@ -149,6 +149,16 @@
           },
           "note": "2021 model only (not BOX-Lite / BOX-3)",
           "log": "boards/esp32-s3-box/pio-espidf-esp32s3box/README.md"
+        },
+        "pio-arduino-esp32s3box": {
+          "level": "observed",
+          "date": "2026-10-07",
+          "templates": {
+            "hello-world": "tested",
+            "uart-btn-led": "observed"
+          },
+          "note": "Arduino-style code; 2021 model only (not BOX-Lite / BOX-3)",
+          "log": "boards/esp32-s3-box/pio-arduino-esp32s3box/README.md"
         }
       }
     }

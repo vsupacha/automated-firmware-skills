@@ -7,6 +7,7 @@ not the ESP32-S3-BOX-3 (2023, other pins). Tool-independent hardware sheet.
 | Profile | Skill | Status |
 | --- | --- | --- |
 | [pio-espidf-esp32s3box/](pio-espidf-esp32s3box/README.md) | `skills/pio-espidf-esp32s3box` (PlatformIO + ESP-IDF) | verified on hardware (backlight seen) |
+| [pio-arduino-esp32s3box/](pio-arduino-esp32s3box/README.md) | `skills/pio-arduino-esp32s3box` (PlatformIO + Arduino) | verified on hardware (backlight seen) |
 
 Sources: Espressif esp-box repository, hardware overview of the ESP32-S3-BOX and the esp-bsp
 `esp-box` board support package; PlatformIO `espressif32` 6.12.0 board `esp32s3box`.
