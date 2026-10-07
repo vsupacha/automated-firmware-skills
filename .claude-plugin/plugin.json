@@ -1,0 +1,10 @@
+{
+  "name": "automated-firmware-skills",
+  "version": "0.1.0",
+  "description": "Gated, AI-driven firmware workflows (tools check, board discovery, project generation, layered code, build, flash, UART test, clean) for MCU dev tools. Skills: modus-psoc-e84 (ModusToolbox + Infineon PSOC Edge E84), cubemx-stm32c5 (STM32CubeMX2 + ST STM32C5), pio-rpi-pico-2w (PlatformIO + Raspberry Pi Pico 2 W).",
+  "author": {
+    "name": "Supachai Vorapojpisut"
+  },
+  "license": "MIT",
+  "keywords": ["firmware", "embedded", "mcu", "modustoolbox", "psoc-edge", "pse84", "stm32", "stm32cubemx2", "platformio", "rp2350", "pico", "build", "flash", "test"]
+}

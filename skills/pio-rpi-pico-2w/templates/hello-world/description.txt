@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the USB console (millis time base)

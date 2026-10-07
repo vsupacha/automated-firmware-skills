@@ -1,0 +1,14 @@
+{
+  "name": "automated-firmware-skills",
+  "owner": {
+    "name": "Supachai Vorapojpisut"
+  },
+  "description": "Community skills for automated MCU firmware workflows.",
+  "plugins": [
+    {
+      "name": "automated-firmware-skills",
+      "source": "./",
+      "description": "Gated firmware workflows per dev tool and MCU (skills/<devtool>-<mcu>), with shared board sheets (boards/) and sample apps (apps/)."
+    }
+  ]
+}

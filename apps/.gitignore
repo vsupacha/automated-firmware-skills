@@ -1,0 +1,16 @@
+# written by the pio-rpi-pico-2w skill: per-PC and regenerable files (keep app sources + tests)
+.bench/
+*/.pio/
+*/logs/
+# added by the modus-psoc-e84 skill: per-PC and regenerable files (keep app sources + tests)
+mtb_shared/
+.cache/
+*/build/
+*/proj_*/build/
+*/proj_*/libs/
+.mtbqueryapi
+.ninja_log
+nsc_veneer.o
+# added by the cubemx-stm32c5 skill: per-PC and regenerable files (keep the .ioc2, src/, tests/)
+*/mx/
+*/.mx/

@@ -1,0 +1,32 @@
+# --- apps workspace: per-PC and regenerable content (never commit) ---
+apps/mtb_shared/
+apps/.cache/
+# probe serials + COM ports of this PC (discover.sh)
+apps/.bench/
+apps/*/build/
+apps/*/proj_*/build/
+apps/*/proj_*/libs/
+# build/flash/test logs contain probe serials and local paths
+apps/*/logs/
+apps/*/.git/
+# PlatformIO build outputs
+apps/*/.pio/
+# STM32CubeMX2 generated project + working copy (regenerated from <app>.ioc2 by regen.sh)
+apps/*/mx/
+apps/*/.mx/
+# ModusToolbox query files hold absolute local paths
+.mtbqueryapi
+.ninja_log
+nsc_veneer.o
+
+# --- flash dumps of your own boards (backup.sh) ---
+backup/
+
+# --- Python / editors / OS ---
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.vscode/
+.DS_Store
+Thumbs.db

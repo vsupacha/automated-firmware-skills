@@ -1,0 +1,1 @@
+UART console (led/btn commands) + B1 toggles LD1 - full I/O demo
