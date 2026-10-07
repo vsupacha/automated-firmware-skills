@@ -14,3 +14,7 @@ nsc_veneer.o
 # added by the cubemx-stm32c5 skill: per-PC and regenerable files (keep the .ioc2, src/, tests/)
 */mx/
 */.mx/
+# added by the pio-espidf-esp32s3box skill: per-PC and regenerable files (keep app sources + tests)
+*/sdkconfig.*
+!*/sdkconfig.defaults
+*/managed_components/

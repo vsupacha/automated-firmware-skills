@@ -11,6 +11,10 @@ apps/*/logs/
 apps/*/.git/
 # PlatformIO build outputs
 apps/*/.pio/
+# ESP-IDF: sdkconfig.<env> is regenerated from sdkconfig.defaults; managed IDF components
+apps/*/sdkconfig.*
+!apps/*/sdkconfig.defaults
+apps/*/managed_components/
 # STM32CubeMX2 generated project + working copy (regenerated from <app>.ioc2 by regen.sh)
 apps/*/mx/
 apps/*/.mx/

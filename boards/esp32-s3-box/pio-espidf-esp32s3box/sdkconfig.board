@@ -1,0 +1,8 @@
+# ESP32-S3-BOX (2021) - board-specific sdkconfig lines, appended to the app's sdkconfig.defaults
+# by pio-espidf-esp32s3box/new_app.sh. Values from Espressif's ESP32-S3-BOX docs; mark what was checked on
+# hardware in README.md (verification log).
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+# PSRAM (8 MB octal on this board per vendor docs) stays OFF until discover.sh has confirmed it:
+# a wrong PSRAM mode stops the boot. Enable with CONFIG_SPIRAM=y + CONFIG_SPIRAM_MODE_OCT=y.

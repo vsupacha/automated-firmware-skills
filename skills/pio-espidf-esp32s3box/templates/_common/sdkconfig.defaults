@@ -1,0 +1,8 @@
+# Common sdkconfig defaults of the pio-espidf-esp32s3box skill (new_app.sh appends the board's
+# sdkconfig.board below). PlatformIO generates sdkconfig.<env> from this file on the first build;
+# change settings here (or in sdkconfig.board), delete sdkconfig.<env>, rebuild.
+
+# console = USB Serial/JTAG of the ESP32-S3 (board.c installs its driver)
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+# 1 kHz tick: board_delay_ms(1) in the superloop is 1 ms, not a 10 ms tick
+CONFIG_FREERTOS_HZ=1000

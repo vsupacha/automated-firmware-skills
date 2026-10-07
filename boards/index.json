@@ -127,6 +127,30 @@
           "log": "boards/rpi-pico-2w/pio-rpi-pico-2w/README.md"
         }
       }
+    },
+    {
+      "id": "esp32-s3-box",
+      "name": "Espressif ESP32-S3-BOX",
+      "aliases": [
+        "ESP32-S3-BOX",
+        "ESP32 S3 BOX",
+        "S3 BOX",
+        "ESP-BOX"
+      ],
+      "mcu": "ESP32-S3",
+      "mcu_family": "Espressif ESP32-S3",
+      "profiles": {
+        "pio-espidf-esp32s3box": {
+          "level": "observed",
+          "date": "2026-10-07",
+          "templates": {
+            "hello-world": "tested",
+            "uart-btn-led": "observed"
+          },
+          "note": "2021 model only (not BOX-Lite / BOX-3)",
+          "log": "boards/esp32-s3-box/pio-espidf-esp32s3box/README.md"
+        }
+      }
     }
   ]
 }
