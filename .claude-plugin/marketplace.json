@@ -8,7 +8,7 @@
     {
       "name": "automated-firmware-skills",
       "source": "./",
-      "description": "Gated firmware workflows per dev tool and MCU (skills/<devtool>-<mcu>), with shared board sheets (boards/) and sample apps (apps/)."
+      "description": "Gated firmware workflows per toolchain, framework and board (skills/<toolchain>-<framework>-<board>), with shared board sheets (boards/) and sample apps (apps/)."
     }
   ]
 }

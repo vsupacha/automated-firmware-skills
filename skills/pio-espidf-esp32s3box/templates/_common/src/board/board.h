@@ -4,7 +4,7 @@
 * Layer 1 - board adaptation for ESP32-S3 boards (ESP-IDF drivers).
 * The ONLY place for GPIO numbers, ESP-IDF driver calls and BOARD_xxx #ifdefs.
 * func/ and app_main.c use this API only (docs/board-api.md - the same API as
-* the modus-psoc-e84 and cubemx-stm32c5 skills, so <repo>/lib/func is shared
+* the modus-pdl-edgitalk and cubemx2-hal2-stm32c562nucleo skills, so <repo>/lib/func is shared
 * unchanged).
 *
 * The board id reaches C as -DBOARD_<ID> (src/CMakeLists.txt, written by

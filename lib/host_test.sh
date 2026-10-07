@@ -39,7 +39,7 @@ else
              -o -name mtb_shared -o -name bsps -o -name .git \) -prune -o -type d -name func -print)
   if [ -z "$FUNC" ]; then
     if find "$TARGET" -path '*/func/*.cpp' -not -path '*/.pio/*' | grep -q .; then
-      die "only C++ func sources in $TARGET (pio-rpi-pico-2w copy) - host tests cover the C lib/func; see docs/board-api.md"
+      die "only C++ func sources in $TARGET (pio-arduino-rpipico2w copy) - host tests cover the C lib/func; see docs/board-api.md"
     fi
     die "no func/ folder with $MODULES sources in $TARGET"
   fi

@@ -5,6 +5,8 @@
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILL_NAME="$(basename "$SKILL_DIR")"           # pio-espidf-esp32s3box: profile subfolder in boards/<id>/
+IDE_EXT=platformio.platformio-ide   # stage 2d: VS Code extension that opens, builds, flashes and debugs the app
+IDE_NAME="PlatformIO IDE"
 REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 # shellcheck disable=SC1091
 . "$REPO_ROOT/lib/common.sh" || { echo "ERROR: $REPO_ROOT/lib/common.sh missing - keep the repo layout" >&2; exit 1; }
@@ -18,10 +20,17 @@ fw_init_boards "$ESP_WS" "$ESP_BOARDS_DIR"
 
 # PlatformIO core dir and tools
 PIO_HOME="${PLATFORMIO_CORE_DIR:-$HOME/.platformio}"
+# PlatformIO Core: the VS Code extension / installer script's own penv (LOCAL), then PATH, then
+# pip installs: per user (LOCAL %APPDATA%/Python/*/Scripts) or for all users (GLOBAL Program Files)
 if [ -z "$PIO" ]; then
   for c in "$PIO_HOME/penv/Scripts/pio.exe" "$PIO_HOME/penv/bin/pio" "$(command -v pio 2>/dev/null)"; do
     [ -n "$c" ] && [ -x "$c" ] && { PIO="$c"; break; }
   done
+fi
+if [ -z "$PIO" ]; then
+  PIO="$(fw_find_dirs "$(cygpath -u "${APPDATA:-$HOME/AppData/Roaming}" 2>/dev/null)/Python/Python3*/Scripts" \
+                      "/c/Program Files/Python3*/Scripts" "/c/Python3*/Scripts" \
+         | while IFS= read -r d; do [ -x "$d/pio.exe" ] && echo "$d/pio.exe"; done | tail -1)"
 fi
 PYTHON="${PYTHON:-$(command -v python || command -v python3)}"
 export PLATFORMIO_NO_ANSI=1 PLATFORMIO_DISABLE_PROGRESSBAR=true
@@ -101,5 +110,6 @@ pio_pkg_version() {
 # write_workspace_gitignore <workspace>: this skill's per-PC / regenerable files
 write_workspace_gitignore() {
   # sdkconfig.<env> is generated from sdkconfig.defaults by every build; dependencies.lock is kept
-  fw_gitignore "$1" "$SKILL_NAME" ".bench/" "*/.pio/" "*/logs/" "*/sdkconfig.*" "!*/sdkconfig.defaults" "*/managed_components/"
+  # */.vscode/, */*.code-workspace: IDE files with per-PC paths, re-made by open_ide.sh / PlatformIO IDE
+  fw_gitignore "$1" "$SKILL_NAME" ".bench/" "*/.pio/" "*/logs/" "*/.vscode/" "*/*.code-workspace" "*/sdkconfig.*" "!*/sdkconfig.defaults" "*/managed_components/"
 }

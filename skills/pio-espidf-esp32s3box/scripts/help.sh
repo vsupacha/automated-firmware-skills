@@ -28,6 +28,8 @@ skill pio-espidf-esp32s3box (ESP32-S3-BOX, PlatformIO + ESP-IDF) - ask Claude in
  Create and build (no board needed)
   "create a hello-world app for the BOX"      -> new_app.sh <board> <app> "" hello-world
   "write an app: BOOT toggles the backlight"  -> template + code in src/board, src/func, src/app_main.c
+  "open it in VS Code"                        -> open_ide.sh <app>  (VS Code + PlatformIO IDE; new_app does it)
+     then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                  -> build.sh <app>
  Run on hardware (milestone M3; Claude asks before every flash)
   "find my board"                             -> discover.sh <board>   (esptool, writes nothing, resets the chip)
@@ -45,6 +47,8 @@ skill pio-espidf-esp32s3box (ESP32-S3-BOX, PlatformIO + ESP-IDF) - สั่ง 
  สร้างและ build (ไม่ต้องมีบอร์ด)
   "สร้างแอป hello-world สำหรับ BOX"               -> new_app.sh <board> <app> "" hello-world
   "เขียนแอป กด BOOT แล้วไฟจอสลับ"                  -> template + โค้ดใน src/board, src/func, src/app_main.c
+  "เปิดใน VS Code"                                -> open_ide.sh <app>  (VS Code + PlatformIO IDE; new_app เปิดให้เอง)
+     จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                                -> build.sh <app>
  ใช้กับบอร์ดจริง (milestone M3; Claude จะถามก่อน flash ทุกครั้ง)
   "หาบอร์ดที่ต่ออยู่"                               -> discover.sh <board>   (esptool อ่านอย่างเดียว แต่ chip จะรีเซ็ต)

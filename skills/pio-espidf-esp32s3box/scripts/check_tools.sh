@@ -33,10 +33,10 @@ svc="$(path_synced "$WSABS")"
 # PlatformIO Core
 if [ -n "$PIO" ] && [ -x "$PIO" ]; then
   v="$("$PIO" --version 2>/dev/null | tr -d '\r' | sed 's/.*version //')"
-  ok "PlatformIO Core" "$v  ($PIO)"
+  ok "PlatformIO Core" "$v  ($(fw_where "$PIO"))"
   case "$v" in "$PIO_VERSION"*) ;; *) wrn "PlatformIO vs profile" "profile proven with $PIO_VERSION.x, found $v";; esac
 else
-  bad "PlatformIO Core" "not found - install: python -m pip install -U platformio (or the VS Code PlatformIO extension)"
+  bad "PlatformIO Core" "not found (LOCAL ~/.platformio/penv or user pip, GLOBAL pip for all users) - install: python -m pip install -U platformio (or the VS Code PlatformIO extension)"
 fi
 
 # Pinned platform + the packages it pins (installed on the first build if missing)
@@ -65,7 +65,7 @@ fi
 
 # python + pyserial (discover, flash, tests - M3; not needed to create/build)
 if [ -n "$PYTHON" ]; then
-  ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')"
+  ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')  ($(fw_scope "$PYTHON"))"
   if "$PYTHON" -c "import serial" 2>/dev/null; then ok "pyserial" "$("$PYTHON" -c 'import serial;print(serial.VERSION)')"
   else wrn "pyserial" "missing - needed for discover/flash/test (M3): python -m pip install --user pyserial"; fi
 else
@@ -79,6 +79,9 @@ if [ -n "$devs" ]; then
 else
   wrn "Espressif USB device" "none connected (fine for create/build; needed for discover/flash/test)"
 fi
+
+# IDE path (stage 2d): VS Code + PlatformIO IDE - optional for the script path
+fw_check_ide
 
 echo "----------------------------------------------------------------"
 echo "missing/bad=$missing warnings=$warn"

@@ -5,7 +5,7 @@ parts. Toolchain profiles live in subfolders:
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [modus-psoc-e84/](modus-psoc-e84/README.md) | `skills/modus-psoc-e84` (ModusToolbox) | verified on hardware |
+| [modus-pdl-edgitalk/](modus-pdl-edgitalk/README.md) | `skills/modus-pdl-edgitalk` (ModusToolbox) | verified on hardware |
 
 Sources: RT-Thread BSP <https://github.com/RT-Thread-Studio/sdk-bsp-psoc_e84-edgi-talk>
 (schematics: `docs/board/PSOC-Edge-E84/PSoc_Edge_Basic_Schematic.pdf`, `..._Core_Schematic.pdf`;

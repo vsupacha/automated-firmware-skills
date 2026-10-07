@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the ST-LINK virtual COM port (USART1, HAL tick time base)

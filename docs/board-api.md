@@ -42,8 +42,8 @@ silkscreen, so console commands and tests say `led 1`, `btn1`.
 
 | Skill | Function | Why |
 | --- | --- | --- |
-| modus-psoc-e84 | `board_start_cm55()` | boot the second core (dual-core apps) |
-| modus-psoc-e84 | `board_button_diag(idx)` | drive mode / HSIOM / levels of a button pin |
+| modus-pdl-edgitalk | `board_start_cm55()` | boot the second core (dual-core apps) |
+| modus-pdl-edgitalk | `board_button_diag(idx)` | drive mode / HSIOM / levels of a button pin |
 
 `func/` must not call extensions; an execution layer that does is tied to that skill.
 
@@ -51,9 +51,9 @@ silkscreen, so console commands and tests say `led 1`, `btn1`.
 
 | Skill | Implementation | Status |
 | --- | --- | --- |
-| modus-psoc-e84 | `templates/_common/proj_cm33_ns/board/board.c` | conforms |
-| cubemx-stm32c5 | `templates/_common/src/board/board.c` | conforms |
-| pio-rpi-pico-2w | `templates/_common/src/board/board.cpp` | **differs** - 1-based `n`, `board_button_read`, no `board_led_read` / `board_led_name` / `board_button_pin` / `board_console_flush`, `BOARD_ID_NAME`, console via `Print &board_console()`; uses a C++ copy of func. To be merged into this contract and `lib/func`. |
+| modus-pdl-edgitalk | `templates/_common/proj_cm33_ns/board/board.c` | conforms |
+| cubemx2-hal2-stm32c562nucleo | `templates/_common/src/board/board.c` | conforms |
+| pio-arduino-rpipico2w | `templates/_common/src/board/board.cpp` | **differs** - 1-based `n`, `board_button_read`, no `board_led_read` / `board_led_name` / `board_button_pin` / `board_console_flush`, `BOARD_ID_NAME`, console via `Print &board_console()`; uses a C++ copy of func. To be merged into this contract and `lib/func`. |
 | host (fake) | `lib/host/board.h`, `board_fake.c` | conforms - drives `host_test.sh` |
 
 ## Checks

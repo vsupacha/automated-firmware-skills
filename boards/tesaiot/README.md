@@ -5,7 +5,7 @@ board**. Everything on the AI Kit applies; this sheet adds the base board. Tool-
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [modus-psoc-e84/](modus-psoc-e84/README.md) | `skills/modus-psoc-e84` (ModusToolbox), `BOARD_EXTENDS=kit-pse84-ai` | AI-Kit I/O verified; SW4/SW5 blocked by camera |
+| [modus-pdl-edgitalk/](modus-pdl-edgitalk/README.md) | `skills/modus-pdl-edgitalk` (ModusToolbox), `BOARD_EXTENDS=kit-pse84-ai` | AI-Kit I/O verified; SW4/SW5 blocked by camera |
 
 Sources: TESAIoT SDK <https://github.com/tesaiot/tesaiot-pse84-devkit-sdk>, docs J4, J5 and
 "Peripherals at a glance" <https://tesaiot.github.io/tesaiot-pse84-devkit-sdk/sdk/mtb-mpy/index.html>.

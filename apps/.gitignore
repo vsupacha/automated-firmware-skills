@@ -1,8 +1,8 @@
-# written by the pio-rpi-pico-2w skill: per-PC and regenerable files (keep app sources + tests)
+# written by the pio-arduino-rpipico2w skill: per-PC and regenerable files (keep app sources + tests)
 .bench/
 */.pio/
 */logs/
-# added by the modus-psoc-e84 skill: per-PC and regenerable files (keep app sources + tests)
+# added by the modus-pdl-edgitalk skill: per-PC and regenerable files (keep app sources + tests)
 mtb_shared/
 .cache/
 */build/
@@ -11,10 +11,13 @@ mtb_shared/
 .mtbqueryapi
 .ninja_log
 nsc_veneer.o
-# added by the cubemx-stm32c5 skill: per-PC and regenerable files (keep the .ioc2, src/, tests/)
+# added by the cubemx2-hal2-stm32c562nucleo skill: per-PC and regenerable files (keep the .ioc2, src/, tests/)
 */mx/
 */.mx/
 # added by the pio-espidf-esp32s3box skill: per-PC and regenerable files (keep app sources + tests)
 */sdkconfig.*
 !*/sdkconfig.defaults
 */managed_components/
+# IDE files (all skills): per-PC paths, re-made by open_ide.sh / the VS Code extension
+*/.vscode/
+*/*.code-workspace

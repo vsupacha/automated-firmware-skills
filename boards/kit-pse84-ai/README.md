@@ -5,7 +5,7 @@ kit on the QWA309 base board: see [../tesaiot/](../tesaiot/README.md).
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [modus-psoc-e84/](modus-psoc-e84/README.md) | `skills/modus-psoc-e84` (ModusToolbox) | verified on hardware |
+| [modus-pdl-edgitalk/](modus-pdl-edgitalk/README.md) | `skills/modus-pdl-edgitalk` (ModusToolbox) | verified on hardware |
 
 Sources: Infineon KIT_PSE84_AI documentation; TESAIoT SDK docs J4 / "Peripherals at a glance"
 <https://tesaiot.github.io/tesaiot-pse84-devkit-sdk/sdk/mtb-mpy/index.html>.

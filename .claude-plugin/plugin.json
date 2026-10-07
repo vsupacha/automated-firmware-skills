@@ -1,7 +1,7 @@
 {
   "name": "automated-firmware-skills",
   "version": "0.1.0",
-  "description": "Gated, AI-driven firmware workflows (tools check, board discovery, project generation, layered code, build, flash, UART test, clean) for MCU dev tools. Skills: modus-psoc-e84 (ModusToolbox + Infineon PSOC Edge E84), cubemx-stm32c5 (STM32CubeMX2 + ST STM32C5), pio-rpi-pico-2w (PlatformIO + Raspberry Pi Pico 2 W), pio-espidf-esp32s3box (PlatformIO + ESP-IDF + Espressif ESP32-S3-BOX), pio-arduino-esp32s3box (PlatformIO + Arduino + ESP32-S3-BOX).",
+  "description": "Gated, AI-driven firmware workflows (tools check, board discovery, project generation, layered code, build, flash, UART test, clean) for MCU dev tools. Skills: modus-pdl-edgitalk (ModusToolbox + Infineon PSOC Edge E84), cubemx2-hal2-stm32c562nucleo (STM32CubeMX2 + ST STM32C5), pio-arduino-rpipico2w (PlatformIO + Raspberry Pi Pico 2 W), pio-espidf-esp32s3box (PlatformIO + ESP-IDF + Espressif ESP32-S3-BOX), pio-arduino-esp32s3box (PlatformIO + Arduino + ESP32-S3-BOX), cubemx-hal-stm32n6570dk (STM32CubeMX + STM32CubeN6 HAL + ST STM32N6570-DK, M1), cubemx-hal-stm32f407disco (STM32CubeMX + STM32CubeF4 HAL + ST STM32F407G-DISC1, M1), cubemx-hal-stm32l475iot (STM32CubeMX + STM32CubeL4 HAL + ST B-L475E-IOT01A).",
   "author": {
     "name": "Supachai Vorapojpisut"
   },
@@ -24,6 +24,10 @@
     "esp32",
     "esp32-s3",
     "esp-idf",
-    "arduino"
+    "arduino",
+    "stm32n6",
+    "stm32cubemx",
+    "stm32f4",
+    "stm32l4"
   ]
 }

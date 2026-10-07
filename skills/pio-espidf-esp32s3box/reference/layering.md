@@ -5,7 +5,7 @@ src/app_main.c      execution: app_main() wiring, command table, superloop (yiel
   │ uses
 src/func/*.c/.h     services from <repo>/lib/func, unchanged: console (line editor + dispatch),
   │ uses             led (1-based, read-back), button (debounce, events) - shared with the
-  │                  modus-psoc-e84 and cubemx-stm32c5 skills
+  │                  modus-pdl-edgitalk and cubemx2-hal2-stm32c562nucleo skills
 src/board/board.*   board adaptation: GPIO numbers, ESP-IDF drivers (gpio, usb_serial_jtag,
   │ uses             esp_timer), FreeRTOS delay, BOARD_xxx #if tables
 ESP-IDF 5.5         drivers, FreeRTOS, newlib (printf -> USB Serial/JTAG VFS), bootloader

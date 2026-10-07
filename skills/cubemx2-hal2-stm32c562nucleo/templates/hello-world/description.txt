@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the ST-LINK virtual COM port (HAL tick time base)

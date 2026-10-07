@@ -1,0 +1,1 @@
+UART console (led/btn commands) + B1 (USER) toggles LED2 - full I/O demo

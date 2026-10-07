@@ -6,7 +6,7 @@ Usage:
 
 Checks
   skills    SKILL.md frontmatter (name = folder, description <= 1024 chars, no tags) and required
-            sections; the standard stage scripts exist, have a shebang and LF endings; M3 scripts
+            sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT, stage 2d), have a shebang and LF endings; M3 scripts
             are gated; scripts/ and reference/ files named in SKILL.md exist; hello-world and
             uart-btn-led templates with description.txt and valid tests/*.json; test specs of the
             same template agree across skills (warning)
@@ -28,9 +28,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-REQUIRED_SCRIPTS = ["env.sh", "help.sh", "check_tools.sh", "new_app.sh", "build.sh",
-                    "discover.sh", "flash.sh", "serial_test.py", "clean.sh"]
+# <toolchain>-<framework>-<board>: at least three lowercase parts joined by "-"
+SKILL_NAME_RE = re.compile(r"^[a-z0-9]+-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$")
+REQUIRED_SCRIPTS = ["env.sh", "help.sh", "check_tools.sh", "new_app.sh", "open_ide.sh", "build.sh",
+                    "clean.sh"]
+# stage 2d (IDE handoff): VS Code extension ids a skill may name in env.sh IDE_EXT
+IDE_EXT_RE = re.compile(r"^IDE_EXT=([a-z0-9-]+\.[a-z0-9-]+)", re.M)
+# M3 stage scripts: required, unless the skill's SKILL.md marks its M3 row "planned" (M1-only skill)
+M3_STAGE_SCRIPTS = ["discover.sh", "flash.sh", "serial_test.py"]
 M3_SCRIPTS = ["discover.sh", "flash.sh", "backup.sh", "identity_check.sh"]
 REQUIRED_SECTIONS = ["Milestones, stage numbers and developer actions", "Help menu", "Stage 1",
                      "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Stage 7",
@@ -104,7 +109,7 @@ def check_skills():
     specs = {}                                   # (template, spec file) -> {skill: json}
     for sd in skills:
         name = sd.name
-        ok(SKILL_NAME_RE.match(name), f"skills/{name}: folder name must be lowercase words joined by '-'")
+        ok(SKILL_NAME_RE.match(name), f"skills/{name}: folder name must be <toolchain>-<framework>-<board> (lowercase, '-' between parts)")
         md = sd / "SKILL.md"
         if not ok(md.is_file(), f"skills/{name}: no SKILL.md"):
             continue
@@ -118,7 +123,7 @@ def check_skills():
             ok(not re.search(r"<[A-Za-z/]", desc), f"skills/{name}/SKILL.md: description contains a tag")
         heads = re.findall(r"^#{2,3} +(.+)$", text, re.M)
         for sec in REQUIRED_SECTIONS:
-            ok(any(h.startswith(sec) for h in heads), f"skills/{name}/SKILL.md: missing section '{sec} ...'")
+            ok(any(sec in h for h in heads), f"skills/{name}/SKILL.md: missing section '{sec} ...'")
         for ref in sorted(set(re.findall(r"\b((?:scripts|reference)/[\w.-]+\.(?:sh|py|md))\b", text))):
             if Path(ref).stem == "x":                   # "$SKILL/scripts/x.sh" placeholder
                 continue
@@ -127,6 +132,19 @@ def check_skills():
         sc = sd / "scripts"
         for s in REQUIRED_SCRIPTS:
             ok((sc / s).is_file(), f"skills/{name}/scripts/{s} missing (standard stage script)")
+        env = sc / "env.sh"
+        if env.is_file():
+            ok(IDE_EXT_RE.search(read(env)) is not None,
+               f"skills/{name}/scripts/env.sh: no IDE_EXT=<publisher.extension> (stage 2d IDE handoff)")
+            ok("IDE_NAME=" in read(env), f"skills/{name}/scripts/env.sh: no IDE_NAME (stage 2d IDE handoff)")
+        if (sc / "new_app.sh").is_file():
+            ok("fw_new_app_ide" in read(sc / "new_app.sh"),
+               f"skills/{name}/scripts/new_app.sh does not end with stage 2d (fw_new_app_ide)")
+        m3_row = next((l for l in text.splitlines() if l.startswith("| M3 hardware")), "")
+        m3_planned = "**planned**" in m3_row
+        for s in M3_STAGE_SCRIPTS:
+            ok((sc / s).is_file(), f"skills/{name}/scripts/{s} missing (M3 stage script"
+               + (", M3 planned in SKILL.md)" if m3_planned else ")"), warn if m3_planned else err)
         for f in sorted(sc.glob("*")):
             if f.suffix not in (".sh", ".py"):
                 continue

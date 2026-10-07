@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the SWO console (ITM, read it in the debugger's SWV view)

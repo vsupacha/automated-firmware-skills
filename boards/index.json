@@ -22,14 +22,14 @@
       "mcu": "PSE846GPS2DBZC4A",
       "mcu_family": "Infineon PSOC Edge E84",
       "profiles": {
-        "modus-psoc-e84": {
+        "modus-pdl-edgitalk": {
           "level": "interactive",
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
             "uart-btn-led": "interactive"
           },
-          "log": "boards/edgi-talk/modus-psoc-e84/README.md"
+          "log": "boards/edgi-talk/modus-pdl-edgitalk/README.md"
         }
       }
     },
@@ -45,7 +45,7 @@
       "mcu": "PSE846GPS2DBZC4A",
       "mcu_family": "Infineon PSOC Edge E84",
       "profiles": {
-        "modus-psoc-e84": {
+        "modus-pdl-edgitalk": {
           "level": "interactive",
           "date": "2026-10-03",
           "templates": {
@@ -53,7 +53,7 @@
             "button-led": "interactive"
           },
           "note": "verified on the AI Kit through the tesaiot profile (same kit, AI-Kit I/O)",
-          "log": "boards/kit-pse84-ai/modus-psoc-e84/README.md"
+          "log": "boards/kit-pse84-ai/modus-pdl-edgitalk/README.md"
         }
       }
     },
@@ -70,7 +70,7 @@
       "mcu": "PSE846GPS2DBZC4A",
       "mcu_family": "Infineon PSOC Edge E84",
       "profiles": {
-        "modus-psoc-e84": {
+        "modus-pdl-edgitalk": {
           "level": "interactive",
           "date": "2026-10-03",
           "templates": {
@@ -78,7 +78,7 @@
             "button-led": "interactive"
           },
           "note": "QWA309 SW4/SW5 untested: the DVP camera holds P17.5/P17.7 low",
-          "log": "boards/tesaiot/modus-psoc-e84/README.md"
+          "log": "boards/tesaiot/modus-pdl-edgitalk/README.md"
         }
       }
     },
@@ -94,14 +94,14 @@
       "mcu": "STM32C562RET6",
       "mcu_family": "ST STM32C5",
       "profiles": {
-        "cubemx-stm32c5": {
+        "cubemx2-hal2-stm32c562nucleo": {
           "level": "observed",
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
             "uart-btn-led": "observed"
           },
-          "log": "boards/nucleo-c562re/cubemx-stm32c5/README.md"
+          "log": "boards/nucleo-c562re/cubemx2-hal2-stm32c562nucleo/README.md"
         }
       }
     },
@@ -117,14 +117,14 @@
       "mcu": "RP2350A",
       "mcu_family": "Raspberry Pi RP2350",
       "profiles": {
-        "pio-rpi-pico-2w": {
+        "pio-arduino-rpipico2w": {
           "level": "observed",
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
             "uart-btn-led": "observed"
           },
-          "log": "boards/rpi-pico-2w/pio-rpi-pico-2w/README.md"
+          "log": "boards/rpi-pico-2w/pio-arduino-rpipico2w/README.md"
         }
       }
     },
@@ -159,6 +159,84 @@
           },
           "note": "Arduino-style code; 2021 model only (not BOX-Lite / BOX-3)",
           "log": "boards/esp32-s3-box/pio-arduino-esp32s3box/README.md"
+        }
+      }
+    },
+    {
+      "id": "stm32n6570-dk",
+      "name": "ST STM32N6570-DK",
+      "aliases": [
+        "STM32N6570-DK",
+        "STM32N6570 DK",
+        "N6570-DK",
+        "STM32N6 Discovery",
+        "N6 DK"
+      ],
+      "mcu": "STM32N657X0H3Q",
+      "mcu_family": "ST STM32N6",
+      "profiles": {
+        "cubemx-hal-stm32n6570dk": {
+          "level": "built",
+          "date": "2026-10-07",
+          "templates": {
+            "hello-world": "built",
+            "uart-btn-led": "built"
+          },
+          "note": "M1 only (create, build); hardware stages planned",
+          "log": "boards/stm32n6570-dk/cubemx-hal-stm32n6570dk/README.md"
+        }
+      }
+    },
+    {
+      "id": "stm32f407g-disc1",
+      "name": "ST STM32F407G-DISC1 (STM32F4DISCOVERY)",
+      "aliases": [
+        "STM32F407G-DISC1",
+        "STM32F4DISCOVERY",
+        "STM32F4 Discovery",
+        "F4 Discovery",
+        "F407 Discovery",
+        "MB997"
+      ],
+      "mcu": "STM32F407VGT6",
+      "mcu_family": "ST STM32F4",
+      "profiles": {
+        "cubemx-hal-stm32f407disco": {
+          "level": "built",
+          "date": "2026-10-07",
+          "templates": {
+            "hello-world": "built",
+            "uart-btn-led": "built"
+          },
+          "note": "M1 only (create, build); console is SWO output only; hardware stages planned",
+          "log": "boards/stm32f407g-disc1/cubemx-hal-stm32f407disco/README.md"
+        }
+      }
+    },
+    {
+      "id": "b-l475e-iot01a",
+      "name": "ST B-L475E-IOT01A (Discovery kit IoT node)",
+      "aliases": [
+        "B-L475E-IOT01A",
+        "B-L475E-IOT01A1",
+        "B-L475E-IOT01A2",
+        "STM32L475 IoT node",
+        "L475 Discovery",
+        "IoT Discovery",
+        "MB1297"
+      ],
+      "mcu": "STM32L475VGT6",
+      "mcu_family": "ST STM32L4",
+      "profiles": {
+        "cubemx-hal-stm32l475iot": {
+          "level": "observed",
+          "date": "2026-10-08",
+          "templates": {
+            "hello-world": "unverified",
+            "uart-btn-led": "observed"
+          },
+          "note": "M1 + M3; uart-btn-led flashed, tests 13/13, interactive 5/5, LED2 seen by the owner; console RX by interrupt (no USART RX FIFO); hello-world not run yet",
+          "log": "boards/b-l475e-iot01a/cubemx-hal-stm32l475iot/README.md"
         }
       }
     }

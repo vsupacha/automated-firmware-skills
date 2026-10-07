@@ -1,7 +1,10 @@
 # Workflow contract for every skill
 
-Every skill in `skills/` drives one dev tool for one MCU family or board (`<devtool>-<mcu>`, or
-`<devtool>-<framework>-<board>` when the framework matters, hyphens only).
+Every skill in `skills/` drives one toolchain with one framework for one board, named
+**`<toolchain>-<framework>-<board>`** (lowercase, hyphens only between the three parts), e.g.
+`cubemx-hal-stm32f407disco`, `cubemx2-hal2-stm32c562nucleo`, `pio-espidf-esp32s3box`,
+`modus-pdl-edgitalk`. Related boards of the same MCU may share a skill as extra board profiles
+(`boards/<id>/<skill>/`), e.g. KIT_PSE84_AI and TESAIoT under `modus-pdl-edgitalk`.
 All skills follow the same milestones, stage numbers, script names, gate lines and exit codes, so
 an agent (or a developer) can drive any board the same way and a port to another MCU/toolchain is
 proven by the **same tests**.
@@ -10,10 +13,13 @@ Reference implementations:
 
 | Skill | Toolchain | Board | Notes |
 | --- | --- | --- | --- |
-| [modus-psoc-e84](../skills/modus-psoc-e84/SKILL.md) | ModusToolbox, make, OpenOCD | Edgi-Talk, TESAIoT | vendor IDE toolchain, external probe |
-| [cubemx-stm32c5](../skills/cubemx-stm32c5/SKILL.md) | STM32CubeMX2 CLI, CMake, STM32CubeProgrammer | NUCLEO-C562RE | code generator, on-board ST-LINK |
-| [pio-rpi-pico-2w](../skills/pio-rpi-pico-2w/SKILL.md) | PlatformIO, picotool | Pico 2 W | native USB, no probe |
+| [modus-pdl-edgitalk](../skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox, make, OpenOCD | Edgi-Talk, TESAIoT | vendor IDE toolchain, external probe |
+| [cubemx2-hal2-stm32c562nucleo](../skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 CLI, CMake, STM32CubeProgrammer | NUCLEO-C562RE | code generator, on-board ST-LINK |
+| [pio-arduino-rpipico2w](../skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO, picotool | Pico 2 W | native USB, no probe |
 | [pio-espidf-esp32s3box](../skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF, esptool | ESP32-S3-BOX | USB Serial/JTAG, no probe; shares `lib/func` |
+| [cubemx-hal-stm32n6570dk](../skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeN6 HAL, CMake | STM32N6570-DK | M1 only; FSBL in internal SRAM; shares `lib/func` |
+| [cubemx-hal-stm32f407disco](../skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeF4 HAL, CMake | STM32F407G-DISC1 | M1 only; console SWO output (ST-LINK/V2, no VCP); shares `lib/func` |
+| [cubemx-hal-stm32l475iot](../skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | B-L475E-IOT01A | M1 + M3; ST-LINK/V2-1 VCP console (RX by interrupt: no USART FIFO); shares `lib/func` |
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
 
 ## Milestones and stages
@@ -23,6 +29,7 @@ Reference implementations:
 | **M1 skeleton** - build a correct project automatically | 0 | help | `help.sh [--en]` | - | no |
 | | 1 | setup | `check_tools.sh <board>` | `missing/bad=0` | no |
 | | 2 | create | `new_app.sh <board> <app> [ws] [template]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
+| | 2d | open in IDE | `open_ide.sh <app> [--no-open]` (new_app.sh runs it) - see [IDE handoff](#ide-handoff-stage-2d) | `IDE: READY` | no |
 | | 3 | build | `build.sh <app>` | `BUILD: PASS` + manifest | no |
 | **M2 layering** - BSP/drivers > logic > execution | 4 | layer check | `python lib/check_layers.py <app>` | `LAYERS: PASS` | no |
 | | 5 | host test | `bash lib/host_test.sh [<app>]`: `func/` with a fake `board.h` on the PC | `HOST: PASS` | no |
@@ -35,10 +42,58 @@ Reference implementations:
 
 Stage 6 (connect) may run before stage 2 - it only needs the board, not an app.
 
+### Two paths after stage 2: code it yourself, or let the agent run the stages
+
+```
+1 setup ─► 2 create ─┬─► IDE path (developer):  2d open_ide ─► edit, build, flash, debug in VS Code
+check_tools  new_app │                           (the vendor extension's own buttons)
+                     │        ▲ switch any time - same app folder, same build outputs ▼
+                     └─► script path (agent):   3 build.sh ─► 4/5 layer + host checks ─► 7 flash.sh ─► 8 serial_test
+```
+
+- **Coding can start at any time.** `new_app.sh` ends with stage 2d and opens the app in VS Code,
+  so the developer can start editing right after creation, or later after any gate passed.
+- **The two paths share one project.** The IDE builds the same configuration into the same folder as
+  `build.sh`; code edited in the IDE goes through the same gates when the agent runs the scripts
+  again (`build.sh`, `check_layers.py`, `flash.sh` with its identity check, `serial_test.py`).
+- **Agents follow the developer's choice.** On the IDE path the agent stops after stage 2d and
+  only runs scripts when asked ("build it", "test it"); it never overwrites files the developer is
+  editing. Asked to continue on the script path, it re-runs the gates from stage 3.
+
+Worked example: [Edgi-Talk on the IDE path](walkthrough-edgi-talk-ide.md) (prompts, outputs, both paths).
+
 **Release scope:** `<repo>/milestones.env` (`ACTIVE_MILESTONES`, override `FW_ACTIVE_MILESTONES`)
 lists the milestones a release activates. Scripts of an inactive milestone call
 `require_milestone` (lib/common.sh) and stop with `ACTION: SETUP` (exit 10). Enabling a milestone
 is the developer's decision, never the agent's.
+
+## IDE handoff (stage 2d)
+
+Every skill must hand each app it creates over to the toolchain's IDE, so a developer can take over
+at any point - edit the code, build, flash, debug and test by hand - and go back to the scripts
+later. The IDE is **VS Code with the toolchain vendor's extension**:
+
+| Toolchain | VS Code extension (`IDE_EXT` in env.sh) | Workspace file | Made by |
+| --- | --- | --- | --- |
+| ModusToolbox | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) | `<app>.code-workspace` + `.vscode/` | ModusToolbox's own `make vscode` (this PC's tool paths: git-ignored, re-made per PC) |
+| STM32CubeMX / STM32CubeMX2 | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | `<app>.code-workspace` (`mx/`, `src/`, `tests/` as folders) + `mx/.settings/*.store.json`, `mx/.vscode/{settings,launch}.json` | `lib/common.sh` `fw_vscode_cube_setup`, from the board profile's pinned bundles |
+| PlatformIO | PlatformIO IDE (`platformio.platformio-ide`) | `<app>.code-workspace` (the app folder; `platformio.ini` at its root); PlatformIO IDE adds `.vscode/` | `lib/common.sh` `fw_code_workspace` |
+
+Rules for `open_ide.sh <app> [--no-open]`:
+
+1. **Same project, same outputs.** The IDE must build the same configuration into the same folder as
+   `build.sh` (Makefiles + `build/`, CMake preset + `mx/build/<preset>`, PlatformIO env +
+   `.pio/build/<env>`) with the same pinned tools - never a second copy of the project.
+2. **Open the workspace file, never the app folder** (STM32Cube: CMake project at a workspace
+   folder root; ModusToolbox: multi-project apps). IDE files (`<app>.code-workspace`, `.vscode/`)
+   are generated - some hold this PC's tool paths - so they are git-ignored for every skill and
+   `open_ide.sh` re-makes them on each PC; never put settings a build needs only there.
+3. **Gate** `IDE: READY <workspace>` (then `IDE: OPENED`, or `IDE: not opened` with `--no-open`).
+   VS Code or the extension missing = `ACTION: SETUP` (exit 10): installing them is the developer's.
+   `new_app.sh` runs it at the end (`--no-open` for headless runs) and only reports a missing IDE.
+4. Print where the IDE's build / flash / debug / monitor buttons are and how they map to the scripts.
+   What a developer does in the IDE (e.g. flashing without the identity gate) is their call; an
+   agent still flashes with `flash.sh` behind its gates.
 
 ## Exit codes and developer actions
 
@@ -53,7 +108,7 @@ is the developer's decision, never the agent's.
 
 | Type | Meaning | Examples |
 | --- | --- | --- |
-| `SETUP` | install or change the developer's system | ModusToolbox Setup (Infineon account, admin), STM32CubeMX2 / STM32Cube for VS Code bundles and packs (licence acceptance), PlatformIO, drivers (WinUSB/Zadig), `git core.longpaths`, moving a workspace off an unsafe path |
+| `SETUP` | install or change the developer's system | ModusToolbox Setup (Infineon account, admin), VS Code + the toolchain extension, STM32CubeMX2 / STM32Cube for VS Code bundles and packs (licence acceptance), PlatformIO, drivers (WinUSB/Zadig), `git core.longpaths`, moving a workspace off an unsafe path |
 | `CONNECT` | plug something in / boot mode | board or probe USB, Pico BOOTSEL held at power-up |
 | `POWER_CYCLE` | unplug + replug | TESAIoT display firmware after flashing |
 | `JUMPER` | switches, solder bridges, accessories | QWA309 CS switch, unplug the DVP camera, Nucleo SB8 (LD1 vs D13) |
@@ -77,8 +132,8 @@ board       board/  (board.h API)     the port boundary: one API, one implementa
 BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico core (never edit)
 ```
 
-- `lib/func` is shared unchanged by modus-psoc-e84, cubemx-stm32c5 and pio-espidf-esp32s3box.
-  Arduino skills (pio-rpi-pico-2w, pio-arduino-esp32s3box) keep an Arduino-style C++ func/ in their
+- `lib/func` is shared unchanged by modus-pdl-edgitalk, cubemx2-hal2-stm32c562nucleo and pio-espidf-esp32s3box.
+  Arduino skills (pio-arduino-rpipico2w, pio-arduino-esp32s3box) keep an Arduino-style C++ func/ in their
   templates (`<Arduino.h>`, Print/Stream, millis) - same console protocol and tests. It may include only `board.h` and the C library.
 - `board.h` is the same API on every board: init, millis/delay, LEDs (write/read/name), buttons
   (read/name/pin), console getc/flush, printf to the console - the contract is
@@ -127,9 +182,10 @@ apps/.bench/<id>.env                                         per-PC instance dat
 
 ## Adding a skill (a new toolchain or MCU family)
 
-1. `skills/<devtool>-<mcu>/SKILL.md` mapping the stage table above to the tool's commands.
+1. `skills/<toolchain>-<framework>-<board>/SKILL.md` mapping the stage table above to the tool's commands.
 2. `scripts/env.sh` sourcing `lib/common.sh`; one script per stage with the gate lines and exit
    codes above; `serial_test.py` as a thin wrapper of `lib/fwtest.py`.
+   `open_ide.sh` (stage 2d) hands apps to VS Code + the toolchain's extension (`IDE_EXT`).
 3. A `board.h` implementation per board under `templates/_common`, reusing `lib/func`.
 4. For each board: `boards/<id>/<skill>/` profile + verification log (`boards/_template/`).
 5. hello-world and uart-btn-led templates with the shared test specs; run M1 and M3 on hardware.

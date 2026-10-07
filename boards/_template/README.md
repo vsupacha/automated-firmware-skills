@@ -2,13 +2,13 @@
 
 Tool-independent hardware sheet. Copy `boards/_template/` to `boards/<id>/` (lowercase, hyphens),
 fill this file, then add one profile subfolder per skill that supports the board
-(`<skill>/`, e.g. `modus-psoc-e84/` - see its README for the steps).
+(`<skill>/`, e.g. `modus-pdl-edgitalk/` - see its README for the steps).
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [modus-psoc-e84/](modus-psoc-e84/README.md) | `skills/modus-psoc-e84` | not verified |
-| cubemx-stm32c5/ | `skills/cubemx-stm32c5` (STM32C5 boards) | not verified |
-| pio-rpi-pico-2w/ | `skills/pio-rpi-pico-2w` (RP2350 boards) | not verified |
+| [modus-pdl-edgitalk/](modus-pdl-edgitalk/README.md) | `skills/modus-pdl-edgitalk` | not verified |
+| cubemx2-hal2-stm32c562nucleo/ | `skills/cubemx2-hal2-stm32c562nucleo` (STM32C5 boards) | not verified |
+| pio-arduino-rpipico2w/ | `skills/pio-arduino-rpipico2w` (RP2350 boards) | not verified |
 
 Sources: schematic, vendor manual, BSP (links).
 

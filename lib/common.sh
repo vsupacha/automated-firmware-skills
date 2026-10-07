@@ -209,6 +209,199 @@ bench_unlock() {
   return 0
 }
 
+# ---- Stage 2d: open the app in its IDE (docs/workflow.md "IDE handoff") -------------------------
+# Every skill's open_ide.sh makes <app>/<app>.code-workspace usable by VS Code + the toolchain's
+# extension and hands it over, so a developer can edit, build, flash and debug with the IDE's own
+# buttons on the same project and build outputs as the scripts. env.sh sets IDE_EXT (extension
+# id) and IDE_NAME.
+
+# fw_code_workspace <app-dir> <path=label>...: write <app>/<app>.code-workspace unless it exists:
+# relative folders only (no user paths - it can be committed) and IDE_EXT as the recommended
+# extension (VS Code offers to install it).
+fw_code_workspace() {
+  local dir="$1" ws f sep=""; shift
+  ws="$dir/$(basename "$dir").code-workspace"
+  [ -f "$ws" ] && return 0
+  {
+    printf '{\n  "folders": [\n'
+    for f in "$@"; do
+      printf '%s    { "name": "%s", "path": "%s" }' "$sep" "${f#*=}" "${f%%=*}"; sep=$',\n'
+    done
+    printf '\n  ],\n  "settings": {},\n  "extensions": {\n    "recommendations": [ "%s" ]\n  }\n}\n' "$IDE_EXT"
+  } >"$ws"
+}
+
+# ---- Tool installs: GLOBAL (per machine, all users) or LOCAL (per user) --------------------------
+# Vendor installers offer both (Program Files, C:\ST, C:\Infineon vs %LOCALAPPDATA%, the user
+# profile), and one PC can mix them. Scripts search both scopes; check_tools.sh labels every tool
+# with the scope it was found in.
+FW_LOCALAPPDATA="$(cygpath -u "${LOCALAPPDATA:-$HOME/AppData/Local}" 2>/dev/null || echo "$HOME/AppData/Local")"
+
+# fw_scope <path>: LOCAL when the path is inside the user profile, else GLOBAL
+fw_scope() {
+  local p u
+  p="$(cygpath -m "$1" 2>/dev/null || echo "$1")"; u="$(cygpath -m "${USERPROFILE:-$HOME}" 2>/dev/null || echo "$HOME")"
+  case "$(echo "$p/" | tr 'A-Z' 'a-z')" in "$(echo "$u/" | tr 'A-Z' 'a-z')"*) echo LOCAL;; *) echo GLOBAL;; esac
+}
+# fw_where <path>: "LOCAL <user profile>/..." / "GLOBAL <Program Files>/..." for check_tools rows
+fw_where() { echo "$(fw_scope "$1") $(winpath "$1")"; }
+
+# fw_find_dirs <glob>...: existing directories matching the globs (list GLOBAL and LOCAL candidates;
+# globs may contain spaces), one per line, sorted by the version in the last path element - so
+# "| tail -1" is the newest install whichever scope it is in
+fw_find_dirs() {
+  local g d
+  for g in "$@"; do
+    while IFS= read -r d; do [ -d "$d" ] && echo "${d%/}"; done < <(compgen -G "$g")
+  done | awk -F/ '{print $NF "\t" $0}' | sort -V | cut -f2- | uniq
+}
+
+# fw_code_cli: VS Code's command-line launcher - PATH first, then the per-user (LOCAL) and
+# per-machine (GLOBAL) installs
+fw_code_cli() {
+  local c
+  for c in "$(command -v code 2>/dev/null)" "$FW_LOCALAPPDATA/Programs/Microsoft VS Code/bin/code" \
+           "/c/Program Files/Microsoft VS Code/bin/code"; do
+    [ -n "$c" ] && [ -f "$c" ] && { echo "$c"; return 0; }
+  done
+  return 1
+}
+# fw_ide_ext_version <code-cli>: version of IDE_EXT installed in VS Code (exit 1 if missing). The
+# whole list is read first (grep -q would cut the pipe); ids are compared in lowercase (Git Bash
+# grep 3.0 aborts on -i together with -F).
+fw_ide_ext_version() {
+  local list want
+  list="$("$1" --list-extensions --show-versions 2>/dev/null | tr -d '\r' | tr 'A-Z' 'a-z')"
+  want="$(echo "$IDE_EXT" | tr 'A-Z' 'a-z')"
+  printf '%s\n' "$list" | grep -F "$want@" | grep "^$want@" | head -1 | sed 's/.*@//' | grep .
+}
+# fw_check_ide: check_tools.sh rows for stage 2d (VS Code + IDE_EXT). WARN only: the script path
+# works without the IDE. Needs the caller's ok/wrn row functions.
+fw_check_ide() {
+  local code v
+  if ! code="$(fw_code_cli)"; then
+    wrn "IDE: VS Code" "not found (user or system install) - needed only for the IDE path (open_ide.sh)"
+    return 0
+  fi
+  v="$("$code" --version 2>/dev/null | head -1 | tr -d '\r')"
+  ok "IDE: VS Code" "${v:-?}  ($(fw_where "$(dirname "$(dirname "$code")")"))"
+  if v="$(fw_ide_ext_version "$code")"; then ok "IDE: extension" "$IDE_NAME $v"
+  else wrn "IDE: extension" "$IDE_NAME missing - code --install-extension $IDE_EXT (IDE path only)"; fi
+}
+
+# fw_open_ide <workspace-file> [0]: gate "IDE: READY <file>", then check VS Code and IDE_EXT
+# (missing -> exit 10 ACTION: SETUP; installing is the developer's) and open the workspace in
+# VS Code - never the app folder. A second argument 0 = check only, do not open a window.
+fw_open_ide() {
+  local ws="$1" open="${2:-1}" code
+  [ -f "$ws" ] || die "no $ws - re-run open_ide.sh (or new_app.sh)"
+  echo "IDE: READY $(winpath "$ws")  (VS Code + $IDE_NAME)"
+  code="$(fw_code_cli)" || need_user SETUP "install Visual Studio Code (user or system installer) and its extension $IDE_NAME ($IDE_EXT) - or open $(winpath "$ws") yourself with File > Open Workspace from File"
+  fw_ide_ext_version "$code" >/dev/null \
+    || need_user SETUP "install the VS Code extension $IDE_NAME: code --install-extension $IDE_EXT (or Extensions view), then re-run open_ide.sh"
+  [ "$open" = 1 ] || { echo "IDE: not opened (--no-open)"; return 0; }
+  "$code" "$(winpath "$ws")" >/dev/null 2>&1 &
+  echo "IDE: OPENED in VS Code"
+}
+
+# fw_new_app_ide <app-dir> <0|1>: stage 2d at the end of new_app.sh (1 = open a window). The app
+# exists either way, so a missing IDE/extension is reported as a note and new_app.sh still exits 0.
+fw_new_app_ide() {
+  local out rc flag=""
+  [ "$2" = 1 ] || flag=--no-open
+  out="$(bash "$SKILL_DIR/scripts/open_ide.sh" "$1" $flag 2>&1)"; rc=$?
+  printf '%s\n' "$out" | sed 's/^ACTION: SETUP /IDE: NOT OPENED - developer action: /'
+  [ $rc = 0 ] || [ $rc = 10 ] || echo "WARN: open_ide.sh failed (exit $rc) - the app itself was created"
+  return 0
+}
+
+# fw_vscode_cube_setup <mx-dir>: pre-write the STM32CubeIDE for VS Code project setup of a
+# generated CMake project, from the board profile, so the extension opens it as an already
+# configured STM32Cube project (no "configure discovered projects?" prompt) with the pinned bundle
+# versions: .vscode/settings.json (cube-cmake), .vscode/launch.json (the extension's own default
+# "Launch ST-Link GDB Server": build, flash, run to main), .settings/ide.store.json (source,
+# board, device, core, toolchain), .settings/bundles.store.json. Existing files are kept (the
+# extension owns them once written). Profile: MCU_CPN, CMAKE/NINJA/GCC/PROGRAMMER_VERSION,
+# CLANGD_VERSION, GDBSERVER_VERSION; optional VSCODE_BOARD, VSCODE_CORE, VSCODE_SOURCE
+# (default STM32CubeMX; empty = not recorded).
+fw_vscode_cube_setup() {
+  local mx="$1" extra="" src="${VSCODE_SOURCE-STM32CubeMX}"
+  mkdir -p "$mx/.vscode" "$mx/.settings"
+  [ -f "$mx/.vscode/settings.json" ] || cat >"$mx/.vscode/settings.json" <<'EOF'
+{
+    "cmake.cmakePath": "cube-cmake",
+    "cmake.configureArgs": [
+        "-DCMAKE_COMMAND=cube-cmake"
+    ],
+    "cmake.preferredGenerators": [
+        "Ninja"
+    ]
+}
+EOF
+  [ -f "$mx/.vscode/launch.json" ] || cat >"$mx/.vscode/launch.json" <<'EOF'
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "stlinkgdbtarget",
+            "request": "launch",
+            "name": "STM32Cube: Launch ST-Link GDB Server",
+            "origin": "snippet",
+            "cwd": "${workspaceFolder}",
+            "preBuild": "${command:st-stm32-ide-debug-launch.build}",
+            "runEntry": "main",
+            "imagesAndSymbols": [
+                {
+                    "imageFileName": "${command:st-stm32-ide-debug-launch.get-projects-binary-from-context1}"
+                }
+            ]
+        }
+    ]
+}
+EOF
+  [ -n "$src" ] && extra="
+  \"source\": {
+    \"sourceType\": \"$src\"
+  },"
+  [ -n "$VSCODE_BOARD" ] && extra="$extra
+  \"board\": \"$VSCODE_BOARD\","
+  [ -f "$mx/.settings/ide.store.json" ] || cat >"$mx/.settings/ide.store.json" <<EOF
+{$extra
+  "device": "$MCU_CPN",${VSCODE_CORE:+
+  \"core\": \"$VSCODE_CORE\",}
+  "toolchain": "GCC"
+}
+EOF
+  [ -f "$mx/.settings/bundles.store.json" ] || cat >"$mx/.settings/bundles.store.json" <<EOF
+{
+  "bundles": [
+    { "name": "cmake", "version": "$CMAKE_VERSION" },
+    { "name": "ninja", "version": "$NINJA_VERSION" },
+    { "name": "gnu-tools-for-stm32", "version": "$GCC_VERSION" },
+    { "name": "st-arm-clangd", "version": "$CLANGD_VERSION" },
+    { "name": "programmer", "version": "$PROGRAMMER_VERSION" },
+    { "name": "stlink-gdbserver", "version": "$GDBSERVER_VERSION" }
+  ]
+}
+EOF
+  return 0
+}
+
+# fw_cube_open_ide <app-dir> [0]: stage 2d for the STM32Cube skills. The workspace opens mx/ as
+# its own folder (STM32CubeIDE for VS Code sets up only a CMake project at a workspace folder's
+# root - "contains multiple CMake projects" otherwise), plus src/ and tests/.
+fw_cube_open_ide() {
+  local d="$1"
+  [ -f "$d/mx/.settings/ide.store.json" ] && [ -f "$d/mx/.vscode/launch.json" ] \
+    || die "$d/mx has no STM32CubeIDE for VS Code setup - run regen.sh $d first"
+  fw_code_workspace "$d" "mx=$(basename "$d") (STM32Cube project: mx)" "src=$(basename "$d") (app sources: src)" "tests=$(basename "$d") (tests)"
+  if [ -f "$d/.vscode/settings.json" ] && grep -q 'cmake.sourceDirectory' "$d/.vscode/settings.json"; then
+    echo "WARN: $d/.vscode/settings.json (cmake.sourceDirectory) was written when the app FOLDER was opened -"
+    echo "      CMake Tools then configures mx/ without the STM32Cube toolchain. Ask the user before deleting it."
+  fi
+  fw_open_ide "$d/$(basename "$d").code-workspace" "${2:-1}"
+}
+
 # fw_gitignore <workspace> <skill> <line>...: append the missing lines to <workspace>/.gitignore
 # (the workspace may be shared with other skills; the user's own lines stay)
 fw_gitignore() {

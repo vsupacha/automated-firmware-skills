@@ -1,0 +1,1 @@
+B1 toggles LD3, EVT lines on the SWO console (the board has no console input: no commands)

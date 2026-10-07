@@ -35,7 +35,7 @@ automated-firmware-skills/
 ├── milestones.env           release scope: active milestones (M1 in this release)
 ├── lib/                     shared by all skills: common.sh, fwtest.py (test engine), func/ (logic layer),
 │                            check_layers.py + host_test.sh + host/ (M2 checks)
-├── skills/<devtool>-<mcu>/  one skill per dev tool + MCU: SKILL.md, scripts/, reference/, templates/
+├── skills/<toolchain>-<framework>-<board>/  one skill each: SKILL.md, scripts/, reference/, templates/
 ├── boards/<id>/             board hardware sheet (README.md), one profile subfolder per skill
 ├── boards/index.json        board ids, aliases, MCU and evidence level per profile (for agents)
 ├── tools/validate_skills.py repo validator: run it before every commit
@@ -46,9 +46,12 @@ automated-firmware-skills/
 
 | Skill | Dev tool | MCU | Host | Status |
 | --- | --- | --- | --- | --- |
-| [modus-psoc-e84](skills/modus-psoc-e84/SKILL.md) | ModusToolbox 3.9 | Infineon PSOC Edge E84 | Windows + Git Bash | verified on hardware |
-| [cubemx-stm32c5](skills/cubemx-stm32c5/SKILL.md) | STM32CubeMX2 1.1.1 CLI + CMake + STM32CubeProgrammer | ST STM32C5 | Windows + Git Bash | verified on hardware |
-| [pio-rpi-pico-2w](skills/pio-rpi-pico-2w/SKILL.md) | PlatformIO 6.1 + arduino-pico 6.1 | Raspberry Pi RP2350 | Windows + Git Bash (bash on Linux/macOS untested) | verified on hardware |
+| [modus-pdl-edgitalk](skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox 3.9 | Infineon PSOC Edge E84 | Windows + Git Bash | verified on hardware |
+| [cubemx2-hal2-stm32c562nucleo](skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 1.1.1 CLI + CMake + STM32CubeProgrammer | ST STM32C5 | Windows + Git Bash | verified on hardware |
+| [pio-arduino-rpipico2w](skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO 6.1 + arduino-pico 6.1 | Raspberry Pi RP2350 | Windows + Git Bash (bash on Linux/macOS untested) | verified on hardware |
+| [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeN6 1.4.1 + CMake | ST STM32N6 | Windows + Git Bash | M1: generated + built (hardware stages planned) |
+| [cubemx-hal-stm32f407disco](skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeF4 1.28.3 + CMake | ST STM32F4 | Windows + Git Bash | M1: generated + built (hardware stages planned) |
+| [cubemx-hal-stm32l475iot](skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeL4 1.18.2 + CMake + STM32CubeProgrammer | ST STM32L4 | Windows + Git Bash | verified on hardware |
 | [pio-espidf-esp32s3box](skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO 6.2 + ESP-IDF 5.5 (espressif32 6.12.0) | Espressif ESP32-S3 | Windows + Git Bash | verified on hardware |
 | [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO 6.2 + arduino-esp32 2.0.17 (espressif32 6.12.0) | Espressif ESP32-S3 | Windows + Git Bash | verified on hardware |
 
@@ -59,11 +62,14 @@ Zephyr and RT-Thread skills.
 
 | Board | Hardware sheet | Profiles |
 | --- | --- | --- |
-| RT-Thread Edgi-Talk | [boards/edgi-talk](boards/edgi-talk/README.md) | modus-psoc-e84 |
-| Infineon KIT_PSE84_AI | [boards/kit-pse84-ai](boards/kit-pse84-ai/README.md) | modus-psoc-e84 |
-| TESAIoT DevKit (AI Kit + QWA309) | [boards/tesaiot](boards/tesaiot/README.md) | modus-psoc-e84 (extends kit-pse84-ai) |
-| ST NUCLEO-C562RE | [boards/nucleo-c562re](boards/nucleo-c562re/README.md) | cubemx-stm32c5 |
-| Raspberry Pi Pico 2 W | [boards/rpi-pico-2w](boards/rpi-pico-2w/README.md) | pio-rpi-pico-2w |
+| RT-Thread Edgi-Talk | [boards/edgi-talk](boards/edgi-talk/README.md) | modus-pdl-edgitalk |
+| Infineon KIT_PSE84_AI | [boards/kit-pse84-ai](boards/kit-pse84-ai/README.md) | modus-pdl-edgitalk |
+| TESAIoT DevKit (AI Kit + QWA309) | [boards/tesaiot](boards/tesaiot/README.md) | modus-pdl-edgitalk (extends kit-pse84-ai) |
+| ST NUCLEO-C562RE | [boards/nucleo-c562re](boards/nucleo-c562re/README.md) | cubemx2-hal2-stm32c562nucleo |
+| Raspberry Pi Pico 2 W | [boards/rpi-pico-2w](boards/rpi-pico-2w/README.md) | pio-arduino-rpipico2w |
+| ST STM32F407G-DISC1 (STM32F4DISCOVERY) | [boards/stm32f407g-disc1](boards/stm32f407g-disc1/README.md) | cubemx-hal-stm32f407disco |
+| ST STM32N6570-DK | [boards/stm32n6570-dk](boards/stm32n6570-dk/README.md) | cubemx-hal-stm32n6570dk |
+| ST B-L475E-IOT01A (Discovery kit IoT node) | [boards/b-l475e-iot01a](boards/b-l475e-iot01a/README.md) | cubemx-hal-stm32l475iot |
 | Espressif ESP32-S3-BOX (2021) | [boards/esp32-s3-box](boards/esp32-s3-box/README.md) | pio-espidf-esp32s3box, pio-arduino-esp32s3box |
 
 New board: copy [boards/_template](boards/_template/README.md). Your own board in your own project:
@@ -88,7 +94,7 @@ line above.
 
 Then ask: "how do I use this?" / "ขอวิธีใช้หน่อย" - the skill answers with its command menu.
 
-### Requirements (modus-psoc-e84)
+### Requirements (modus-pdl-edgitalk)
 
 - Windows with Git for Windows (Git Bash); Python 3 with pyserial.
 - ModusToolbox 3.9 tools, ModusToolbox Programming Tools, Arm GCC, Edge Protect Security Suite.
@@ -96,7 +102,7 @@ Then ask: "how do I use this?" / "ขอวิธีใช้หน่อย" - 
   the Windows user folder and the ModusToolbox install - the scripts refuse unsafe paths.
   Cloud-synced folders work; pause sync if files get locked.
 
-### Requirements (cubemx-stm32c5)
+### Requirements (cubemx2-hal2-stm32c562nucleo)
 
 - Windows with Git for Windows (Git Bash); Python 3 with pyserial.
 - STM32CubeMX2 1.1.1 and the STM32Cube bundles (installed with STM32Cube for VS Code / the bundle
@@ -105,12 +111,28 @@ Then ask: "how do I use this?" / "ขอวิธีใช้หน่อย" - 
   NUCLEO-C562RE board pack 2.1.0 (`check_tools.sh` lists what is missing).
 - Workspace path without spaces, ≤100 characters.
 
-### Requirements (pio-rpi-pico-2w)
+### Requirements (pio-arduino-rpipico2w)
 
 - PlatformIO Core 6.1 (pip or the VS Code extension), Git, Python 3 with pyserial.
 - The first build downloads the pinned platform + arduino-pico (~1.5 GB). On Windows set
   `git config --global core.longpaths true` first.
 - Workspace path ≤100 characters, English characters only.
+
+### Requirements (cubemx-hal-stm32n6570dk)
+
+- Windows with Git for Windows (Git Bash); Python 3.
+- STM32CubeMX 6.18.1 with the STM32Cube_FW_N6 V1.4.1 package (installed from STM32CubeMX:
+  Help > Manage embedded software packages), and the STM32Cube bundles GNU Tools for STM32
+  14.3.1+st.2, CMake 4.4.0+st.1, Ninja 1.13.2+st.1 (as for cubemx2-hal2-stm32c562nucleo).
+- Workspace path without spaces, ≤100 characters.
+
+### Requirements (cubemx-hal-stm32l475iot)
+
+- Windows with Git for Windows (Git Bash); Python 3 with pyserial (hardware stages).
+- STM32CubeMX 6.18.1 (installed for all users or per user - both are found) with the
+  STM32Cube_FW_L4 V1.18.2 package, and the STM32Cube bundles GNU Tools for STM32 14.3.1+st.2,
+  CMake 4.4.0+st.1, Ninja 1.13.2+st.1, STM32CubeProgrammer 2.23.0.
+- Workspace path without spaces, ≤100 characters.
 
 ### Requirements (pio-espidf-esp32s3box)
 
@@ -119,6 +141,19 @@ Then ask: "how do I use this?" / "ขอวิธีใช้หน่อย" - 
   (pyserial + esptool come with it).
 - Workspace path without spaces, ≤100 characters.
 
+### IDE (every skill)
+
+Every app a skill creates opens in **VS Code with the toolchain vendor's extension**, so you can take
+over at any point and edit, build, flash, debug and test by hand. The IDE uses the same project
+and build folders as the scripts. `new_app.sh` runs `open_ide.sh` at the end; it tells you what to
+install if something is missing. Details: [docs/workflow.md](docs/workflow.md#ide-handoff-stage-2d).
+
+| Skills | VS Code extension |
+| --- | --- |
+| modus-pdl-edgitalk | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) |
+| cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32l475iot | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) |
+| pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box | PlatformIO IDE (`platformio.platformio-ide`) |
+
 ## Command reference
 
 Every stage is a plain script, so you can run the workflow yourself without an agent. Run from the
@@ -126,15 +161,24 @@ repo root in **Git Bash** on Windows (in PowerShell, `bash` may start WSL instea
 installed, replace `skills/` with the plugin's `skills/` folder. Apps go to `./apps` (the repo's
 `apps/` inside the repo); boards are the folder names under `boards/`.
 
+**Two paths after `new_app.sh`** (switch any time - both work on the same app and build outputs):
+
+| Path | Who drives | Commands |
+| --- | --- | --- |
+| **IDE** - code it yourself | you, in VS Code with the vendor extension | `new_app.sh` opens the app (stage 2d; again any time with `open_ide.sh apps/<app>`); then edit, build, flash, debug with the extension's buttons |
+| **Scripts** - let the agent (or a terminal) run the gates | Claude, or you in Git Bash | `build.sh` → `check_layers.py` / `host_test.sh` → `discover.sh` → `flash.sh --yes` → `serial_test.py` |
+
+A worked example with real prompts and outputs: [Edgi-Talk on the IDE path](docs/walkthrough-edgi-talk-ide.md).
+
 Each script prints a gate line - go to the next stage only when it says PASS. Exit codes: 0 pass,
 1 fail, 2 warnings, **10 = do what the `ACTION:` line says, then re-run the same command**.
 Stage numbers below are the shared ones from [docs/workflow.md](docs/workflow.md). Stages 6-8
 (connect, backup, flash, test) are milestone M3: enable it in `milestones.env` first.
 
-### modus-psoc-e84 (ModusToolbox + PSOC Edge E84)
+### modus-pdl-edgitalk (ModusToolbox + PSOC Edge E84)
 
 ```bash
-S=skills/modus-psoc-e84/scripts
+S=skills/modus-pdl-edgitalk/scripts
 ```
 
 | Stage | Command | Gate |
@@ -144,6 +188,7 @@ S=skills/modus-psoc-e84/scripts
 | 6 connect | `bash $S/discover.sh <board> [--serial <probe-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
 | 2 create from example | `bash $S/examples.sh <board> [words] [--detail <id>]`, then `bash $S/new_app.sh <board> <app> "" --example <id>` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--getlibs] [--allow-warnings]` | `BUILD: PASS` |
 | 7 backup (before the first flash) | `bash $S/backup.sh <board>` | backup files written |
 | 7 flash | `bash $S/flash.sh apps/<app> --yes [--hex <file.hex>]` | `FLASH: PASS` (exit 10 `ACTION: POWER_CYCLE` = replug USB) |
@@ -156,7 +201,7 @@ Boards: `edgi-talk`, `kit-pse84-ai`, `tesaiot`. Templates: `hello-world`, `butto
 Example - hello world on Edgi-Talk:
 
 ```bash
-S=skills/modus-psoc-e84/scripts
+S=skills/modus-pdl-edgitalk/scripts
 bash $S/check_tools.sh edgi-talk
 bash $S/discover.sh edgi-talk
 bash $S/new_app.sh edgi-talk hello-edgi "" hello-world
@@ -165,10 +210,10 @@ bash $S/flash.sh apps/hello-edgi --yes
 python $S/serial_test.py auto apps/hello-edgi/tests/hello_world.json apps/hello-edgi/logs/test.log --board edgi-talk
 ```
 
-### cubemx-stm32c5 (STM32CubeMX2 + STM32C5)
+### cubemx2-hal2-stm32c562nucleo (STM32CubeMX2 + STM32C5)
 
 ```bash
-S=skills/cubemx-stm32c5/scripts
+S=skills/cubemx2-hal2-stm32c562nucleo/scripts
 ```
 
 | Stage | Command | Gate |
@@ -178,6 +223,7 @@ S=skills/cubemx-stm32c5/scripts
 | 6 connect | `bash $S/discover.sh <board> [--serial <stlink-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--ioc2 <file>]` | `REGEN: PASS`, `Created ...` |
 | 2 regenerate (after a .ioc2 change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 7 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
 | 8 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
@@ -189,7 +235,7 @@ from the board (or copied from `--ioc2`); `mx/` is generated from it and never e
 Example - B1 toggles LD1 on a NUCLEO-C562RE:
 
 ```bash
-S=skills/cubemx-stm32c5/scripts
+S=skills/cubemx2-hal2-stm32c562nucleo/scripts
 bash $S/check_tools.sh nucleo-c562re
 bash $S/discover.sh nucleo-c562re
 bash $S/new_app.sh nucleo-c562re btn-led "" uart-btn-led
@@ -198,10 +244,10 @@ bash $S/flash.sh apps/btn-led --yes
 python $S/serial_test.py auto apps/btn-led/tests/uart_btn_led.json apps/btn-led/logs/test.log --board nucleo-c562re --interactive
 ```
 
-### pio-rpi-pico-2w (PlatformIO + Raspberry Pi Pico 2 W)
+### pio-arduino-rpipico2w (PlatformIO + Raspberry Pi Pico 2 W)
 
 ```bash
-S=skills/pio-rpi-pico-2w/scripts
+S=skills/pio-arduino-rpipico2w/scripts
 ```
 
 | Stage | Command | Gate |
@@ -210,6 +256,7 @@ S=skills/pio-rpi-pico-2w/scripts
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 6 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 7 flash | `bash $S/flash.sh apps/<app> --yes [--uf2 <file.uf2>]` | `FLASH: PASS` |
 | 8 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
@@ -221,13 +268,75 @@ or be in BOOTSEL: `flash.sh` reboots it into BOOTSEL itself.
 Example - BOOTSEL toggles the LED on a Pico 2 W:
 
 ```bash
-S=skills/pio-rpi-pico-2w/scripts
+S=skills/pio-arduino-rpipico2w/scripts
 bash $S/check_tools.sh rpi-pico-2w
 bash $S/discover.sh rpi-pico-2w
 bash $S/new_app.sh rpi-pico-2w btn-led "" uart-btn-led
 bash $S/build.sh apps/btn-led
 bash $S/flash.sh apps/btn-led --yes
 python $S/serial_test.py auto apps/btn-led/tests/uart_btn_led.json apps/btn-led/logs/test.log --board rpi-pico-2w --interactive
+```
+
+### cubemx-hal-stm32n6570dk (STM32CubeMX + STM32CubeN6 HAL + STM32N6570-DK) - M1
+
+```bash
+S=skills/cubemx-hal-stm32n6570dk/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `REGEN: PASS`, `Created ...` |
+| 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `stm32n6570-dk`. Templates: `hello-world`, `uart-btn-led`. Each app's `<app>.ioc` starts
+from ST's FSBL-only template in STM32CubeN6 plus the console UART; `mx/` is generated headlessly
+by STM32CubeMX and never edited by hand. Flash and test are planned (M3).
+
+### cubemx-hal-stm32f407disco (STM32CubeMX + STM32CubeF4 HAL + STM32F4 Discovery) - M1
+
+Same commands and gates as cubemx-hal-stm32n6570dk with `S=skills/cubemx-hal-stm32f407disco/scripts`
+and board `stm32f407g-disc1`. The `.ioc` starts from the CubeMX board configuration
+(`loadboard STM32F407G-DISC1`) plus SWO; the console is SWO output only (the board's ST-LINK/V2 has
+no virtual COM port).
+
+### cubemx-hal-stm32l475iot (STM32CubeMX + STM32CubeL4 HAL + B-L475E-IOT01A)
+
+```bash
+S=skills/cubemx-hal-stm32l475iot/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 6 connect | `bash $S/discover.sh <board> [--serial <stlink-serial>]` | `IDENTITY: PASS` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `REGEN: PASS`, `Created ...` |
+| 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 7 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
+| 8 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `b-l475e-iot01a`. Templates: `hello-world`, `uart-btn-led` (B1 USER toggles LED2). The
+`.ioc` starts from the CubeMX board configuration (`loadboard B-L475E-IOT01A1`) plus USART1 on the
+ST-LINK virtual COM port; the console receives by interrupt (the L4 USART has no RX FIFO).
+
+Example - B1 toggles LED2 on a B-L475E-IOT01A:
+
+```bash
+S=skills/cubemx-hal-stm32l475iot/scripts
+bash $S/check_tools.sh b-l475e-iot01a
+bash $S/discover.sh b-l475e-iot01a
+bash $S/new_app.sh b-l475e-iot01a btn-led "" uart-btn-led
+bash $S/build.sh apps/btn-led
+bash $S/flash.sh apps/btn-led --yes
+python $S/serial_test.py auto apps/btn-led/tests/uart_btn_led.json apps/btn-led/logs/test.log --board b-l475e-iot01a --interactive
 ```
 
 ### pio-espidf-esp32s3box (PlatformIO + ESP-IDF + ESP32-S3-BOX)
@@ -242,6 +351,7 @@ S=skills/pio-espidf-esp32s3box/scripts
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 6 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 7 backup (optional, factory firmware) | `bash $S/backup.sh <board>` | `BACKUP: PASS` |
 | 7 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
@@ -273,9 +383,10 @@ writes four regions (bootloader, partitions, `boot_app0`, sketch).
 
   | Skill | Workspace | Boards folder | Board serial | Console port |
   | --- | --- | --- | --- | --- |
-  | modus-psoc-e84 | `PSE84_WS` | `PSE84_BOARDS_DIR` | `PSE84_PROBE_SERIAL` | `PSE84_CONSOLE` |
-  | pio-rpi-pico-2w | `PICO_WS` | `PICO_BOARDS_DIR` | `PICO_USB_SERIAL` | `PICO_CONSOLE` |
-  | cubemx-stm32c5 | `CUBE_WS` | `CUBE_BOARDS_DIR` | `CUBE_PROBE_SERIAL` | `CUBE_CONSOLE` |
+  | modus-pdl-edgitalk | `PSE84_WS` | `PSE84_BOARDS_DIR` | `PSE84_PROBE_SERIAL` | `PSE84_CONSOLE` |
+  | pio-arduino-rpipico2w | `PICO_WS` | `PICO_BOARDS_DIR` | `PICO_USB_SERIAL` | `PICO_CONSOLE` |
+  | cubemx2-hal2-stm32c562nucleo | `CUBE_WS` | `CUBE_BOARDS_DIR` | `CUBE_PROBE_SERIAL` | `CUBE_CONSOLE` |
+  | cubemx-hal-stm32l475iot | `L4_WS` | `L4_BOARDS_DIR` | `L4_PROBE_SERIAL` | `L4_CONSOLE` |
 - **Your own board**: put its profile in `<project>/boards/<id>/<skill>/board.env` (copy
   `boards/_template/`). The scripts find it before the repo's boards.
 - **Flashing**: always check the board, the app and the image hash yourself before `flash.sh --yes`.
