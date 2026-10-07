@@ -30,3 +30,7 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# --- local handoff notes between PCs (Claude Code loads it; never committed) ---
+CLAUDE.local.md
+.claude/settings.local.json

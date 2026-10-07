@@ -72,7 +72,7 @@ See [apps/README.md](apps/README.md).
 **As a Claude Code plugin** (works from any project folder; apps go to `./apps` there):
 
 ```
-/plugin marketplace add <github-owner>/automated-firmware-skills
+/plugin marketplace add vsupacha/automated-firmware-skills
 /plugin install automated-firmware-skills@automated-firmware-skills
 ```
 
