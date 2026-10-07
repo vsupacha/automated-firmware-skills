@@ -2,6 +2,7 @@
 # Stage 5: program the combined image to THIS PC's board (probe serial from discover.sh).
 # Usage: flash.sh <app-dir> --yes [--board <id>] [--hex <file>]
 #   --yes    REQUIRED: records that the user approved erasing/programming this board
+#            (not needed when the developer put FLASH_POLICY=auto into the bench file)
 #   --board  defaults to APP_BOARD in <app>/pse84-app.env
 #   --hex    flash another combined hex (e.g. a known-good/recovery image) instead of the
 #            app's build/app_combined.hex; skips the manifest check
@@ -32,8 +33,9 @@ APP_BOARD="$(sed -n 's/^APP_BOARD=//p' "$APPDIR/pse84-app.env" 2>/dev/null)"
 [ -n "$BOARD" ] || die "board unknown: pass --board <id>"
 load_board "$BOARD"
 require_vars PROBE_SERIAL EXPECTED_DEVICE EXPECTED_LIFECYCLE OPENOCD_TARGET_CFG
-[ $YES = 1 ] || need_user APPROVE "erase and program board '$BOARD_ID' (probe ${PROBE_SERIAL:-?}) with app $(basename "$APPDIR") - re-run flash.sh with --yes after the user agrees"
+require_flash_approval $YES "erase and program board '$BOARD_ID' (probe ${PROBE_SERIAL:-?}) with app $(basename "$APPDIR")"
 [ -z "$APP_BOARD" ] || [ "$APP_BOARD" = "$BOARD_ID" ] || die "app was created for '$APP_BOARD', not '$BOARD_ID'"
+bench_lock "$BOARD_ID" flash.sh
 
 # 1. image gate
 if [ -n "$HEX" ]; then

@@ -22,7 +22,7 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
 | M1 skeleton | 1 setup, 2 create, 3 build | Stage 1, Stage 2 step 2, Stage 4 |
-| M2 layering | 4 layer check, 5 host test *(planned)* | Stage 3 (rules + shared `lib/func`) |
+| M2 layering | 4 layer check, 5 host test | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 hardware | 6 connect, 7 flash, 8 test, 9 debug *(planned)* | Stage 2 step 1, Stage 5, Stage 6 |
 | M4 porting | 10 port *(planned)* | Extending |
 | - | 11 clean | Stage 7 |
@@ -178,6 +178,11 @@ Read `reference/layering.md` before writing code. Rules:
   and `INCLUDES+=../shared` added to both cores). `help.sh` lists templates from `description.txt`.
 - Multi-core work (CM55 owns a peripheral, IPC mailbox): reference/layering.md "Dual-core".
 
+**Check the layers (M2 - gated like M3, stops with `ACTION: SETUP` until enabled):**
+`python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS` (exit 2 = warnings to fix), and
+`bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` unit-tested on the PC
+against a fake board, no hardware). Fix a violation in the layer the message names.
+
 ## Stage 4 - Build
 
 ```bash
@@ -200,6 +205,10 @@ through the flash bank into `$PSE84_BACKUP_DIR` (.bin/.hex/.sha256; clean.sh kee
 ```bash
 bash "$SKILL/scripts/flash.sh" <app-dir> --yes [--hex <known-good.hex>]
 ```
+`FLASH_POLICY=auto` in this board's bench file replaces `--yes` for a dedicated lab board - only
+the developer writes it, never you. discover, flash and test hold a per-board lock: `board '<id>'
+is in use` means another run has the board - wait; delete the lock only after the user confirms
+that run is gone.
 Gates inside: app made for this board → hex matches the PASS manifest → read-only identity →
 acquire-only attach (resets, writes nothing) with **device + life cycle check** → program,
 verify, reset. Never flash a single-core hex; boot order is S-M33 → NS-M33 → M55.

@@ -39,15 +39,73 @@ spec.json keys:
 Exit 0 = all non-skipped steps PASS.
 """
 import argparse
+import atexit
 import json
 import os
 import re
+import shutil
+import socket
 import sys
 import time
 from pathlib import Path
 
 import serial
 from serial.tools import list_ports
+
+
+def _pid_alive(pid):
+    if os.name == "nt":             # os.kill(pid, 0) would TERMINATE the process on Windows
+        import ctypes
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        h = k32.OpenProcess(0x1000, False, pid)          # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return ctypes.get_last_error() == 5          # access denied = exists
+        code = ctypes.c_ulong()
+        k32.GetExitCodeProcess(h, ctypes.byref(code))
+        k32.CloseHandle(h)
+        return code.value == 259                         # STILL_ACTIVE
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def bench_lock(bench_dir, board_id, tool):
+    """Exclusive use of this PC's board - same protocol as bench_lock in lib/common.sh."""
+    if os.environ.get("FW_BENCH_LOCK_HELD") == board_id:
+        return
+    d = Path(bench_dir) / f"{board_id}.lock"
+    host = socket.gethostname()
+    d.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        d.mkdir()
+    except FileExistsError:
+        try:
+            text = (d / "owner").read_text(encoding="utf-8")
+        except OSError:
+            text = ""
+        owner = dict(line.split("=", 1) for line in text.splitlines() if "=" in line)
+        pid = owner.get("pid", "")
+        if owner.get("host", "").lower() == host.lower() and pid.isdigit() and _pid_alive(int(pid)):
+            sys.exit(f"ERROR: board '{board_id}' is in use: {' '.join(text.split())}\n"
+                     f"       Wait until that run ends and re-run. If no such run exists any more, delete {d}")
+        print(f"NOTE: replacing a stale lock of board '{board_id}' ({' '.join(text.split())})")
+        shutil.rmtree(d, ignore_errors=True)
+        d.mkdir()
+    (d / "owner").write_text(f"host={host}\npid={os.getpid()}\ntool={tool}\n"
+                             f"since={time.strftime('%Y-%m-%d %H:%M:%S')}\n", encoding="utf-8", newline="\n")
+    os.environ["FW_BENCH_LOCK_HELD"] = board_id
+
+    def release():
+        try:
+            if f"pid={os.getpid()}\n" in (d / "owner").read_text(encoding="utf-8"):
+                shutil.rmtree(d, ignore_errors=True)
+        except OSError:
+            pass
+    atexit.register(release)
 
 
 
@@ -121,6 +179,7 @@ def run(cfg):
         board.update(own)
         bench = Path(os.environ.get(f"{P}_BENCH_DIR") or ws / ".bench") / f"{args.board}.env"
         board.update(read_env(bench))
+        bench_lock(bench.parent, args.board, "serial_test.py")
         if os.environ.get(f"{P}_{cfg['serial_env']}"):
             board[cfg["serial_key"]] = os.environ[f"{P}_{cfg['serial_env']}"]
     labels = [s.strip() for s in board.get("BTN_LABELS", "").split(",") if s.strip()]

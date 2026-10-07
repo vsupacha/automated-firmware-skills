@@ -14,6 +14,7 @@ while [ $# -gt 0 ]; do
 done
 [ -n "$BOARD" ] || die "usage: discover.sh <board-id> [--serial <usb-serial>]  (boards: $(known_boards))"
 load_board "$BOARD"
+bench_lock "$BOARD_ID" discover.sh
 
 info "RP2 USB devices (VID $USB_VID) on this PC"
 mapfile -t DEVS < <(usb_devices | tr -d '\r' | grep -E '^(app|bootsel) ')
@@ -55,10 +56,12 @@ fi
 echo "IDENTITY: PASS"
 
 mkdir -p "$BENCH_DIR"
+KEEP="$(bench_dev_lines "$BENCH_DIR/$BOARD_ID.env")"   # e.g. FLASH_POLICY
 cat >"$BENCH_DIR/$BOARD_ID.env" <<EOF
 # Bench instance: board '$BOARD_ID' on this PC, written $(date '+%Y-%m-%d %H:%M')
 # by pio-rpi-pico-2w/discover.sh. Re-run discover.sh after changing board or USB port.
 USB_SERIAL=$SER
 CONSOLE_PORT=$PORT
 EOF
+[ -z "$KEEP" ] || echo "$KEEP" >>"$BENCH_DIR/$BOARD_ID.env"
 info "Saved $BENCH_DIR/$BOARD_ID.env  (USB_SERIAL=$SER CONSOLE_PORT=${PORT:--})"

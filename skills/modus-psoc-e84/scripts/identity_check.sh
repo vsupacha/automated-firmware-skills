@@ -8,6 +8,7 @@
 require_milestone M3 "identity_check.sh (stage 6 connect)"
 [ -n "$1" ] || die "usage: identity_check.sh <board-id> [logfile]"
 load_board "$1"
+bench_lock "$BOARD_ID" identity_check.sh
 require_vars PROBE_SERIAL OPENOCD_TARGET_CFG
 LOG="${2:-${TMPDIR:-/tmp}/identity-$BOARD_ID-$(ts).log}"
 [ -x "$OPENOCD" ] || die "openocd not found ($OPENOCD); run check_tools.sh"

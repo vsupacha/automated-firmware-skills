@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Stage 5: program an app's ELF into the board of this PC's bench file.
 # Usage: flash.sh <app-dir> --yes [--elf <file>]
-#   --yes   required: the agent must have asked the user first (board, app, ELF sha256 prefix)
+#   --yes   required: the agent must have asked the user first (board, app, ELF sha256 prefix),
+#           unless the developer put FLASH_POLICY=auto into this board's bench file
 #   --elf   program another image (recovery / known-good); skips the manifest gate
 # Gates: app made for this board -> ELF matches the PASS manifest -> bench ST-LINK connected ->
 # read-only hot-plug identity (device name/ID) -> program under reset + verify + reset.
@@ -35,7 +36,8 @@ else
     || die "ELF does not match the PASS manifest (rebuilt or edited after the build?) - run build.sh"
 fi
 SHA="$(sha256sum "$ELF" | cut -d' ' -f1)"
-[ $YES = 1 ] || need_user APPROVE "program board '$APP_BOARD' with app $(basename "$APPDIR") (ELF sha256 ${SHA:0:16}...) - re-run flash.sh with --yes after the user agrees"
+require_flash_approval $YES "program board '$APP_BOARD' with app $(basename "$APPDIR") (ELF sha256 ${SHA:0:16}...)"
+bench_lock "$BOARD_ID" flash.sh
 info "App $(basename "$APPDIR") for board $APP_BOARD, ELF sha256 ${SHA:0:16}..."
 
 # 2. probe + identity (read-only)

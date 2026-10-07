@@ -17,6 +17,7 @@ while [ $# -gt 0 ]; do
 done
 [ -n "$BOARD" ] || die "usage: backup.sh <board-id> [<start> <size>] [--out <dir>]"
 load_board "$BOARD"
+bench_lock "$BOARD_ID" backup.sh
 require_vars PROBE_SERIAL EXPECTED_DEVICE OPENOCD_TARGET_CFG
 START="${START:-${BACKUP_START:-0x60000000}}"; SIZE="${SIZE:-${BACKUP_SIZE:-0x00C00000}}"
 OUT="${OUT:-$PSE84_BACKUP_DIR}"; mkdir -p "$OUT"; OUT="$(cd "$OUT" && pwd)"

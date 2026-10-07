@@ -12,6 +12,7 @@ while [ $# -gt 0 ]; do
 done
 [ -n "$BOARD" ] || die "usage: discover.sh <board-id> [--serial <stlink-serial>]  (boards: $(known_boards))"
 load_board "$BOARD"
+bench_lock "$BOARD_ID" discover.sh
 [ -x "$PROGRAMMER" ] || die "STM32CubeProgrammer CLI $PROGRAMMER_VERSION not found - run check_tools.sh"
 
 info "ST-LINK probes on this PC"
@@ -51,10 +52,12 @@ fi
 echo "IDENTITY: PASS"
 
 mkdir -p "$BENCH_DIR"
+KEEP="$(bench_dev_lines "$BENCH_DIR/$BOARD_ID.env")"   # e.g. FLASH_POLICY
 cat >"$BENCH_DIR/$BOARD_ID.env" <<EOF
 # Bench instance: board '$BOARD_ID' on this PC, written $(date '+%Y-%m-%d %H:%M')
 # by cubemx-stm32c5/discover.sh. Re-run discover.sh after changing board or USB port.
 PROBE_SERIAL=$SN
 CONSOLE_PORT=$COM
 EOF
+[ -z "$KEEP" ] || echo "$KEEP" >>"$BENCH_DIR/$BOARD_ID.env"
 info "Saved $BENCH_DIR/$BOARD_ID.env  (PROBE_SERIAL=$SN CONSOLE_PORT=${COM:--})"

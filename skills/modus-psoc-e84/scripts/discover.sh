@@ -14,6 +14,7 @@ while [ $# -gt 0 ]; do
 done
 [ -n "$BOARD" ] || die "usage: discover.sh <board-id> [--serial <probe-serial>]"
 load_board "$BOARD"
+bench_lock "$BOARD_ID" discover.sh
 
 info "KitProg3 probes on this PC"
 [ -x "$FW_LOADER" ] && "$FW_LOADER" --device-list 2>&1 | grep -E '^\s+[0-9]+:' || true
@@ -47,10 +48,12 @@ PSE84_PROBE_SERIAL="$SERIAL" PSE84_CONSOLE="$COM" bash "$SKILL_DIR/scripts/ident
   || die "identity check failed - not saving. Is this really a '$BOARD_ID' board?"
 
 mkdir -p "$BENCH_DIR"
+KEEP="$(bench_dev_lines "$BENCH_DIR/$BOARD_ID.env")"   # e.g. FLASH_POLICY
 cat >"$BENCH_DIR/$BOARD_ID.env" <<EOF
 # Bench instance for board '$BOARD_ID' on $(hostname), discovered $(date '+%Y-%m-%d %H:%M')
 # by modus-psoc-e84/discover.sh. Re-run discover.sh after changing board or USB port.
 PROBE_SERIAL=$SERIAL
 CONSOLE_PORT=$COM
 EOF
+[ -z "$KEEP" ] || echo "$KEEP" >>"$BENCH_DIR/$BOARD_ID.env"
 info "Saved $BENCH_DIR/$BOARD_ID.env  (PROBE_SERIAL=$SERIAL CONSOLE_PORT=$COM)"

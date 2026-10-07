@@ -1,6 +1,6 @@
 ---
 name: cubemx-stm32c5
-description: End-to-end firmware workflow for STM32C5 boards (NUCLEO-C562RE) with the STM32CubeMX2 command line on Windows - check the pinned STM32Cube bundles and packs, discover the on-board ST-LINK, create the hardware configuration (.ioc2) from the board with the pinned board pack, generate the CMake project headlessly, write layered code (board -> func -> app_main) hooked into the generated main.c, build with the pinned GCC/CMake/Ninja, flash with STM32CubeProgrammer behind identity gates (ST-LINK board, device name and ID), run automated UART tests over the ST-LINK virtual COM port, regenerate after .ioc2 changes, and clean build outputs. Use when asked to create, build, flash (แฟลช) or test STM32C5 / NUCLEO-C562RE firmware with STM32CubeMX2 (บอร์ด Nucleo), start from an existing .ioc2, regenerate after a CubeMX change, add an STM32C5 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for classic STM32CubeMX (.ioc) projects or other STM32 families.
+description: End-to-end firmware workflow for STM32C5 boards (NUCLEO-C562RE) with the STM32CubeMX2 CLI on Windows - check the pinned STM32Cube bundles and packs, discover the on-board ST-LINK, create the hardware configuration (.ioc2) from the board with the pinned board pack, generate the CMake project headlessly, write layered code (board -> func -> app_main) hooked into the generated main.c, build with the pinned GCC/CMake/Ninja, flash with STM32CubeProgrammer behind identity gates (ST-LINK board, device name and ID), run automated UART tests over the ST-LINK virtual COM port, regenerate after .ioc2 changes, and clean build outputs. Use when asked to create, build, flash (แฟลช) or test STM32C5 / NUCLEO-C562RE firmware with STM32CubeMX2 (บอร์ด Nucleo), start from an existing .ioc2, regenerate after a CubeMX change, add an STM32C5 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for classic STM32CubeMX (.ioc) projects or other STM32 families.
 ---
 
 # STM32C5 firmware workflow (STM32CubeMX2)
@@ -23,7 +23,7 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
 | M1 skeleton | 1 setup, 2 create, 3 build | Stage 1, Stage 2 step 2 (+ `regen.sh`), Stage 4 |
-| M2 layering | 4 layer check, 5 host test *(planned)* | Stage 3 (rules + shared `lib/func`) |
+| M2 layering | 4 layer check, 5 host test | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 hardware | 6 connect, 7 flash, 8 test, 9 debug *(planned)* | Stage 2 step 1, Stage 5, Stage 6 |
 | M4 porting | 10 port *(planned)* | Extending |
 | - | 11 clean | Stage 7 |
@@ -142,6 +142,11 @@ Read `reference/layering.md` first. Rules:
   project), so a 1 ms delay in the loop already loses characters.
 - Templates: `hello-world`, `uart-btn-led` (B1 toggles LD1). Tests: `tests/<app>.json`.
 
+**Check the layers (M2 - gated like M3, stops with `ACTION: SETUP` until enabled):**
+`python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS` (exit 2 = warnings to fix), and
+`bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` unit-tested on the PC
+against a fake board, no hardware). Fix a violation in the layer the message names.
+
 ## Stage 4 - Build
 
 ```bash
@@ -159,6 +164,10 @@ firmware. Then:
 ```bash
 bash "$SKILL/scripts/flash.sh" <app> --yes [--elf <known-good.elf>]
 ```
+`FLASH_POLICY=auto` in this board's bench file replaces `--yes` for a dedicated lab board - only
+the developer writes it, never you. discover, flash and test hold a per-board lock: `board '<id>'
+is in use` means another run has the board - wait; delete the lock only after the user confirms
+that run is gone.
 Gates: ELF matches the PASS manifest → bench ST-LINK connected → hot-plug identity (ST-LINK board,
 device name, device ID; stops on signs of read-out protection) → `-c port=SWD sn=<sn> mode=UR
 reset=HWrst -d <elf> -v -rst`. **Gate:** `FLASH: PASS` (`Download verified successfully`).

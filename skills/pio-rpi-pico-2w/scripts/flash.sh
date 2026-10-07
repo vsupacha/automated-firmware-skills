@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Stage 5: program an app's firmware.uf2 into the board of this PC's bench file.
 # Usage: flash.sh <app-dir> --yes [--uf2 <file>]
-#   --yes   required: the agent must have asked the user first (board, app, uf2 sha256 prefix)
+#   --yes   required: the agent must have asked the user first (board, app, uf2 sha256 prefix),
+#           unless the developer put FLASH_POLICY=auto into this board's bench file
 #   --uf2   program another image (recovery / known-good); skips the manifest gate
 # Gates: app made for this board -> uf2 matches the PASS manifest -> board with the bench USB
 # serial found -> reboot to BOOTSEL (1200-baud touch) -> picotool identity (chip, flash size,
@@ -35,7 +36,8 @@ else
   [ -n "$want" ] && [ "$want" = "$have" ] || die "firmware.uf2 does not match the PASS manifest (rebuilt or edited after the build?) - run build.sh"
 fi
 SHA="$(sha256sum "$UF2" | cut -d' ' -f1)"
-[ $YES = 1 ] || need_user APPROVE "program board '$APP_BOARD' with app $(basename "$APPDIR") (uf2 sha256 ${SHA:0:16}...) - re-run flash.sh with --yes after the user agrees"
+require_flash_approval $YES "program board '$APP_BOARD' with app $(basename "$APPDIR") (uf2 sha256 ${SHA:0:16}...)"
+bench_lock "$BOARD_ID" flash.sh
 info "App $(basename "$APPDIR") for board $APP_BOARD, uf2 sha256 ${SHA:0:16}..."
 
 # 2. find the board (sketch running, or already in BOOTSEL)

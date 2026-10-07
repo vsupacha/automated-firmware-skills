@@ -143,6 +143,72 @@ require_vars() {
        'discover.sh $BOARD_ID' (writes $BENCH_DIR/$BOARD_ID.env)."
 }
 
+# ---- bench instance: developer settings, flash policy, board lock (M3) ----------------------
+# Lines of <bench>/<id>.env that belong to the developer, not to discover.sh; discover.sh keeps them
+# when it rewrites the file:  FLASH_POLICY=ask|auto  (default ask)
+BENCH_DEV_KEYS="FLASH_POLICY"
+# bench_dev_lines <bench-file>: the developer's lines of an existing bench file (print before rewriting)
+bench_dev_lines() {
+  local k
+  [ -f "$1" ] || return 0
+  for k in $BENCH_DEV_KEYS; do grep "^$k=" "$1" | tail -1; done
+}
+
+# flash_policy: "auto" only when the developer wrote FLASH_POLICY=auto into this board's bench file
+# (read from the file itself - an environment variable cannot switch approval off). Else "ask".
+flash_policy() {
+  local p=""
+  [ -f "$BENCH_FILE" ] && p="$(sed -n 's/^FLASH_POLICY=\([a-z]*\)[[:space:]]*$/\1/p' "$BENCH_FILE" | tail -1)"
+  case "$p" in auto) echo auto;; *) echo ask;; esac
+}
+# require_flash_approval <yes 0|1> <what is about to happen>: --yes, or FLASH_POLICY=auto, or exit 10
+require_flash_approval() {
+  [ "$1" = 1 ] && return 0
+  if [ "$(flash_policy)" = auto ]; then
+    echo "NOTE: FLASH_POLICY=auto in $BENCH_FILE - $2 without asking (the developer's setting for this board)"
+    return 0
+  fi
+  need_user APPROVE "$2 - re-run with --yes after the user agrees"
+}
+
+# bench_lock <board-id> <tool>: exclusive use of this PC's board by one flash/test/debug run.
+# Lock = <bench>/<id>.lock/ (mkdir is atomic) with an owner file; released on exit. A lock whose
+# process is gone, or that came from another PC through a synced folder, is stale and replaced.
+# Child scripts inherit the lock (FW_BENCH_LOCK_HELD). lib/fwtest.py implements the same protocol.
+fw_pid() { cat "/proc/$$/winpid" 2>/dev/null || echo "$$"; }
+fw_pid_alive() {
+  if [ -e "/proc/$$/winpid" ]; then
+    tasklist //FI "PID eq $1" //NH 2>/dev/null | grep -q "[[:space:]]$1[[:space:]]"
+  else
+    kill -0 "$1" 2>/dev/null
+  fi
+}
+bench_lock() {
+  local id="$1" tool="$2" dir host owner_host owner_pid
+  [ "${FW_BENCH_LOCK_HELD:-}" = "$id" ] && return 0
+  dir="$BENCH_DIR/$id.lock"; host="$(hostname)"
+  mkdir -p "$BENCH_DIR" || die "cannot create $BENCH_DIR"
+  if ! mkdir "$dir" 2>/dev/null; then
+    owner_host="$(sed -n 's/^host=//p' "$dir/owner" 2>/dev/null)"
+    owner_pid="$(sed -n 's/^pid=//p' "$dir/owner" 2>/dev/null)"
+    if [ "${owner_host,,}" = "${host,,}" ] && [ -n "$owner_pid" ] && fw_pid_alive "$owner_pid"; then
+      die "board '$id' is in use: $(tr '\n' ' ' <"$dir/owner")
+       Wait until that run ends and re-run. If no such run exists any more, delete $dir"
+    fi
+    echo "NOTE: replacing a stale lock of board '$id' ($(tr '\n' ' ' <"$dir/owner" 2>/dev/null))"
+    rm -rf "$dir"; mkdir "$dir" 2>/dev/null || die "cannot lock board '$id' ($dir)"
+  fi
+  printf 'host=%s\npid=%s\ntool=%s\nsince=%s\n' "$host" "$(fw_pid)" "$tool" "$(date '+%Y-%m-%d %H:%M:%S')" >"$dir/owner"
+  BENCH_LOCK_DIR="$dir"; export FW_BENCH_LOCK_HELD="$id"
+  trap bench_unlock EXIT
+}
+bench_unlock() {
+  [ -n "${BENCH_LOCK_DIR:-}" ] && [ "$(sed -n 's/^pid=//p' "$BENCH_LOCK_DIR/owner" 2>/dev/null)" = "$(fw_pid)" ] \
+    && rm -rf "$BENCH_LOCK_DIR"
+  BENCH_LOCK_DIR=""
+  return 0
+}
+
 # fw_gitignore <workspace> <skill> <line>...: append the missing lines to <workspace>/.gitignore
 # (the workspace may be shared with other skills; the user's own lines stay)
 fw_gitignore() {

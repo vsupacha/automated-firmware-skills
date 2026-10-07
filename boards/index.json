@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "about": "Machine-readable board index. Resolve a board name with 'aliases' (case, spaces, '-' and '_' ignored) to exactly one id, or ask the user when nothing or several match. Evidence levels come from dated lines in each profile's README (log); tools/validate_skills.py checks this file against the folders.",
+  "evidence_levels": {
+    "unverified": "profile exists, nothing run on hardware",
+    "built": "build gate passed",
+    "flashed": "programmed and verified on the board",
+    "tested": "automatic serial tests passed (RESULT: PASS)",
+    "interactive": "interactive tests passed: a person pressed buttons, the console gave the evidence",
+    "observed": "a person confirmed what the board showed (LED lit)"
+  },
+  "boards": [
+    {
+      "id": "edgi-talk",
+      "name": "RT-Thread Edgi-Talk",
+      "aliases": [
+        "Edgi-Talk",
+        "Edgi Talk",
+        "EdgiTalk",
+        "RT-Thread Edgi-Talk"
+      ],
+      "mcu": "PSE846GPS2DBZC4A",
+      "mcu_family": "Infineon PSOC Edge E84",
+      "profiles": {
+        "modus-psoc-e84": {
+          "level": "interactive",
+          "date": "2026-10-07",
+          "templates": {
+            "hello-world": "tested",
+            "uart-btn-led": "interactive"
+          },
+          "log": "boards/edgi-talk/modus-psoc-e84/README.md"
+        }
+      }
+    },
+    {
+      "id": "kit-pse84-ai",
+      "name": "Infineon PSOC Edge E84 AI Kit",
+      "aliases": [
+        "KIT_PSE84_AI",
+        "PSOC Edge E84 AI Kit",
+        "PSE84 AI Kit",
+        "E84 AI Kit"
+      ],
+      "mcu": "PSE846GPS2DBZC4A",
+      "mcu_family": "Infineon PSOC Edge E84",
+      "profiles": {
+        "modus-psoc-e84": {
+          "level": "interactive",
+          "date": "2026-10-03",
+          "templates": {
+            "uart-btn-led": "interactive",
+            "button-led": "interactive"
+          },
+          "note": "verified on the AI Kit through the tesaiot profile (same kit, AI-Kit I/O)",
+          "log": "boards/kit-pse84-ai/modus-psoc-e84/README.md"
+        }
+      }
+    },
+    {
+      "id": "tesaiot",
+      "name": "TESAIoT PSOC Edge E84 DevKit",
+      "aliases": [
+        "TESAIoT",
+        "TESAIoT DevKit",
+        "TESAIoT PSOC Edge E84 DevKit",
+        "QWA309"
+      ],
+      "extends": "kit-pse84-ai",
+      "mcu": "PSE846GPS2DBZC4A",
+      "mcu_family": "Infineon PSOC Edge E84",
+      "profiles": {
+        "modus-psoc-e84": {
+          "level": "interactive",
+          "date": "2026-10-03",
+          "templates": {
+            "uart-btn-led": "interactive",
+            "button-led": "interactive"
+          },
+          "note": "QWA309 SW4/SW5 untested: the DVP camera holds P17.5/P17.7 low",
+          "log": "boards/tesaiot/modus-psoc-e84/README.md"
+        }
+      }
+    },
+    {
+      "id": "nucleo-c562re",
+      "name": "ST NUCLEO-C562RE",
+      "aliases": [
+        "NUCLEO-C562RE",
+        "Nucleo C562RE",
+        "Nucleo C562",
+        "C562RE"
+      ],
+      "mcu": "STM32C562RET6",
+      "mcu_family": "ST STM32C5",
+      "profiles": {
+        "cubemx-stm32c5": {
+          "level": "observed",
+          "date": "2026-10-07",
+          "templates": {
+            "hello-world": "tested",
+            "uart-btn-led": "observed"
+          },
+          "log": "boards/nucleo-c562re/cubemx-stm32c5/README.md"
+        }
+      }
+    },
+    {
+      "id": "rpi-pico-2w",
+      "name": "Raspberry Pi Pico 2 W",
+      "aliases": [
+        "Pico 2 W",
+        "Pico2W",
+        "Raspberry Pi Pico 2 W",
+        "RPi Pico 2 W"
+      ],
+      "mcu": "RP2350A",
+      "mcu_family": "Raspberry Pi RP2350",
+      "profiles": {
+        "pio-rpi-pico-2w": {
+          "level": "observed",
+          "date": "2026-10-07",
+          "templates": {
+            "hello-world": "tested",
+            "uart-btn-led": "observed"
+          },
+          "log": "boards/rpi-pico-2w/pio-rpi-pico-2w/README.md"
+        }
+      }
+    }
+  ]
+}
