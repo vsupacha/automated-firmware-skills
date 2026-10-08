@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the msh console (uart9 via the ART-Link VCP), RT-Thread thread timing

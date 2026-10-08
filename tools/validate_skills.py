@@ -6,7 +6,7 @@ Usage:
 
 Checks
   skills    SKILL.md frontmatter (name = folder, description <= 1024 chars, no tags) and required
-            sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT, stage 2d), have a shebang and LF endings; board-stage
+            sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT/IDE_APP, stage 2d), have a shebang and LF endings; board-stage
             scripts are gated by M1; scripts/ and reference/ files named in SKILL.md exist; hello-world and
             uart-btn-led templates with description.txt and valid tests/*.json; test specs of the
             same template agree across skills (warning)
@@ -32,8 +32,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL_NAME_RE = re.compile(r"^[a-z0-9]+-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$")
 REQUIRED_SCRIPTS = ["env.sh", "help.sh", "check_tools.sh", "new_app.sh", "open_ide.sh", "build.sh",
                     "clean.sh"]
-# stage 2d (IDE handoff): VS Code extension ids a skill may name in env.sh IDE_EXT
+# stage 2d (IDE handoff): VS Code extension ids a skill may name in env.sh IDE_EXT, or a standalone
+# IDE (IDE_APP=<id>, e.g. rt-thread-studio) that open_ide.sh starts itself
 IDE_EXT_RE = re.compile(r"^IDE_EXT=([a-z0-9-]+\.[a-z0-9-]+)", re.M)
+IDE_APP_RE = re.compile(r"^IDE_APP=([a-z0-9-]+)", re.M)
 # M1 board-stage scripts (connect, flash, test): required, unless the skill's SKILL.md marks its
 # "M1 bring-up (board)" row **planned** (skill with the build stages only)
 BOARD_STAGE_SCRIPTS = ["discover.sh", "flash.sh", "serial_test.py"]
@@ -135,8 +137,8 @@ def check_skills():
             ok((sc / s).is_file(), f"skills/{name}/scripts/{s} missing (standard stage script)")
         env = sc / "env.sh"
         if env.is_file():
-            ok(IDE_EXT_RE.search(read(env)) is not None,
-               f"skills/{name}/scripts/env.sh: no IDE_EXT=<publisher.extension> (stage 2d IDE handoff)")
+            ok(IDE_EXT_RE.search(read(env)) is not None or IDE_APP_RE.search(read(env)) is not None,
+               f"skills/{name}/scripts/env.sh: no IDE_EXT=<publisher.extension> or IDE_APP=<id> (stage 2d IDE handoff)")
             ok("IDE_NAME=" in read(env), f"skills/{name}/scripts/env.sh: no IDE_NAME (stage 2d IDE handoff)")
         if (sc / "new_app.sh").is_file():
             ok("fw_new_app_ide" in read(sc / "new_app.sh"),

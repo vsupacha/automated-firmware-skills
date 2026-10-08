@@ -239,6 +239,54 @@
           "log": "boards/b-l475e-iot01a/cubemx-hal-stm32l475iot/README.md"
         }
       }
+    },
+    {
+      "id": "uno-r4-wifi",
+      "name": "Arduino UNO R4 WiFi",
+      "aliases": [
+        "UNO R4 WiFi",
+        "Arduino UNO R4 WiFi",
+        "UNO R4",
+        "ABX00087",
+        "Uno WiFi R4"
+      ],
+      "mcu": "R7FA4M1AB3CFM",
+      "mcu_family": "Renesas RA4M1",
+      "profiles": {
+        "pio-arduino-unor4wifi": {
+          "level": "observed",
+          "date": "2026-10-09",
+          "templates": {
+            "hello-world": "tested",
+            "uart-btn-led": "observed"
+          },
+          "log": "boards/uno-r4-wifi/pio-arduino-unor4wifi/README.md"
+        }
+      }
+    },
+    {
+      "id": "vision-board",
+      "name": "RT-Thread Vision Board (RA8D1)",
+      "aliases": [
+        "Vision Board",
+        "Vision-Board",
+        "RT-Thread Vision Board",
+        "VisionBoard",
+        "RA8D1 Vision Board"
+      ],
+      "mcu": "R7FA8D1BH",
+      "mcu_family": "Renesas RA8D1",
+      "profiles": {
+        "scons-rtthread-visionboard": {
+          "level": "tested",
+          "date": "2026-10-09",
+          "templates": {
+            "hello-world": "tested",
+            "uart-btn-led": "built"
+          },
+          "log": "boards/vision-board/scons-rtthread-visionboard/README.md"
+        }
+      }
     }
   ]
 }

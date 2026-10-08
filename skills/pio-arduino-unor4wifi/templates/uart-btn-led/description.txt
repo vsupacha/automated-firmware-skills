@@ -1,0 +1,1 @@
+UART console over the USB bridge (led/btn commands) + LED L (D13); no user button on the UNO R4 WiFi

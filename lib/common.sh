@@ -300,7 +300,10 @@ fw_open_ide() {
   fw_ide_ext_version "$code" >/dev/null \
     || need_user SETUP "install the VS Code extension $IDE_NAME: code --install-extension $IDE_EXT (or Extensions view), then re-run open_ide.sh"
   [ "$open" = 1 ] || { echo "IDE: not opened (--no-open)"; return 0; }
-  "$code" "$(winpath "$ws")" >/dev/null 2>&1 &
+  # not in the background: the code CLI returns once VS Code has the window, and a backgrounded CLI
+  # is killed with the caller's process tree before it launches VS Code (seen 2026-10-08)
+  "$code" "$(winpath "$ws")" </dev/null >/dev/null 2>&1 \
+    || need_user SETUP "VS Code did not start - open $(winpath "$ws") yourself with File > Open Workspace from File"
   echo "IDE: OPENED in VS Code"
 }
 

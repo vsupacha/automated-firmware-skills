@@ -21,3 +21,12 @@ nsc_veneer.o
 # IDE files (all skills): per-PC paths, re-made by open_ide.sh / the VS Code extension
 */.vscode/
 */*.code-workspace
+# added by the scons-rtthread-visionboard skill: per-PC and regenerable files (keep app sources + tests)
+.rtstudio/
+*/rtthread.elf
+*/rtthread.hex
+*/rtthread.map
+*/app.hex
+*/.sconsign.dblite
+*/Debug/
+*/__pycache__/

@@ -64,6 +64,8 @@ automated-firmware-skills/
 | [cubemx-hal-stm32l475iot](skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeL4 1.18.2 + CMake + STM32CubeProgrammer | ST STM32L4 | Windows + Git Bash | verified on hardware |
 | [pio-espidf-esp32s3box](skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO 6.2 + ESP-IDF 5.5 (espressif32 6.12.0) | Espressif ESP32-S3 | Windows + Git Bash | verified on hardware |
 | [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO 6.2 + arduino-esp32 2.0.17 (espressif32 6.12.0) | Espressif ESP32-S3 | Windows + Git Bash | verified on hardware |
+| [pio-arduino-unor4wifi](skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO 6.2 + Arduino UNO R4 core 1.4.1 (renesas-ra 1.7.0) | Renesas RA4M1 | Windows + Git Bash | verified on hardware |
+| [scons-rtthread-visionboard](skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons 4.10 + GNU Arm 13.3 + pyOCD (RT-Thread Studio SDK VISION-BOARD 1.3.0) | Renesas RA8D1 | Windows + Git Bash | hello-world tested on hardware |
 
 Planned: `arduino-app-lab-uno-q` (Arduino App Lab); M3 targets: FreeRTOS execution layer,
 Zephyr and RT-Thread skills.
@@ -81,6 +83,8 @@ Zephyr and RT-Thread skills.
 | ST STM32N6570-DK | [boards/stm32n6570-dk](boards/stm32n6570-dk/README.md) | cubemx-hal-stm32n6570dk |
 | ST B-L475E-IOT01A (Discovery kit IoT node) | [boards/b-l475e-iot01a](boards/b-l475e-iot01a/README.md) | cubemx-hal-stm32l475iot |
 | Espressif ESP32-S3-BOX (2021) | [boards/esp32-s3-box](boards/esp32-s3-box/README.md) | pio-espidf-esp32s3box, pio-arduino-esp32s3box |
+| Arduino UNO R4 WiFi | [boards/uno-r4-wifi](boards/uno-r4-wifi/README.md) | pio-arduino-unor4wifi |
+| RT-Thread Vision Board (RA8D1) | [boards/vision-board](boards/vision-board/README.md) | scons-rtthread-visionboard |
 
 New board: copy [boards/_template](boards/_template/README.md). Your own board in your own project:
 put its profile in `<project>/boards/<id>/<skill>/` - the skills look there first.
@@ -128,6 +132,22 @@ Then ask: "how do I use this?" / "ขอวิธีใช้หน่อย" - 
   `git config --global core.longpaths true` first.
 - Workspace path ≤100 characters, English characters only.
 
+### Requirements (pio-arduino-unor4wifi)
+
+- PlatformIO Core 6.2 (pip or the VS Code extension), Git, Python 3 (pyserial: PlatformIO's python
+  has it).
+- The first build downloads the pinned `renesas-ra` platform, the UNO R4 core, GCC 7.2.1 and
+  bossac. No driver needed on Windows (the board's USB bridge is a standard CDC port).
+- Workspace path ≤100 characters, English characters only.
+
+### Requirements (scons-rtthread-visionboard)
+
+- Windows with Git for Windows (Git Bash); Python 3 with pyserial.
+- RT-Thread Studio with, from its SDK Manager: the `VISION-BOARD` 1.3.0 board support package,
+  GNU_Tools_for_ARM_Embedded_Processors 13.3 and RealThread PyOCD 0.2.9 (`check_tools.sh` lists
+  what is missing). Studio brings the RT-Thread env (scons).
+- Workspace path ≤100 characters, English characters only; each app is a standalone ~38 MB copy.
+
 ### Requirements (cubemx-hal-stm32n6570dk)
 
 - Windows with Git for Windows (Git Bash); Python 3.
@@ -153,16 +173,18 @@ Then ask: "how do I use this?" / "ขอวิธีใช้หน่อย" - 
 
 ### IDE (every skill)
 
-Every app a skill creates opens in **VS Code with the toolchain vendor's extension**, so you can take
+Every app a skill creates opens in **VS Code with the toolchain vendor's extension** (or the vendor's own
+IDE where that is the norm: RT-Thread Studio), so you can take
 over at any point and edit, build, flash, debug and test by hand. The IDE uses the same project
 and build folders as the scripts. `new_app.sh` runs `open_ide.sh` at the end; it tells you what to
 install if something is missing. Details: [docs/workflow.md](docs/workflow.md#ide-handoff-stage-2d).
 
-| Skills | VS Code extension |
+| Skills | IDE |
 | --- | --- |
 | modus-pdl-edgitalk | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) |
 | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32l475iot | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) |
-| pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box | PlatformIO IDE (`platformio.platformio-ide`) |
+| pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box, pio-arduino-unor4wifi | PlatformIO IDE (`platformio.platformio-ide`) |
+| scons-rtthread-visionboard | **RT-Thread Studio** (standalone Eclipse-based IDE, `IDE_APP=rt-thread-studio`): the app is imported into `<apps>/.rtstudio` and Studio is started on it |
 
 ## Command reference
 
@@ -377,6 +399,76 @@ Same commands and gates as pio-espidf-esp32s3box with `S=skills/pio-arduino-esp3
 the code is Arduino style (`<Arduino.h>`, `setup()`/`loop()`, Print/Stream, `millis()`), and flash.sh
 writes four regions (bootloader, partitions, `boot_app0`, sketch).
 
+### pio-arduino-unor4wifi (PlatformIO + Arduino + UNO R4 WiFi)
+
+```bash
+S=skills/pio-arduino-unor4wifi/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + PlatformIO IDE | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
+| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `uno-r4-wifi`. Templates: `hello-world`, `uart-btn-led` (LED1 = L on D13; the board has no
+user button, so the button steps are skipped). The board's ESP32-S3 is the USB bridge: a 1200 baud
+touch starts its loader and bossac writes the sketch from 0x4000. That loader cannot read flash, so
+there is no backup and no read-back verify - the test's INFO line proves the image.
+
+Example - hello-world on a UNO R4 WiFi:
+
+```bash
+S=skills/pio-arduino-unor4wifi/scripts
+bash $S/check_tools.sh uno-r4-wifi
+bash $S/discover.sh uno-r4-wifi
+bash $S/new_app.sh uno-r4-wifi hello "" hello-world
+bash $S/build.sh apps/hello
+bash $S/flash.sh apps/hello --yes
+~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/hello/tests/hello_world.json apps/hello/logs/test.log --board uno-r4-wifi
+```
+
+### scons-rtthread-visionboard (RT-Thread + scons + Vision Board)
+
+```bash
+S=skills/scons-rtthread-visionboard/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - import into the RT-Thread Studio workspace + start Studio | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <probe-serial>]` | `IDENTITY: PASS` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
+| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `vision-board`. Templates: `hello-world`, `uart-btn-led` (msh commands `info`, `led`, `btn`;
+KEY0 toggles LED1 = the blue LED). An app is the SDK's blink project + RT-Thread + a layered `src/`,
+already synced as an RT-Thread Studio project (GCC 13.3). flash.sh writes code flash only - never
+the FSP's option-setting memory - and reads every byte back.
+
+Example - hello-world on a Vision Board:
+
+```bash
+S=skills/scons-rtthread-visionboard/scripts
+bash $S/check_tools.sh vision-board
+bash $S/discover.sh vision-board
+bash $S/new_app.sh vision-board hello "" hello-world
+bash $S/build.sh apps/hello
+bash $S/flash.sh apps/hello --yes
+python $S/serial_test.py auto apps/hello/tests/hello_world.json apps/hello/logs/test.log --board vision-board
+```
+
 ### Common options
 
 - **`serial_test.py`**:
@@ -397,6 +489,8 @@ writes four regions (bootloader, partitions, `boot_app0`, sketch).
   | pio-arduino-rpipico2w | `PICO_WS` | `PICO_BOARDS_DIR` | `PICO_USB_SERIAL` | `PICO_CONSOLE` |
   | cubemx2-hal2-stm32c562nucleo | `CUBE_WS` | `CUBE_BOARDS_DIR` | `CUBE_PROBE_SERIAL` | `CUBE_CONSOLE` |
   | cubemx-hal-stm32l475iot | `L4_WS` | `L4_BOARDS_DIR` | `L4_PROBE_SERIAL` | `L4_CONSOLE` |
+  | pio-arduino-unor4wifi | `UNO_WS` | `UNO_BOARDS_DIR` | `UNO_USB_SERIAL` | `UNO_CONSOLE` |
+  | scons-rtthread-visionboard | `RTT_WS` | `RTT_BOARDS_DIR` | `RTT_PROBE_SERIAL` | `RTT_CONSOLE` |
 - **Your own board**: put its profile in `<project>/boards/<id>/<skill>/board.env` (copy
   `boards/_template/`). The scripts find it before the repo's boards.
 - **Flashing**: always check the board, the app and the image hash yourself before `flash.sh --yes`.

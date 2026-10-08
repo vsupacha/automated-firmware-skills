@@ -1,0 +1,1 @@
+msh commands info/led/btn on uart9 + KEY0 toggles LED1 (RGB LED, 3 colours) - full I/O demo

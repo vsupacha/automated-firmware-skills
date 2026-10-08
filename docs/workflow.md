@@ -22,6 +22,8 @@ Reference implementations:
 | [cubemx-hal-stm32f407disco](../skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeF4 HAL, CMake | STM32F407G-DISC1 | M1 build stages only; console SWO output (ST-LINK/V2, no VCP); shares `lib/func` |
 | [cubemx-hal-stm32l475iot](../skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | B-L475E-IOT01A | M1 incl. board stages; ST-LINK/V2-1 VCP console (RX by interrupt: no USART FIFO); shares `lib/func` |
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
+| [pio-arduino-unor4wifi](../skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino (renesas-ra), bossac | UNO R4 WiFi | RA4M1 through the ESP32-S3 USB bridge (1200 baud touch, no read-back); Arduino style like the BOX skill, `console_printf()` |
+| [scons-rtthread-visionboard](../skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons, GNU Arm 13.3, pyOCD (RT-Thread Studio SDK) | Vision Board (RA8D1) | IDE = RT-Thread Studio (`IDE_APP`); msh console; code flash only, read back |
 
 ## Milestones: bottom-up, one firmware layer at a time
 
@@ -134,6 +136,7 @@ later. The IDE is **VS Code with the toolchain vendor's extension**:
 | ModusToolbox | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) | `<app>.code-workspace` + `.vscode/` | ModusToolbox's own `make vscode` (this PC's tool paths: git-ignored, re-made per PC) |
 | STM32CubeMX / STM32CubeMX2 | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | `<app>.code-workspace` (`mx/`, `src/`, `tests/` as folders) + `mx/.settings/*.store.json`, `mx/.vscode/{settings,launch}.json` | `lib/common.sh` `fw_vscode_cube_setup`, from the board profile's pinned bundles |
 | PlatformIO | PlatformIO IDE (`platformio.platformio-ide`) | `<app>.code-workspace` (the app folder; `platformio.ini` at its root); PlatformIO IDE adds `.vscode/` | `lib/common.sh` `fw_code_workspace` |
+| RT-Thread (scons) | none: **RT-Thread Studio**, a standalone Eclipse IDE (`IDE_APP=rt-thread-studio` in env.sh instead of `IDE_EXT`) | the app's own `.project`/`.cproject`/`.settings` (synced with `scons --target=eclipse` by new_app.sh) in the Studio workspace `<apps>/.rtstudio` | the skill's `open_ide.sh`: headless Eclipse import, then `studio.exe -data <workspace>` |
 
 Rules for `open_ide.sh <app> [--no-open]`:
 
@@ -146,6 +149,9 @@ Rules for `open_ide.sh <app> [--no-open]`:
    `open_ide.sh` re-makes them on each PC; never put settings a build needs only there.
 3. **Gate** `IDE: READY <workspace>` (then `IDE: OPENED`, or `IDE: not opened` with `--no-open`).
    VS Code or the extension missing = `ACTION: SETUP` (exit 10): installing them is the developer's.
+   `IDE: OPENED` is printed only after the `code` CLI has handed the workspace to VS Code (the CLI
+   runs in the foreground; a backgrounded CLI is killed with the calling shell); a CLI that fails =
+   `ACTION: SETUP` (open the workspace by hand).
    `new_app.sh` runs it at the end (`--no-open` for headless runs) and only reports a missing IDE.
 4. Print where the IDE's build / flash / debug / monitor buttons are and how they map to the scripts.
    What a developer does in the IDE (e.g. flashing without the identity gate) is their call; an
@@ -189,7 +195,7 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
 ```
 
 - `lib/func` is shared unchanged by modus-pdl-edgitalk, cubemx2-hal2-stm32c562nucleo and pio-espidf-esp32s3box.
-  Arduino skills (pio-arduino-rpipico2w, pio-arduino-esp32s3box) keep an Arduino-style C++ func/ in their
+  Arduino skills (pio-arduino-rpipico2w, pio-arduino-esp32s3box, pio-arduino-unor4wifi) keep an Arduino-style C++ func/ in their
   templates (`<Arduino.h>`, Print/Stream, millis) - same console protocol and tests. It may include only `board.h` and the C library.
 - `board.h` is the same API on every board: init, millis/delay, LEDs (write/read/name), buttons
   (read/name/pin), console getc/flush, printf to the console - the contract is

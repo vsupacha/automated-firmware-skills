@@ -1,0 +1,11 @@
+# src/board (board layer) and src/func (function layer) of the app. src/*.c (hal_entry.c, the
+# execution layer) is compiled by the project's root SConscript ('Applications' group).
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('board/*.c') + Glob('func/*.c')
+
+# -Wextra on top of rtconfig.py's -Wall, for our layers only (not RT-Thread or the FSP)
+group = DefineGroup('AppLayers', src, depend = [''], CPPPATH = [cwd], LOCAL_CFLAGS = ' -Wextra')
+
+Return('group')
