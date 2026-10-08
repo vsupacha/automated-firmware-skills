@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage 8 (test): data-driven serial test runner - STM32C5 UART test runner (ST-LINK virtual COM port).
+"""Stage 6 (test): data-driven serial test runner - STM32C5 UART test runner (ST-LINK virtual COM port).
 
 Usage:
   python serial_test.py <port|auto> <spec.json> <log> [--board ID] [--sync | --wait-boot]

@@ -8,7 +8,7 @@
 #   write_flash 0x0 <file.bin>
 
 . "$(dirname "$0")/env.sh"
-require_milestone M3 "backup.sh (stage 7 backup)"
+require_milestone M1 "backup.sh (stage 5 backup)"
 BOARD=""; OUT="${ESP_BACKUP_DIR:-$(dirname "$ESP_WS")/backup}"
 while [ $# -gt 0 ]; do
   case "$1" in --out) OUT="$2"; shift;; --*) die "unknown option $1";; *) BOARD="$1";; esac; shift

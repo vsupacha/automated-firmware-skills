@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage 8 (test): data-driven serial test runner - PSOC Edge UART test runner.
+"""Stage 6 (test): data-driven serial test runner - PSOC Edge UART test runner.
 
 Usage:
   python serial_test.py <port|auto> <spec.json> <log> [--board ID] [--sync | --wait-boot]

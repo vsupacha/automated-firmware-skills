@@ -11,7 +11,7 @@ order; do not start a stage until the previous gate passed. **Windows + Git Bash
 **milestone M1**; the hardware stages (discover, flash, test) come after the key boards.
 
 ```
-1 tools ─► 2 project + VS Code ─► 3 code ─► 4 build ─► (5 flash, 6 test: M3, planned) ─► 7 clean
+1 tools ─► 2 project + VS Code ─► 3 code ─► 4 build ─► (5 flash, 6 test: planned) ─► 7 clean
 check_tools  new_app    src/board  build.sh                                     clean.sh
              regen      src/func
              open_ide
@@ -32,11 +32,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 skeleton | 1 setup, 2 create, 3 build | Stage 1, Stage 2 (+ `regen.sh`), Stage 4 |
-| M2 layering | 4 layer check, 5 host test | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
-| M3 hardware | 6 connect, 7 flash, 8 test, 9 debug | **planned** for this skill |
-| M4 porting | 10 port *(planned)* | Extending |
-| - | 11 clean | Stage 7 |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 (+ `regen.sh`), Stage 4 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | **planned** for this skill |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
+| - | 14 export *(planned)*, 15 port *(planned)* | Extending |
+| - | 16 clean | Stage 7 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, ...): tell the user exactly that,
@@ -44,6 +45,7 @@ wait for their OK, then re-run the same command. Never work around an ACTION you
 installing STM32CubeMX, firmware packages or bundles (myST login, licences) is the developer's.
 
 **Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**).
+This skill has the M1 build stages only; its board stages (connect, flash, test) are planned.
 Never edit `milestones.env` or set `FW_ACTIVE_MILESTONES` yourself.
 
 ## Help menu (answer this first when asked how to use the skill)
@@ -99,7 +101,7 @@ hardware with the STM32CubeMX GUI on `<app>.ioc`, then `regen.sh`.
 - **Board type** (`boards/<id>/`): `README.md` = hardware; `cubemx-hal-stm32n6570dk/board.env` =
   pinned CubeMX and firmware package versions, `MX_TEMPLATE_IOC`, `MX_CONFIG`, `BOARD_DEFINE`,
   labels, pinned bundle versions.
-- **Bench instance** (`<workspace>/.bench/<id>.env`): M3, not used yet.
+- **Bench instance** (`<workspace>/.bench/<id>.env`): board stages, not used yet.
 
 | id | board | status |
 | --- | --- | --- |
@@ -177,7 +179,7 @@ the generated top level builds `FSBL/` as an external project. **Gate:** `BUILD:
 `mx_FSBL.hex` and `mx/FSBL/build/manifest.txt` (CubeMX + firmware package + tool versions, `.ioc`
 sha256, ELF/HEX sha256, size) **only on PASS**.
 
-## Stage 5 - Flash, Stage 6 - Test (M3, planned)
+## Stage 5 - Flash, Stage 6 - Test (planned)
 
 Not implemented in this skill yet. The FSBL image runs from internal SRAM: in development boot
 mode (BOOT1 switch 1-3) a debugger loads and runs it; booting from external flash needs a signed
@@ -205,7 +207,7 @@ user's `.ioc` and `src/`, plus `.bench` - only when explicitly asked. `mx/` itse
 ## Reporting (always)
 
 Report levels separately: **source matches → generated → built → flashed → booted (READY) →
-tested (PASS n/m) → observed by a human**. With M1 the highest level is **built**. Quote ELF
+tested (PASS n/m) → observed by a human**. With the build stages only, the highest level is **built**. Quote ELF
 sha256, CubeMX/package/tool versions, log paths. Add a dated line to
 `boards/<id>/cubemx-hal-stm32n6570dk/README.md` when something is newly verified.
 

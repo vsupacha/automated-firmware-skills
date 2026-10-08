@@ -30,11 +30,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 skeleton | 1 setup, 2 create, 3 build | Stage 1, Stage 2 step 2, Stage 4 |
-| M2 layering | 4 layer check, 5 host test | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
-| M3 hardware | 6 connect, 7 flash, 8 test, 9 debug *(planned)* | Stage 2 step 1, Stage 5 (+ backup), Stage 6 |
-| M4 porting | 10 port *(planned)* | Extending |
-| - | 11 clean | Stage 7 |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 4 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 2 step 1, Stage 5 (+ backup), Stage 6 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
+| - | 14 export *(planned)*, 15 port *(planned)* | Extending |
+| - | 16 clean | Stage 7 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, APPROVE, CHOOSE ...):
@@ -42,10 +43,12 @@ tell the user exactly that, wait for their OK, then re-run the same command. Nev
 ACTION yourself - installing tools, changing system or git settings, plugging hardware and
 approving deletions are the developer's.
 
-**Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1
-only**). The M3 scripts (discover, backup, flash, serial test) stop with `ACTION: SETUP ... not
-active` until the developer enables M3 there (or exports `FW_ACTIVE_MILESTONES="M1 M3"`). Never
-edit `milestones.env` or set that variable yourself - relay the ACTION like any other.
+**Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**).
+M1 includes the board stages: discover, flash and serial tests run when the developer asks for
+them, and **every flash needs the developer's yes first** (`flash.sh --yes` only after they said
+yes in chat, or `FLASH_POLICY=auto` that they wrote into their own bench file). Scripts of an
+inactive milestone (e.g. M2 `check_layers.py`) stop with `ACTION: SETUP ... not active`; never
+edit `milestones.env` or set `FW_ACTIVE_MILESTONES` yourself - relay the ACTION like any other.
 
 ## Help menu (answer this first when asked how to use the skill)
 
@@ -91,7 +94,7 @@ apps/<app>/
 - **Board type** (`boards/<id>/`): `README.md` = hardware; `pio-espidf-esp32s3box/board.env` =
   pinned platform, PlatformIO board id, `BOARD_DEFINE`, `BTN_LABELS`/`LED_LABELS`, expected
   identity; `sdkconfig.board` = flash size/mode, PSRAM.
-- **Bench instance** (`<workspace>/.bench/<id>.env`, M3): USB serial (= MAC address) and COM port of
+- **Bench instance** (`<workspace>/.bench/<id>.env`, board stages): USB serial (= MAC address) and COM port of
   one board on one PC. Never write a serial or COM port into `boards/`.
 
 | id | board | status |
@@ -115,7 +118,7 @@ Checks the workspace path (no spaces or non-ASCII, ≤100 characters - ESP-IDF's
 python environment break on them), PlatformIO Core (called by full path:
 `~/.platformio/penv/Scripts/pio.exe`; do not put penv on PATH), the pinned platform and the
 packages ESP-IDF builds with (`framework-espidf`, `toolchain-xtensa-esp-elf`, esptool, cmake,
-ninja), git + `core.longpaths` (Windows), python + pyserial (M3 only), and lists Espressif USB
+ninja), git + `core.longpaths` (Windows), python + pyserial (board stages only), and lists Espressif USB
 devices. Read-only. **Gate:** `missing/bad=0`; report every WARN. Missing PlatformIO: tell the user
 to install it - don't install it yourself. Changing git config is the user's call - ask.
 

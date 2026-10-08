@@ -6,7 +6,7 @@
 | Platform `espressif32` | board profile `PIO_PLATFORM` (exact registry version) | 6.12.0 | pins the packages below |
 | ESP-IDF | platform (`framework-espidf`) | 5.5.0 (3.50500.0) | own python env under `~/.platformio/penv/.espidf-*` created by the first build |
 | GCC | platform (`toolchain-xtensa-esp-elf`) | 14.2.0+20241119 | `toolchain-xtensa-esp32s3` (GCC 8.4) is the Arduino-2.x toolchain, not used here |
-| esptool | platform (`tool-esptoolpy`) | 4.9 (2.40900.x) | M3 flash/identity |
+| esptool | platform (`tool-esptoolpy`) | 4.9 (2.40900.x) | flash/identity |
 | CMake / ninja | platform (`tool-cmake`, `tool-ninja`) | 3.30.2 / 1.9.0 | |
 
 The platform pins packages with `~` ranges (patch updates possible): the build manifest records the

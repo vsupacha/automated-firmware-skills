@@ -5,7 +5,7 @@
 # Exit 0 = PASS (probe serial and detected device match; life cycle too if reported).
 
 . "$(dirname "$0")/env.sh"
-require_milestone M3 "identity_check.sh (stage 6 connect)"
+require_milestone M1 "identity_check.sh (stage 4 connect)"
 [ -n "$1" ] || die "usage: identity_check.sh <board-id> [logfile]"
 load_board "$1"
 bench_lock "$BOARD_ID" identity_check.sh

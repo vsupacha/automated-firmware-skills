@@ -1,7 +1,7 @@
 # Common environment for cubemx-hal-stm32l475iot scripts. Source it: . "$(dirname "$0")/env.sh"
 # Windows + Git Bash: classic STM32CubeMX 6.x (headless script mode), the STM32CubeL4 firmware
 # package from the CubeMX repository, the pinned STM32Cube bundles (GCC, CMake, Ninja) and
-# STM32CubeProgrammer + the board's ST-LINK/V2-1 (SWD + virtual COM port) for M3.
+# STM32CubeProgrammer + the board's ST-LINK/V2-1 (SWD + virtual COM port) for flash and tests.
 # Shared helpers (board lookup, paths, need_user/exit 10, .gitignore): <repo>/lib/common.sh
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

@@ -9,7 +9,7 @@
 # Restore: flash.sh <any-app-of-this-board> --yes --hex <file>.hex   (ask the user first)
 
 . "$(dirname "$0")/env.sh"
-require_milestone M3 "backup.sh (stage 7 flash: backup)"
+require_milestone M1 "backup.sh (stage 5 flash: backup)"
 BOARD=""; START=""; SIZE=""; OUT=""
 while [ $# -gt 0 ]; do
   case "$1" in --out) OUT="$2"; shift;; --*) die "unknown option $1";;

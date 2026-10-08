@@ -22,7 +22,7 @@ cat <<'TXT'
   In VS Code (PlatformIO IDE, status bar / PlatformIO sidebar):
     build         Build (check mark) - same env and .pio/build/<env> as build.sh
     flash         Upload (->) - picotool via PlatformIO: 1200-baud reboot into BOOTSEL, auto port
-    monitor       Serial Monitor (plug) at monitor_speed; tests: serial_test.py with tests/*.json (M3)
+    monitor       Serial Monitor (plug) at monitor_speed; tests: serial_test.py with tests/*.json (stage 6)
     debug         needs an external SWD probe on the 3-pin header (debug_tool = cmsis-dap / picoprobe in platformio.ini)
     code          src/ (board -> func -> main); keep platformio.ini pins in step with the board profile
 TXT

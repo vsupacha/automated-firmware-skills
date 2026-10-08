@@ -6,8 +6,8 @@ Usage:
 
 Checks
   skills    SKILL.md frontmatter (name = folder, description <= 1024 chars, no tags) and required
-            sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT, stage 2d), have a shebang and LF endings; M3 scripts
-            are gated; scripts/ and reference/ files named in SKILL.md exist; hello-world and
+            sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT, stage 2d), have a shebang and LF endings; board-stage
+            scripts are gated by M1; scripts/ and reference/ files named in SKILL.md exist; hello-world and
             uart-btn-led templates with description.txt and valid tests/*.json; test specs of the
             same template agree across skills (warning)
   boards    every board has README.md and per-skill profiles (board.env + README.md) of existing
@@ -34,9 +34,10 @@ REQUIRED_SCRIPTS = ["env.sh", "help.sh", "check_tools.sh", "new_app.sh", "open_i
                     "clean.sh"]
 # stage 2d (IDE handoff): VS Code extension ids a skill may name in env.sh IDE_EXT
 IDE_EXT_RE = re.compile(r"^IDE_EXT=([a-z0-9-]+\.[a-z0-9-]+)", re.M)
-# M3 stage scripts: required, unless the skill's SKILL.md marks its M3 row "planned" (M1-only skill)
-M3_STAGE_SCRIPTS = ["discover.sh", "flash.sh", "serial_test.py"]
-M3_SCRIPTS = ["discover.sh", "flash.sh", "backup.sh", "identity_check.sh"]
+# M1 board-stage scripts (connect, flash, test): required, unless the skill's SKILL.md marks its
+# "M1 bring-up (board)" row **planned** (skill with the build stages only)
+BOARD_STAGE_SCRIPTS = ["discover.sh", "flash.sh", "serial_test.py"]
+BOARD_GATED_SCRIPTS = ["discover.sh", "flash.sh", "backup.sh", "identity_check.sh"]
 REQUIRED_SECTIONS = ["Milestones, stage numbers and developer actions", "Help menu", "Stage 1",
                      "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Stage 7",
                      "Reporting", "Safety rules"]
@@ -140,11 +141,12 @@ def check_skills():
         if (sc / "new_app.sh").is_file():
             ok("fw_new_app_ide" in read(sc / "new_app.sh"),
                f"skills/{name}/scripts/new_app.sh does not end with stage 2d (fw_new_app_ide)")
-        m3_row = next((l for l in text.splitlines() if l.startswith("| M3 hardware")), "")
-        m3_planned = "**planned**" in m3_row
-        for s in M3_STAGE_SCRIPTS:
-            ok((sc / s).is_file(), f"skills/{name}/scripts/{s} missing (M3 stage script"
-               + (", M3 planned in SKILL.md)" if m3_planned else ")"), warn if m3_planned else err)
+        board_row = next((l for l in text.splitlines() if l.startswith("| M1 bring-up (board)")), None)
+        ok(board_row is not None, f"skills/{name}/SKILL.md: milestone table has no '| M1 bring-up (board) |' row")
+        board_planned = "**planned**" in (board_row or "")
+        for s in BOARD_STAGE_SCRIPTS:
+            ok((sc / s).is_file(), f"skills/{name}/scripts/{s} missing (M1 board-stage script"
+               + (", planned in SKILL.md)" if board_planned else ")"), warn if board_planned else err)
         for f in sorted(sc.glob("*")):
             if f.suffix not in (".sh", ".py"):
                 continue
@@ -154,10 +156,10 @@ def check_skills():
                 ok(data.startswith(b"#!"), f"{rel(f)}: no shebang line")
             if f.suffix == ".sh" and f.name != "env.sh":
                 ok(b'. "$(dirname "$0")/env.sh"' in data, f"{rel(f)}: does not source env.sh", warn)
-        for s in M3_SCRIPTS:
+        for s in BOARD_GATED_SCRIPTS:
             f = sc / s
             if f.is_file():
-                ok("require_milestone M3" in read(f), f"{rel(f)}: M3 script without 'require_milestone M3'")
+                ok("require_milestone M1" in read(f), f"{rel(f)}: board-stage script without 'require_milestone M1'")
         st = sc / "serial_test.py"
         if st.is_file():
             ok("fwtest.run(" in read(st), f"{rel(st)}: not a wrapper of lib/fwtest.py (milestone gate lives there)")

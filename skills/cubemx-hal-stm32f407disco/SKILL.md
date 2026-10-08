@@ -12,7 +12,7 @@ order; do not start a stage until the previous gate passed. **Windows + Git Bash
 machinery (headless CubeMX, overlay, build gate) is the same as `cubemx-hal-stm32n6570dk`.
 
 ```
-1 tools ─► 2 project + VS Code ─► 3 code ─► 4 build ─► (5 flash, 6 test: M3, planned) ─► 7 clean
+1 tools ─► 2 project + VS Code ─► 3 code ─► 4 build ─► (5 flash, 6 test: planned) ─► 7 clean
 check_tools  new_app    src/board  build.sh                                     clean.sh
              regen      src/func
              open_ide
@@ -33,11 +33,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 skeleton | 1 setup, 2 create, 3 build | Stage 1, Stage 2 (+ `regen.sh`), Stage 4 |
-| M2 layering | 4 layer check, 5 host test | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
-| M3 hardware | 6 connect, 7 flash, 8 test, 9 debug | **planned** for this skill |
-| M4 porting | 10 port *(planned)* | Extending |
-| - | 11 clean | Stage 7 |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 (+ `regen.sh`), Stage 4 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | **planned** for this skill |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
+| - | 14 export *(planned)*, 15 port *(planned)* | Extending |
+| - | 16 clean | Stage 7 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>`: tell the user exactly that, wait for their
@@ -45,6 +46,7 @@ OK, then re-run the same command. Never work around an ACTION yourself - install
 firmware packages or bundles is the developer's.
 
 **Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**).
+This skill has the M1 build stages only; its board stages (connect, flash, test) are planned.
 Never edit `milestones.env` or set `FW_ACTIVE_MILESTONES` yourself.
 
 ## Help menu (answer this first when asked how to use the skill)
@@ -97,7 +99,7 @@ root (`reference/cubemx-cli.md`).
 - **Board type** (`boards/<id>/`): `README.md` = hardware; `cubemx-hal-stm32f407disco/board.env` =
   pinned CubeMX and firmware package versions, `MX_START`, `MX_CONFIG`, `BOARD_DEFINE`, labels,
   `SYSCLK_HZ`, pinned bundle versions, expected device ID.
-- **Bench instance** (`<workspace>/.bench/<id>.env`): M3, not used yet.
+- **Bench instance** (`<workspace>/.bench/<id>.env`): board stages, not used yet.
 
 | id | board | status |
 | --- | --- | --- |
@@ -151,7 +153,7 @@ Read `reference/layering.md` first. Rules:
 - Console protocol: `OK ...`, `ERR ...`, `EVT ...`, `INFO ... board=<id>`, `READY` - printed over
   SWO; console commands cannot reach this board (no input path).
 - Templates: `hello-world`, `uart-btn-led` (B1 toggles LD3, EVT lines). Tests: `tests/<app>.json`
-  (they need console input - M3 on this board would read SWO instead).
+  (they need console input - the board stages here would read SWO instead).
 
 **Check the layers (M2 - gated, stops with `ACTION: SETUP` until enabled):**
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS`, and
@@ -167,7 +169,7 @@ bash "$SKILL/scripts/build.sh" <app> [--clean] [--allow-warnings]
 2 = fix them). Writes `mx.hex` and `mx/build/Debug/manifest.txt` (CubeMX + firmware package + tool
 versions, SYSCLK, `.ioc` sha256, ELF/HEX sha256, size) **only on PASS**.
 
-## Stage 5 - Flash, Stage 6 - Test (M3, planned)
+## Stage 5 - Flash, Stage 6 - Test (planned)
 
 Not implemented in this skill yet. Do not improvise with STM32CubeProgrammer or the VS Code
 debugger as part of the skill - say the hardware stages are planned and stop after `BUILD: PASS`.
@@ -194,7 +196,7 @@ Default: `mx/build` and `.mx` only. `--apps`: whole apps (`f4-app.env`) incl. th
 ## Reporting (always)
 
 Report levels separately: **source matches → generated → built → flashed → booted → tested →
-observed by a human**. With M1 the highest level is **built**. Quote ELF sha256, CubeMX/package/tool
+observed by a human**. With the build stages only, the highest level is **built**. Quote ELF sha256, CubeMX/package/tool
 versions, log paths. Add a dated line to `boards/<id>/cubemx-hal-stm32f407disco/README.md`.
 
 ## Safety rules

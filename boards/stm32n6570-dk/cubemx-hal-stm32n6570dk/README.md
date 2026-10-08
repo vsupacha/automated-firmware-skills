@@ -28,4 +28,4 @@ package and bundles, `MX_TEMPLATE_IOC`, `MX_CONFIG`). Hardware: [../README.md](.
   fails ("Unable to get core ID") in flash boot and in development boot; with BOOT1 at 1-3, reset,
   then connect under reset (`mode=UR reset=HWrst`): device ID 0x486, STM32N6xx rev Z, Cortex-M55,
   3.29 V. VS Code debug failed before the switch change ("Error in initializing ST-LINK device").
-  Input for M3: discover/flash must connect under reset and check the boot mode first.
+  Input for the board stages: discover/flash must connect under reset and check the boot mode first.

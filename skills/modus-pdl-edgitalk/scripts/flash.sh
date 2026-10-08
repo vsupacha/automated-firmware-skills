@@ -16,7 +16,7 @@
 # Start serial_test.py BEFORE this script (after exit 10 POWER_CYCLE, start it with --wait-port instead).
 
 . "$(dirname "$0")/env.sh"
-require_milestone M3 "flash.sh (stage 7 flash)"
+require_milestone M1 "flash.sh (stage 5 flash)"
 APPDIR=""; YES=0; BOARD=""; HEX=""
 while [ $# -gt 0 ]; do
   case "$1" in

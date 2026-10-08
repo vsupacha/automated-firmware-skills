@@ -3,6 +3,11 @@
 Public products, blogs and skill collections close to this repo, and what each milestone should
 take from them. Commercial features are as claimed on the vendors' sites, not tested by us.
 
+> Written for the milestones before 2026-10-08. Mapping to the current bottom-up plan
+> ([workflow.md](workflow.md#milestones-bottom-up-one-firmware-layer-at-a-time)): old M1 skeleton
+> and M3 hardware are now **M1 bring-up**; old M2 layering is **M2 board support**; the FreeRTOS /
+> Zephyr items of old M4 are **M3 execution model**; porting is a stage for every milestone.
+
 ## Sources
 
 | Source | What it is | Closest to us |

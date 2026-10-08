@@ -3,7 +3,7 @@
 # Usage: build.sh <app-dir> [--clean] [--allow-warnings]
 # Gate: "BUILD: PASS" = cmake exit 0, ELF present, 0 warnings in the app's own src/ (exit 2 = fix
 # them, or --allow-warnings). Writes <elf>.hex and mx/build/Debug/manifest.txt (tools, firmware
-# package, .ioc sha256, ELF/HEX sha256, size) only on PASS - the M3 flash stage will require it.
+# package, .ioc sha256, ELF/HEX sha256, size) only on PASS - the flash stage will require it.
 
 . "$(dirname "$0")/env.sh"
 APPDIR=""; CLEAN=0; ALLOW=0

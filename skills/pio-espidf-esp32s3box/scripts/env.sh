@@ -60,7 +60,7 @@ for p in list_ports.comports():
 EOF
 }
 
-# ---- esptool (M3) -----------------------------------------------------------------------------
+# ---- esptool (flash) --------------------------------------------------------------------------
 # PlatformIO's python has pyserial + esptool's dependencies; esptool comes with the platform.
 ESP_PY="${ESP_PY:-$(ls "$PIO_HOME/penv/Scripts/python.exe" "$PIO_HOME/penv/bin/python" 2>/dev/null | head -1)}"
 ESPTOOL="$PIO_HOME/packages/tool-esptoolpy/esptool.py"

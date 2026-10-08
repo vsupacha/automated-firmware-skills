@@ -1,4 +1,4 @@
-"""Shared Stage 8 (test) engine: data-driven serial test runner for every skill.
+"""Shared Stage 6 (test) engine: data-driven serial test runner for every skill.
 
 Each skill has a thin scripts/serial_test.py that calls run(cfg) with its own port lookup:
   cfg = {skill_dir, env_prefix (PSE84|PICO|CUBE), serial_key (bench variable with the USB serial of
@@ -131,16 +131,16 @@ def run(cfg):
     inter.add_argument("--only-interactive", action="store_true")
     ap.add_argument("--only", metavar="REGEX", help="run only steps whose name matches REGEX")
     args = ap.parse_args()
-    # release scope: stage 8 (test) is milestone M3 (<repo>/milestones.env, FW_ACTIVE_MILESTONES)
+    # release scope: stage 6 (test) is milestone M1 (<repo>/milestones.env, FW_ACTIVE_MILESTONES)
     active = os.environ.get("FW_ACTIVE_MILESTONES")
     if active is None:
         conf = REPO_ROOT / "milestones.env"
         text = conf.read_text(encoding="utf-8") if conf.is_file() else ""
         m = re.search(r'^ACTIVE_MILESTONES="?([^"#\n]*)', text, re.M)
         active = m.group(1).strip() if m else ""
-    if "M3" not in active.split():
-        print(f"ACTION: SETUP serial_test.py (stage 8 test) belongs to milestone M3, which is not active in this "
-              f"release (active: {active or 'none'}). Enabling it is the developer's decision: add M3 to "
+    if "M1" not in active.split():
+        print(f"ACTION: SETUP serial_test.py (stage 6 test) belongs to milestone M1, which is not active in this "
+              f"release (active: {active or 'none'}). Enabling it is the developer's decision: add M1 to "
               f"ACTIVE_MILESTONES in {REPO_ROOT / 'milestones.env'}, or export FW_ACTIVE_MILESTONES for one session")
         sys.exit(10)
     interactive = args.interactive or args.only_interactive

@@ -22,6 +22,6 @@ cat <<'TXT'
   In VS Code (STM32CubeIDE for Visual Studio Code):
     build         CMake: Build (F7) - same preset and mx/build/<preset> as build.sh
     flash + debug Run and Debug > "STM32Cube: Launch ST-Link GDB Server" (F5): builds, flashes, stops at main
-    test          serial_test.py with the app's tests/*.json (M3), or any serial terminal on the ST-LINK VCP (115200)
+    test          serial_test.py with the app's tests/*.json (stage 6), or any serial terminal on the ST-LINK VCP (115200)
     hardware      change <app>.ioc in STM32CubeMX, then regen.sh - code goes in src/, never in mx/
 TXT

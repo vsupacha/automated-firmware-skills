@@ -31,7 +31,7 @@ skill pio-espidf-esp32s3box (ESP32-S3-BOX, PlatformIO + ESP-IDF) - ask Claude in
   "open it in VS Code"                        -> open_ide.sh <app>  (VS Code + PlatformIO IDE; new_app does it)
      then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                  -> build.sh <app>
- Run on hardware (milestone M3; Claude asks before every flash)
+ Run on hardware (milestone M1; Claude asks before every flash)
   "find my board"                             -> discover.sh <board>   (esptool, writes nothing, resets the chip)
   "back up the factory firmware"              -> backup.sh <board>
   "flash it"                                  -> flash.sh <app> --yes
@@ -50,7 +50,7 @@ skill pio-espidf-esp32s3box (ESP32-S3-BOX, PlatformIO + ESP-IDF) - สั่ง 
   "เปิดใน VS Code"                                -> open_ide.sh <app>  (VS Code + PlatformIO IDE; new_app เปิดให้เอง)
      จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                                -> build.sh <app>
- ใช้กับบอร์ดจริง (milestone M3; Claude จะถามก่อน flash ทุกครั้ง)
+ ใช้กับบอร์ดจริง (milestone M1; Claude จะถามก่อน flash ทุกครั้ง)
   "หาบอร์ดที่ต่ออยู่"                               -> discover.sh <board>   (esptool อ่านอย่างเดียว แต่ chip จะรีเซ็ต)
   "สำรอง firmware เดิม"                           -> backup.sh <board>
   "แฟลชเลย"                                      -> flash.sh <app> --yes
@@ -60,8 +60,8 @@ skill pio-espidf-esp32s3box (ESP32-S3-BOX, PlatformIO + ESP-IDF) - สั่ง 
   "เพิ่มบอร์ดใหม่" / "เพิ่ม template"               -> boards/_template/, SKILL.md หัวข้อ Extending
 EOF
 fi
-if [ $LANG_EN = 1 ]; then echo " Active milestones: $(fw_active_milestones)  (hardware commands = M3; enable in milestones.env)"
-else echo " milestone ที่เปิดใช้: $(fw_active_milestones)  (คำสั่งกับบอร์ดจริง = M3 เปิดใช้ใน milestones.env)"; fi
+if [ $LANG_EN = 1 ]; then echo " Active milestones: $(fw_active_milestones)"
+else echo " milestone ที่เปิดใช้: $(fw_active_milestones)"; fi
 [ $LANG_EN = 1 ] && echo " Boards installed:" || echo " บอร์ดที่มี:"
 boards
 [ $LANG_EN = 1 ] && echo " App templates:" || echo " template แอป:"

@@ -62,8 +62,8 @@ skill cubemx2-hal2-stm32c562nucleo (STM32C5 / NUCLEO-C562RE, STM32CubeMX2 + CMak
   "เพิ่มบอร์ดใหม่" / "เพิ่ม template"             -> boards/_template/, SKILL.md หัวข้อ Extending
 EOF
 fi
-if [ $LANG_EN = 1 ]; then echo " Active milestones: $(fw_active_milestones)  (hardware commands = M3; enable in milestones.env)"
-else echo " milestone ที่เปิดใช้: $(fw_active_milestones)  (คำสั่งกับบอร์ดจริง = M3 เปิดใช้ใน milestones.env)"; fi
+if [ $LANG_EN = 1 ]; then echo " Active milestones: $(fw_active_milestones)"
+else echo " milestone ที่เปิดใช้: $(fw_active_milestones)"; fi
 [ $LANG_EN = 1 ] && echo " Boards installed:" || echo " บอร์ดที่มี:"
 boards
 [ $LANG_EN = 1 ] && echo " App templates:" || echo " template แอป:"

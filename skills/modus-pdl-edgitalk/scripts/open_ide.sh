@@ -42,6 +42,6 @@ cat <<'TXT'
     flash         Run Task "Program" / "Build & Program" (KitProg3 + OpenOCD; no identity gate -
                   with several probes set MTB_PROBE_SERIAL in bsp.mk and re-run open_ide.sh --refresh)
     debug         Run and Debug: "Multi-Core Debug", "Launch/Attach PSOCE84 CM33/CM55 (KitProg3_MiniProg4)"
-    test          serial_test.py with tests/*.json (M3), or any serial terminal on the KitProg3 COM port
+    test          serial_test.py with tests/*.json (stage 6), or any serial terminal on the KitProg3 COM port
     hardware      Device Configurator from the Assistant view; then rebuild (generated sources)
 TXT

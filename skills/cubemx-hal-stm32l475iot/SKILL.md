@@ -32,11 +32,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 skeleton | 1 setup, 2 create, 3 build | Stage 1, Stage 2 steps 2-4 (+ `regen.sh`, `open_ide.sh`), Stage 4 |
-| M2 layering | 4 layer check, 5 host test | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
-| M3 hardware | 6 connect, 7 flash, 8 test, 9 debug *(planned)* | Stage 2 step 1, Stage 5, Stage 6 |
-| M4 porting | 10 port *(planned)* | Extending |
-| - | 11 clean | Stage 7 |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 steps 2-4 (+ `regen.sh`, `open_ide.sh`), Stage 4 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 2 step 1, Stage 5, Stage 6 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
+| - | 14 export *(planned)*, 15 port *(planned)* | Extending |
+| - | 16 clean | Stage 7 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, APPROVE, CHOOSE...): tell
@@ -44,11 +45,12 @@ the user exactly that, wait for their OK, then re-run the same command. Never wo
 ACTION yourself - installing STM32CubeMX, firmware packages, bundles or drivers, plugging hardware
 and approving flashes or deletions are the developer's.
 
-**Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**). The
-M3 scripts (discover, flash, serial test) are implemented and verified on hardware, but stop with
-`ACTION: SETUP ... not active` until the developer enables M3 there (or exports
-`FW_ACTIVE_MILESTONES="M1 M3"`). Never edit `milestones.env` or set that variable yourself unless
-the developer asks.
+**Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**).
+M1 includes the board stages: discover, flash and serial tests run when the developer asks for
+them, and **every flash needs the developer's yes first** (`flash.sh --yes` only after they said
+yes in chat, or `FLASH_POLICY=auto` that they wrote into their own bench file). Scripts of an
+inactive milestone (e.g. M2 `check_layers.py`) stop with `ACTION: SETUP ... not active`; never
+edit `milestones.env` or set `FW_ACTIVE_MILESTONES` yourself - relay the ACTION like any other.
 
 ## Help menu (answer this first when asked how to use the skill)
 
@@ -121,13 +123,13 @@ bash "$SKILL/scripts/check_tools.sh" <board-id> [--ws <workspace>]
 ```
 Checks the workspace path (no spaces/non-ASCII, ≤100 characters), STM32CubeMX (pinned version, its
 bundled java), the CubeMX repository and the pinned `STM32Cube_FW_L4` package (+ the board's BSP),
-GNU Tools for STM32 / CMake / Ninja / STM32CubeProgrammer bundles, python + pyserial (M3) and the
+GNU Tools for STM32 / CMake / Ninja / STM32CubeProgrammer bundles, python + pyserial (board stages) and the
 IDE (VS Code + STM32CubeIDE for VS Code, warning only). Every tool row says **GLOBAL** (installed
 for all users) or **LOCAL** (per user). Read-only. **Gate:** `missing/bad=0`.
 
 ## Stage 2 - Discover the board, create the project
 
-1. **Discover (M3, read-only):** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <sn>]`
+1. **Discover (stage 4 connect, read-only):** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <sn>]`
    - lists ST-LINKs, hot-plug connects (no reset, no write) and checks the board name the ST-LINK
      reports (`STM32L4IO`), the device name and the device ID (0x415); saves the bench file.
    - **Gate:** `IDENTITY: PASS`. Several ST-LINKs: `--serial` (it never guesses). No board yet?

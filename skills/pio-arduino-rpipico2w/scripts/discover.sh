@@ -7,7 +7,7 @@
 # On PASS writes <PICO_WS>/.bench/<board-id>.env.
 
 . "$(dirname "$0")/env.sh"
-require_milestone M3 "discover.sh (stage 6 connect)"
+require_milestone M1 "discover.sh (stage 4 connect)"
 BOARD=""; WANT=""
 while [ $# -gt 0 ]; do
   case "$1" in --serial) WANT="$(echo "$2" | tr a-z A-Z)"; shift;; --*) die "unknown option $1";; *) BOARD="$1";; esac; shift

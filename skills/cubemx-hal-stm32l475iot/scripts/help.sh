@@ -33,7 +33,7 @@ skill cubemx-hal-stm32l475iot (B-L475E-IOT01A, STM32CubeMX + STM32CubeL4 HAL + C
   "open it in VS Code"                      -> open_ide.sh <app>  (VS Code + STM32CubeIDE extension; new_app does it)
      then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                -> build.sh <app>
- Run on hardware (milestone M3; Claude asks before every flash)
+ Run on hardware (milestone M1; Claude asks before every flash)
   "flash it"                                -> flash.sh <app> --yes   (identity gates: ST-LINK board, device ID)
   "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  Housekeeping
@@ -51,7 +51,7 @@ skill cubemx-hal-stm32l475iot (B-L475E-IOT01A, STM32CubeMX + STM32CubeL4 HAL + C
   "เปิดใน VS Code"                             -> open_ide.sh <app>  (VS Code + STM32CubeIDE extension; new_app เปิดให้เอง)
      จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                              -> build.sh <app>
- ใช้กับบอร์ดจริง (milestone M3; Claude ถามก่อนแฟลชทุกครั้ง)
+ ใช้กับบอร์ดจริง (milestone M1; Claude ถามก่อนแฟลชทุกครั้ง)
   "แฟลชให้หน่อย"                               -> flash.sh <app> --yes   (ตรวจตัวตนบอร์ด: ST-LINK, device ID)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                   -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  งานอื่น

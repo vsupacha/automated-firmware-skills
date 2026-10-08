@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 5 (M2 host test): compile the logic layer against the fake board (lib/host) and run its
+# Stage 10 (M2 host test, optional): compile the logic layer against the fake board (lib/host) and run its
 # unit tests on this PC - no board, no vendor toolchain.
 # Usage: host_test.sh [<app-dir> | <func-dir>] [--keep]
 #   default: <repo>/lib/func. An app dir is searched for its func/ folder (src/func,
@@ -13,7 +13,7 @@
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
 . "$REPO_ROOT/lib/common.sh"
-require_milestone M2 "host_test.sh (stage 5 host test)"
+require_milestone M2 "host_test.sh (stage 10 host test)"
 
 TARGET=""; KEEP=0
 while [ $# -gt 0 ]; do

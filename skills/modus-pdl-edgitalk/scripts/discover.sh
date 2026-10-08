@@ -7,7 +7,7 @@
 # Every student/PC runs this once; board type data in boards/<id>/ stays untouched.
 
 . "$(dirname "$0")/env.sh"
-require_milestone M3 "discover.sh (stage 6 connect)"
+require_milestone M1 "discover.sh (stage 4 connect)"
 BOARD=""; SERIAL=""
 while [ $# -gt 0 ]; do
   case "$1" in --serial) SERIAL="$2"; shift;; --*) die "unknown option $1";; *) BOARD="$1";; esac; shift

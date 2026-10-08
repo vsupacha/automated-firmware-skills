@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage 8 (test): data-driven serial test runner - ESP32-S3 USB Serial/JTAG console.
+"""Stage 6 (test): data-driven serial test runner - ESP32-S3 USB Serial/JTAG console.
 
 Usage:
   python serial_test.py <port|auto> <spec.json> <log> [--board ID] [--sync | --wait-boot]

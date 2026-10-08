@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage 8 (test): data-driven serial test runner - Pico 2 W serial test runner (USB CDC console).
+"""Stage 6 (test): data-driven serial test runner - Pico 2 W serial test runner (USB CDC console).
 
 Usage:
   python serial_test.py <port|auto> <spec.json> <log> [--board ID] [--sync | --wait-boot]

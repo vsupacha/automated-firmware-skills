@@ -22,7 +22,7 @@ cat <<'TXT'
   In VS Code (PlatformIO IDE, status bar / PlatformIO sidebar):
     build         Build (check mark) - same env and .pio/build/<env> as build.sh
     flash         Upload (->) - esptool via PlatformIO, auto port; the ESP-IDF menuconfig: "Run Menuconfig"
-    monitor       Serial Monitor (plug) at monitor_speed; tests: serial_test.py with tests/*.json (M3)
+    monitor       Serial Monitor (plug) at monitor_speed; tests: serial_test.py with tests/*.json (stage 6)
     debug         USB Serial/JTAG: PlatformIO Debug (F5) with debug_tool = esp-builtin in platformio.ini (not set up by the skill)
     code          src/ (board -> func -> main); keep platformio.ini pins in step with the board profile
 TXT

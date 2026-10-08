@@ -10,7 +10,7 @@
 # Exit 0 = "FLASH: PASS"; 1 = FAIL. Writes only the flash of the selected board.
 
 . "$(dirname "$0")/env.sh"
-require_milestone M3 "flash.sh (stage 7 flash)"
+require_milestone M1 "flash.sh (stage 5 flash)"
 APPDIR=""; YES=0; UF2=""
 while [ $# -gt 0 ]; do
   case "$1" in --yes) YES=1;; --uf2) UF2="$2"; shift;; --*) die "unknown option $1";; *) APPDIR="$1";; esac; shift

@@ -7,7 +7,8 @@ Every skill in `skills/` drives one toolchain with one framework for one board, 
 (`boards/<id>/<skill>/`), e.g. KIT_PSE84_AI and TESAIoT under `modus-pdl-edgitalk`.
 All skills follow the same milestones, stage numbers, script names, gate lines and exit codes, so
 an agent (or a developer) can drive any board the same way and a port to another MCU/toolchain is
-proven by the **same tests**.
+proven by the **same tests**. These board skills are the M1 outcome; skills of the later milestones
+(board drivers, execution models, components, profiling) build on them through the `board.h` API.
 
 Reference implementations:
 
@@ -17,45 +18,98 @@ Reference implementations:
 | [cubemx2-hal2-stm32c562nucleo](../skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 CLI, CMake, STM32CubeProgrammer | NUCLEO-C562RE | code generator, on-board ST-LINK |
 | [pio-arduino-rpipico2w](../skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO, picotool | Pico 2 W | native USB, no probe |
 | [pio-espidf-esp32s3box](../skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF, esptool | ESP32-S3-BOX | USB Serial/JTAG, no probe; shares `lib/func` |
-| [cubemx-hal-stm32n6570dk](../skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeN6 HAL, CMake | STM32N6570-DK | M1 only; FSBL in internal SRAM; shares `lib/func` |
-| [cubemx-hal-stm32f407disco](../skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeF4 HAL, CMake | STM32F407G-DISC1 | M1 only; console SWO output (ST-LINK/V2, no VCP); shares `lib/func` |
-| [cubemx-hal-stm32l475iot](../skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | B-L475E-IOT01A | M1 + M3; ST-LINK/V2-1 VCP console (RX by interrupt: no USART FIFO); shares `lib/func` |
+| [cubemx-hal-stm32n6570dk](../skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeN6 HAL, CMake | STM32N6570-DK | M1 build stages only; FSBL in internal SRAM; shares `lib/func` |
+| [cubemx-hal-stm32f407disco](../skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeF4 HAL, CMake | STM32F407G-DISC1 | M1 build stages only; console SWO output (ST-LINK/V2, no VCP); shares `lib/func` |
+| [cubemx-hal-stm32l475iot](../skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | B-L475E-IOT01A | M1 incl. board stages; ST-LINK/V2-1 VCP console (RX by interrupt: no USART FIFO); shares `lib/func` |
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
 
-## Milestones and stages
+## Milestones: bottom-up, one firmware layer at a time
+
+The milestones follow how an embedded developer brings up firmware - bottom-up, each layer proven
+**on the real board** before the next one is generated on top of it. The outcome of each milestone
+is a **collection of skills + scripts** that can do that milestone's jobs on its own; each layer's
+output (pin map, `board.h` API, component APIs) is the catalog the next layer's generation may use,
+so an agent never calls APIs that were not built and tested first.
+
+| Milestone | Builds | Outcome (skills + scripts) | Proven by (on the board) |
+| --- | --- | --- | --- |
+| **M1 bring-up** | toolchain, project, IDE, build, probe connection, flash, smoke test, debug attach | one skill per toolchain + framework + board (`<toolchain>-<framework>-<board>`) | smoke test PASS; debugger halts at `main` |
+| **M2 board support** | BSP drivers behind the `board.h` API, from vendor board configs > netlist > schematic > the developer | board-driver skills + the layer checks | per-peripheral tests (loopback, `WHO_AM_I`, LED seen) + `LAYERS: PASS` |
+| **M3 execution model** | bare-metal superloop, RTOS (FreeRTOS), RTOS + stack (Zephyr, RT-Thread) | execution skills + the trace tool | the same logic tests pass under each model; trace rules (order, latency, period, stack) PASS |
+| **M4 components** | middleware on M2 + M3: LVGL, USB device classes, file system, network stack ... | one skill per component (adapter to `board.h` + the execution model) | component demo test |
+| **M5 application + profiling** | application logic in `func/`, tested on the board with stub/driver inputs; time and memory per function (e.g. a digital filter) | profiling scripts | tests + budgets PASS (cycles, stack, RAM/flash) |
+
+Order: M3 (execution model) comes before M4 (components) because middleware depends on it - LVGL
+needs a tick and a lock, a network stack runs with or without an OS, USB needs ISR/task decisions.
+For Zephyr / RT-Thread the M2 work is mostly devicetree / Kconfig instead of hand-written drivers,
+so the execution model is recorded when the app is created even though it is proven in M3.
+
+**Testing runs through every milestone, on the target.** Each milestone ends with a test on the real
+board (`serial_test.py` + `tests/*.json`). Logic is validated on the board with stub or driver
+inputs injected through the console, not by running the code on the PC; `host_test.sh` stays an
+optional quick check. Timing is only *measured* on hardware (DWT cycle counter, `CCOUNT`, a timer);
+memory can be read without it (map file, `-fstack-usage`) - report *estimated* vs *measured*.
+
+**M3 trace (planned design).** Execution flow is checked from a binary event trace, not `printf`
+(a UART line costs milliseconds and changes the scheduling it measures): `trace(id, arg)` writes
+`{cycles, id, arg}` into a RAM ring buffer (`.noinit`, survives a reset) from ISRs, tasks and the
+RTOS trace hooks; after the run the buffer is read over the console (`trace dump`) or by the
+debugger (works after a fault), decoded with the event-id table shared by C and Python, and checked
+against rules next to the tests - `follows A->B within_us`, `period`, `never`, `stack_free_min_pct`.
+Each board supplies `board_cycles()`; the tracer reports its own overhead.
+
+## Stages
+
+Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own sections.
 
 | Milestone | # | Stage | Script (same name in every skill) | Gate | Board |
 | --- | --- | --- | --- | --- | --- |
-| **M1 skeleton** - build a correct project automatically | 0 | help | `help.sh [--en]` | - | no |
+| **M1 bring-up** | 0 | help | `help.sh [--en]` | - | no |
 | | 1 | setup | `check_tools.sh <board>` | `missing/bad=0` | no |
 | | 2 | create | `new_app.sh <board> <app> [ws] [template]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
 | | 2d | open in IDE | `open_ide.sh <app> [--no-open]` (new_app.sh runs it) - see [IDE handoff](#ide-handoff-stage-2d) | `IDE: READY` | no |
 | | 3 | build | `build.sh <app>` | `BUILD: PASS` + manifest | no |
-| **M2 layering** - BSP/drivers > logic > execution | 4 | layer check | `python lib/check_layers.py <app>` | `LAYERS: PASS` | no |
-| | 5 | host test | `bash lib/host_test.sh [<app>]`: `func/` with a fake `board.h` on the PC | `HOST: PASS` | no |
-| **M3 hardware** - test and debug on the real board, with the HW/tools available | 6 | connect | `discover.sh <board>` | `IDENTITY: PASS` | yes |
-| | 7 | flash | `flash.sh <app> --yes` | `FLASH: PASS` | yes |
-| | 8 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]` | `RESULT: PASS` | yes |
-| | 9 | debug | `debug.sh` *(planned)*: GDB server, attach, fault registers, backtrace | `DEBUG: ...` | yes + probe |
-| **M4 porting** - other vendors, toolchains, OS | 10 | port | `port.sh <app> --to <skill>:<board> [--os ...]` *(planned)* | target passes M1-M3 with the **same** `tests/*.json` | target |
-| all | 11 | clean | `clean.sh [--apps] [--yes]` | `CLEAN: done` | no |
+| | 4 | connect | `discover.sh <board>` | `IDENTITY: PASS` | yes |
+| | 5 | flash | `flash.sh <app> --yes` (**ask the developer first**) | `FLASH: PASS` | yes |
+| | 6 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]` | `RESULT: PASS` | yes |
+| | 7 | debug | `debug.sh` *(planned)*: GDB server, attach, halt at `main`, fault registers, backtrace | `DEBUG: ...` | yes + probe |
+| **M2 board support** | 8 | board drivers | *(planned)*: pin/peripheral map from the board sources, `board.h` drivers, per-peripheral `tests/*.json` (run with stage 6) | `RESULT: PASS` per peripheral | yes |
+| | 9 | layer check | `python lib/check_layers.py <app>` | `LAYERS: PASS` | no |
+| | 10 | host test *(optional)* | `bash lib/host_test.sh [<app>]`: `func/` with a fake `board.h` on the PC | `HOST: PASS` | no |
+| **M3 execution model** | 11 | execution + trace | *(planned)*: superloop / RTOS execution layer; trace ring buffer read over the console or the debugger, rules in `tests/*.json` | `TRACE: PASS` | yes |
+| **M4 components** | 12 | components | *(planned)*: add a middleware component with its adapter and demo test | `RESULT: PASS` | yes |
+| **M5 application + profiling** | 13 | profile | *(planned)*: cycles per function, stack high-water, RAM/flash from the map file, against budgets | `PROFILE: PASS` | yes |
+| all | 14 | export | `export_app.sh <app>` *(planned)*: standalone AI-assisted project - see [three ways out](#three-ways-out-of-the-pipeline) | `EXPORT: PASS` | no |
+| | 15 | port | `port.sh <app> --to <skill>:<board>` *(planned)* | target passes its milestones with the **same** `tests/*.json` | target |
+| | 16 | clean | `clean.sh [--apps] [--yes]` | `CLEAN: done` | no |
 
-Stage 6 (connect) may run before stage 2 - it only needs the board, not an app.
+Stage 4 (connect) may run before stage 2 - it only needs the board, not an app.
 
-### Two paths after stage 2: code it yourself, or let the agent run the stages
+### Three ways out of the pipeline
+
+AI generation is a starting point, never a lock-in. After any gate the developer may leave the
+agent-driven path:
 
 ```
-1 setup ─► 2 create ─┬─► IDE path (developer):  2d open_ide ─► edit, build, flash, debug in VS Code
-check_tools  new_app │                           (the vendor extension's own buttons)
+1 setup ─► 2 create ─┬─► A  IDE path (developer):  2d open_ide ─► edit, build, flash, debug in VS Code
+check_tools  new_app │                             (the vendor extension's own buttons)
                      │        ▲ switch any time - same app folder, same build outputs ▼
-                     └─► script path (agent):   3 build.sh ─► 4/5 layer + host checks ─► 7 flash.sh ─► 8 serial_test
+                     ├─► B  script path (agent):   3 build ─► 4 connect ─► 5 flash ─► 6 test ─► 9 layers ...
+                     │
+                     └─► C  standalone project:    14 export_app ─► the app + the skills, scripts, board
+                                                   profile and tests it uses, as a project of its own
 ```
 
-- **Coding can start at any time.** `new_app.sh` ends with stage 2d and opens the app in VS Code,
-  so the developer can start editing right after creation, or later after any gate passed.
-- **The two paths share one project.** The IDE builds the same configuration into the same folder as
-  `build.sh`; code edited in the IDE goes through the same gates when the agent runs the scripts
-  again (`build.sh`, `check_layers.py`, `flash.sh` with its identity check, `serial_test.py`).
+- **A - IDE path.** `new_app.sh` ends with stage 2d and opens the app in VS Code, so the developer
+  can code, build, flash and debug themselves right after creation or after any later gate.
+- **B - script path.** The agent runs the stages behind their gates. A and B share one project:
+  the IDE builds the same configuration into the same folder as `build.sh`, and code edited in the
+  IDE goes through the same gates when the agent runs the scripts again (`build.sh`,
+  `check_layers.py`, `flash.sh` with its identity check, `serial_test.py`).
+- **C - standalone AI-assisted project** *(planned, stage 14)*. `export_app.sh` copies the app
+  together with the skills, `lib/` scripts, board profile and tests it uses into a project of its
+  own (`.claude/skills/`, `CLAUDE.md`, `tests/`), so an agent can keep developing it outside this
+  repo - with the same gates, without the other boards and toolchains.
 - **Agents follow the developer's choice.** On the IDE path the agent stops after stage 2d and
   only runs scripts when asked ("build it", "test it"); it never overwrites files the developer is
   editing. Asked to continue on the script path, it re-runs the gates from stage 3.
@@ -65,7 +119,9 @@ Worked example: [Edgi-Talk on the IDE path](walkthrough-edgi-talk-ide.md) (promp
 **Release scope:** `<repo>/milestones.env` (`ACTIVE_MILESTONES`, override `FW_ACTIVE_MILESTONES`)
 lists the milestones a release activates. Scripts of an inactive milestone call
 `require_milestone` (lib/common.sh) and stop with `ACTION: SETUP` (exit 10). Enabling a milestone
-is the developer's decision, never the agent's.
+is the developer's decision, never the agent's. M1 includes the board stages; flashing stays behind
+its own approval: `flash.sh` needs `--yes`, which the agent passes only after the developer said yes
+(see [Hardware-dependent testing](#hardware-dependent-testing)).
 
 ## IDE handoff (stage 2d)
 
@@ -123,10 +179,10 @@ life cycle / read-out protection / option bytes / OTP / eFuses / secure boot, up
 Everything else - path checks, versions, packs, identity, generation, layering, build, flash and
 verify, serial tests - runs automatically behind the gates.
 
-## Architecture (M2): BSP/drivers > logic > execution
+## Architecture: BSP/drivers > logic > execution (M2-M5)
 
 ```
-execution   main / app_main / tasks   superloop today; FreeRTOS / Zephyr / RT-Thread tasks (M4)
+execution   main / app_main / tasks   superloop today; FreeRTOS / Zephyr / RT-Thread tasks (M3)
 logic       func/   (lib/func)        portable C services: console, led, button ... board.h only
 board       board/  (board.h API)     the port boundary: one API, one implementation per board
 BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico core (never edit)
@@ -138,16 +194,16 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
 - `board.h` is the same API on every board: init, millis/delay, LEDs (write/read/name), buttons
   (read/name/pin), console getc/flush, printf to the console - the contract is
   [board-api.md](board-api.md).
-- Checks: `check_layers.py` (includes, vendor calls, `#if BOARD_*` per layer) and `host_test.sh`
-  (the func services against `lib/host`'s fake board: console line editing and dispatch, LED
+- Checks: `check_layers.py` (includes, vendor calls, `#if BOARD_*` per layer) and the optional
+  `host_test.sh` (the func services against `lib/host`'s fake board: console line editing and dispatch, LED
   numbering and read-back, button debounce and events). The host test needs a host C compiler
   (gcc, clang or Visual Studio C++ with the Windows SDK).
 - Services expose init/poll functions; the execution layer decides how they run (a superloop calls
-  `*_poll()`, an RTOS wraps them in tasks) - this is what makes M4 OS ports mechanical.
+  `*_poll()`, an RTOS wraps them in tasks) - this is what makes the M3 execution models mechanical.
 - Console protocol (test contract): `READY`, `INFO app=.. v=.. board=<id> ...`, `OK ...`,
   `ERR <reason>`, `EVT ...`, `<TAG> k=v ...`.
 
-## Hardware-dependent testing (M3)
+## Hardware-dependent testing
 
 - **Board type vs bench instance:** what is the same for every copy of a board is in `boards/`;
   what differs per PC or physical board (probe serial, COM port) is in `<ws>/.bench/<id>.env`,
@@ -174,7 +230,7 @@ lib/common.sh, lib/fwtest.py, lib/func/                      shared by all skill
 boards/<id>/README.md                                        board hardware, tool-independent
 boards/<id>/<skill>/                                         that skill's board profile + log
 boards/index.json                                            board ids, aliases, MCU, evidence level per profile
-lib/host/, host_test.sh, check_layers.py                     M2 checks: fake board + unit tests, layer rules
+lib/host/, host_test.sh, check_layers.py                     M2 checks: layer rules, optional fake-board unit tests
 tools/validate_skills.py                                     repo validator (run before every commit)
 apps/<app>/                                                  generated projects
 apps/.bench/<id>.env                                         per-PC instance data (git-ignored)
@@ -188,6 +244,6 @@ apps/.bench/<id>.env                                         per-PC instance dat
    `open_ide.sh` (stage 2d) hands apps to VS Code + the toolchain's extension (`IDE_EXT`).
 3. A `board.h` implementation per board under `templates/_common`, reusing `lib/func`.
 4. For each board: `boards/<id>/<skill>/` profile + verification log (`boards/_template/`).
-5. hello-world and uart-btn-led templates with the shared test specs; run M1 and M3 on hardware.
+5. hello-world and uart-btn-led templates with the shared test specs; run all M1 stages on hardware.
 6. Add the skill to the tables in the top-level `README.md` and its boards to `boards/index.json`.
 7. `python tools/validate_skills.py` until `VALIDATE: PASS`.

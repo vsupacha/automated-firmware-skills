@@ -182,7 +182,7 @@
             "hello-world": "built",
             "uart-btn-led": "built"
           },
-          "note": "M1 only (create, build); hardware stages planned",
+          "note": "M1 build stages only (create, build); hardware stages planned",
           "log": "boards/stm32n6570-dk/cubemx-hal-stm32n6570dk/README.md"
         }
       }
@@ -208,7 +208,7 @@
             "hello-world": "built",
             "uart-btn-led": "built"
           },
-          "note": "M1 only (create, build); console is SWO output only; hardware stages planned",
+          "note": "M1 build stages only (create, build); console is SWO output only; hardware stages planned",
           "log": "boards/stm32f407g-disc1/cubemx-hal-stm32f407disco/README.md"
         }
       }
@@ -235,7 +235,7 @@
             "hello-world": "unverified",
             "uart-btn-led": "observed"
           },
-          "note": "M1 + M3; uart-btn-led flashed, tests 13/13, interactive 5/5, LED2 seen by the owner; console RX by interrupt (no USART RX FIFO); hello-world not run yet",
+          "note": "M1 incl. board stages; uart-btn-led flashed, tests 13/13, interactive 5/5, LED2 seen by the owner; console RX by interrupt (no USART RX FIFO); hello-world not run yet",
           "log": "boards/b-l475e-iot01a/cubemx-hal-stm32l475iot/README.md"
         }
       }

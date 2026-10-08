@@ -8,17 +8,27 @@ Started from the TESAIoT track (Infineon PSOC Edge E84 + ModusToolbox, Edgi-Talk
 DevKit boards, 2026-10). Written for Claude Code; the scripts are plain bash/Python and can be
 driven by other agents too.
 
+The milestones follow embedded bring-up **bottom-up**: each firmware layer is proven on the real
+board before the next one is generated on top of it, and each milestone ships as a collection of
+skills + scripts that can do its jobs.
+
 | Milestone | What the skills do for you | Stages | Status in this release |
 | --- | --- | --- | --- |
-| **M1** skeleton | check tools, create a correct project for the board, build it reproducibly | setup → create → build | **active** |
-| **M2** layering | keep the code in layers: BSP/drivers → board → logic → execution | layer check → host test (shared `lib/func` on the PC, fake board) | implemented, **gated** |
-| **M3** hardware | find the board, flash it behind identity gates, test it over the console, (debug) | connect → flash → test → (debug) | implemented, verified on all boards, **gated** |
-| **M4** porting | move an app to another vendor / toolchain / OS with the same tests | *(planned)* | planned |
+| **M1** bring-up | check tools, create a correct project, open it in the IDE, build, find the board, flash it behind identity gates, smoke-test it over the console, (debug) | setup → create → IDE → build → connect → flash → test → (debug) | **active**; board stages verified on 6 skills, planned for N6 / F4 |
+| **M2** board support | BSP drivers behind one `board.h` API (from vendor board configs, netlists, schematics), checked in layers | (board drivers) → layer check → host test (optional) | layer check implemented, **gated** |
+| **M3** execution model | bare metal, FreeRTOS, Zephyr / RT-Thread; execution flow checked from an on-board trace | *(planned)* | planned |
+| **M4** components | middleware on top: LVGL, USB, file system, network ... | *(planned)* | planned |
+| **M5** application + profiling | application logic tested on the board with stub/driver inputs; time and memory budgets | *(planned)* | planned |
 
-**Release scope:** [milestones.env](milestones.env) activates **M1** only. The M3 scripts are in the
-repo and were verified on every board listed below, but stop with `ACTION: SETUP ... not active`
-until you enable M3 there (`ACTIVE_MILESTONES="M1 M3"`) or for one shell session with
-`export FW_ACTIVE_MILESTONES="M1 M3"`. Flashing changes your board, so it is your decision.
+**Release scope:** [milestones.env](milestones.env) activates **M1**, including its board stages:
+the agent finds, flashes and tests your board when you ask, and **asks before every flash**
+(`flash.sh` refuses without `--yes`). M2 scripts stop with `ACTION: SETUP ... not active` until you
+enable M2 there or for one shell session with `export FW_ACTIVE_MILESTONES="M1 M2"`.
+
+**AI generation is optional at every step.** After the project is created you can (A) code, build,
+flash and debug it yourself in VS Code with the vendor extension, (B) let the agent run the gated
+stages, or - planned - (C) export the app with the skills and scripts it uses as a standalone
+AI-assisted project. See [docs/workflow.md](docs/workflow.md#three-ways-out-of-the-pipeline).
 
 Steps that only a developer can do - installing toolchains, accepting licences, plugging boards,
 pressing buttons, approving a flash - are never guessed: the scripts stop with exit code 10 and an
@@ -49,13 +59,13 @@ automated-firmware-skills/
 | [modus-pdl-edgitalk](skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox 3.9 | Infineon PSOC Edge E84 | Windows + Git Bash | verified on hardware |
 | [cubemx2-hal2-stm32c562nucleo](skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 1.1.1 CLI + CMake + STM32CubeProgrammer | ST STM32C5 | Windows + Git Bash | verified on hardware |
 | [pio-arduino-rpipico2w](skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO 6.1 + arduino-pico 6.1 | Raspberry Pi RP2350 | Windows + Git Bash (bash on Linux/macOS untested) | verified on hardware |
-| [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeN6 1.4.1 + CMake | ST STM32N6 | Windows + Git Bash | M1: generated + built (hardware stages planned) |
-| [cubemx-hal-stm32f407disco](skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeF4 1.28.3 + CMake | ST STM32F4 | Windows + Git Bash | M1: generated + built (hardware stages planned) |
+| [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeN6 1.4.1 + CMake | ST STM32N6 | Windows + Git Bash | M1 build stages: generated + built (board stages planned) |
+| [cubemx-hal-stm32f407disco](skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeF4 1.28.3 + CMake | ST STM32F4 | Windows + Git Bash | M1 build stages: generated + built (board stages planned) |
 | [cubemx-hal-stm32l475iot](skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless) + STM32CubeL4 1.18.2 + CMake + STM32CubeProgrammer | ST STM32L4 | Windows + Git Bash | verified on hardware |
 | [pio-espidf-esp32s3box](skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO 6.2 + ESP-IDF 5.5 (espressif32 6.12.0) | Espressif ESP32-S3 | Windows + Git Bash | verified on hardware |
 | [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO 6.2 + arduino-esp32 2.0.17 (espressif32 6.12.0) | Espressif ESP32-S3 | Windows + Git Bash | verified on hardware |
 
-Planned: `arduino-app-lab-uno-q` (Arduino App Lab); M4 targets: FreeRTOS execution layer,
+Planned: `arduino-app-lab-uno-q` (Arduino App Lab); M3 targets: FreeRTOS execution layer,
 Zephyr and RT-Thread skills.
 
 ## Boards
@@ -172,8 +182,8 @@ A worked example with real prompts and outputs: [Edgi-Talk on the IDE path](docs
 
 Each script prints a gate line - go to the next stage only when it says PASS. Exit codes: 0 pass,
 1 fail, 2 warnings, **10 = do what the `ACTION:` line says, then re-run the same command**.
-Stage numbers below are the shared ones from [docs/workflow.md](docs/workflow.md). Stages 6-8
-(connect, backup, flash, test) are milestone M3: enable it in `milestones.env` first.
+Stage numbers below are the shared ones from [docs/workflow.md](docs/workflow.md). Stages 4-6
+(connect, backup, flash, test) are part of M1; the agent asks before every flash.
 
 ### modus-pdl-edgitalk (ModusToolbox + PSOC Edge E84)
 
@@ -185,15 +195,15 @@ S=skills/modus-pdl-edgitalk/scripts
 | --- | --- | --- |
 | 0 help | `bash $S/help.sh [--en]` | - |
 | 1 setup | `bash $S/check_tools.sh <board> [--fix] [--ws <workspace>]` | `missing/bad=0` |
-| 6 connect | `bash $S/discover.sh <board> [--serial <probe-serial>]` | `IDENTITY: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <probe-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
 | 2 create from example | `bash $S/examples.sh <board> [words] [--detail <id>]`, then `bash $S/new_app.sh <board> <app> "" --example <id>` | `Created ...` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--getlibs] [--allow-warnings]` | `BUILD: PASS` |
-| 7 backup (before the first flash) | `bash $S/backup.sh <board>` | backup files written |
-| 7 flash | `bash $S/flash.sh apps/<app> --yes [--hex <file.hex>]` | `FLASH: PASS` (exit 10 `ACTION: POWER_CYCLE` = replug USB) |
-| 8 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
-| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+| 5 backup (before the first flash) | `bash $S/backup.sh <board>` | backup files written |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes [--hex <file.hex>]` | `FLASH: PASS` (exit 10 `ACTION: POWER_CYCLE` = replug USB) |
+| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Boards: `edgi-talk`, `kit-pse84-ai`, `tesaiot`. Templates: `hello-world`, `button-led`,
 `uart-btn-led`, `dual-core-ipc`. BSP diff tool: `python $S/modus_diff.py base.modus board.modus`.
@@ -220,14 +230,14 @@ S=skills/cubemx2-hal2-stm32c562nucleo/scripts
 | --- | --- | --- |
 | 0 help | `bash $S/help.sh [--en]` | - |
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
-| 6 connect | `bash $S/discover.sh <board> [--serial <stlink-serial>]` | `IDENTITY: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <stlink-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--ioc2 <file>]` | `REGEN: PASS`, `Created ...` |
 | 2 regenerate (after a .ioc2 change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
-| 7 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
-| 8 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
-| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
+| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `nucleo-c562re`. Templates: `hello-world`, `uart-btn-led`. The app's `<app>.ioc2` is created
 from the board (or copied from `--ioc2`); `mx/` is generated from it and never edited by hand.
@@ -254,13 +264,13 @@ S=skills/pio-arduino-rpipico2w/scripts
 | --- | --- | --- |
 | 0 help | `bash $S/help.sh [--en]` | - |
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
-| 6 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
-| 7 flash | `bash $S/flash.sh apps/<app> --yes [--uf2 <file.uf2>]` | `FLASH: PASS` |
-| 8 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
-| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes [--uf2 <file.uf2>]` | `FLASH: PASS` |
+| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `rpi-pico-2w`. Templates: `hello-world`, `uart-btn-led`. The board can be running a sketch
 or be in BOOTSEL: `flash.sh` reboots it into BOOTSEL itself.
@@ -291,11 +301,11 @@ S=skills/cubemx-hal-stm32n6570dk/scripts
 | 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
-| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `stm32n6570-dk`. Templates: `hello-world`, `uart-btn-led`. Each app's `<app>.ioc` starts
 from ST's FSBL-only template in STM32CubeN6 plus the console UART; `mx/` is generated headlessly
-by STM32CubeMX and never edited by hand. Flash and test are planned (M3).
+by STM32CubeMX and never edited by hand. Flash and test are planned (M1 board stages).
 
 ### cubemx-hal-stm32f407disco (STM32CubeMX + STM32CubeF4 HAL + STM32F4 Discovery) - M1
 
@@ -314,14 +324,14 @@ S=skills/cubemx-hal-stm32l475iot/scripts
 | --- | --- | --- |
 | 0 help | `bash $S/help.sh [--en]` | - |
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
-| 6 connect | `bash $S/discover.sh <board> [--serial <stlink-serial>]` | `IDENTITY: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <stlink-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `REGEN: PASS`, `Created ...` |
 | 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
-| 7 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
-| 8 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
-| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
+| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `b-l475e-iot01a`. Templates: `hello-world`, `uart-btn-led` (B1 USER toggles LED2). The
 `.ioc` starts from the CubeMX board configuration (`loadboard B-L475E-IOT01A1`) plus USART1 on the
@@ -349,14 +359,14 @@ S=skills/pio-espidf-esp32s3box/scripts
 | --- | --- | --- |
 | 0 help | `bash $S/help.sh [--en]` | - |
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
-| 6 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
-| 7 backup (optional, factory firmware) | `bash $S/backup.sh <board>` | `BACKUP: PASS` |
-| 7 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
-| 8 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
-| 11 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+| 5 backup (optional, factory firmware) | `bash $S/backup.sh <board>` | `BACKUP: PASS` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
+| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `esp32-s3-box`. Templates: `hello-world`, `uart-btn-led` (LED1 = LCD backlight, BTN1 = BOOT).
 The app's `src/func` is the shared `lib/func`; ESP-IDF settings live in `sdkconfig.defaults`.

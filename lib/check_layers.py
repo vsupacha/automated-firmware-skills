@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage 4 (M2 layer check): check the layering rules of docs/board-api.md in app sources.
+"""Stage 9 (M2 layer check): check the layering rules of docs/board-api.md in app sources.
 
 Usage:
   python check_layers.py <app-dir> [<dir> ...]
@@ -65,7 +65,7 @@ def milestone_gate():
         m = re.search(r'^ACTIVE_MILESTONES="?([^"#\n]*)', text, re.M)
         active = m.group(1).strip() if m else ""
     if "M2" not in active.split():
-        print(f"ACTION: SETUP check_layers.py (stage 4 layer check) belongs to milestone M2, which is not "
+        print(f"ACTION: SETUP check_layers.py (stage 9 layer check) belongs to milestone M2, which is not "
               f"active in this release (active: {active or 'none'}). Enabling it is the developer's decision: "
               f"add M2 to ACTIVE_MILESTONES in {REPO_ROOT / 'milestones.env'}, or export "
               f'FW_ACTIVE_MILESTONES="{(active + " ") if active else ""}M2" for one session')

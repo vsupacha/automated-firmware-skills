@@ -63,11 +63,11 @@ else
   bad "git" "not found - install Git (Git for Windows)"
 fi
 
-# python + pyserial (discover, flash, tests - M3; not needed to create/build)
+# python + pyserial (discover, flash, tests; not needed to create/build)
 if [ -n "$PYTHON" ]; then
   ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')  ($(fw_scope "$PYTHON"))"
   if "$PYTHON" -c "import serial" 2>/dev/null; then ok "pyserial" "$("$PYTHON" -c 'import serial;print(serial.VERSION)')"
-  else wrn "pyserial" "missing - needed for discover/flash/test (M3): python -m pip install --user pyserial"; fi
+  else wrn "pyserial" "missing - needed for discover/flash/test: python -m pip install --user pyserial"; fi
 else
   bad "python" "not found"
 fi

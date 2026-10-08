@@ -55,8 +55,8 @@ for t in "GNU Tools for STM32|$GCC_BIN/arm-none-eabi-gcc.exe|$GCC_VERSION" "CMak
   if [ -x "$exe" ]; then ok "$name" "$ver  ($(fw_scope "$exe"))"; else bad "$name" "$ver not found ($exe) - install the STM32Cube bundle (STM32Cube for VS Code / bundle manager)"; fi
 done
 
-# python (tests, M3)
-if [ -n "$PYTHON" ]; then ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')"; else wrn "python" "not found (needed for M3 tests only)"; fi
+# python (board tests)
+if [ -n "$PYTHON" ]; then ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')"; else wrn "python" "not found (needed for board tests only)"; fi
 
 # IDE path (stage 2d): VS Code + STM32CubeIDE for VS Code - optional for the script path
 fw_check_ide

@@ -50,18 +50,18 @@ fi
 
 # Build bundles (pinned)
 for t in "GNU Tools for STM32|$GCC_BIN/arm-none-eabi-gcc.exe|$GCC_VERSION" "CMake|$CMAKE_BIN/cmake.exe|$CMAKE_VERSION" \
-         "Ninja|$NINJA_BIN/ninja.exe|$NINJA_VERSION" "STM32CubeProgrammer (M3)|$PROGRAMMER|$PROGRAMMER_VERSION"; do
+         "Ninja|$NINJA_BIN/ninja.exe|$NINJA_VERSION" "STM32CubeProgrammer (flash)|$PROGRAMMER|$PROGRAMMER_VERSION"; do
   IFS='|' read -r name exe ver <<<"$t"
   if [ -x "$exe" ]; then ok "$name" "$ver  ($(fw_scope "$exe"))"; else bad "$name" "$ver not found ($exe) - install the STM32Cube bundle (STM32Cube for VS Code / bundle manager)"; fi
 done
 
-# python + pyserial (VCP discovery and serial tests, M3)
+# python + pyserial (VCP discovery and serial tests)
 if [ -n "$PYTHON" ]; then
   ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')  ($(fw_scope "$PYTHON"))"
-  if pv="$("$PYTHON" -c "import serial; print(serial.VERSION)" 2>/dev/null | tr -d '\r')"; then ok "pyserial (M3)" "$pv"
-  else wrn "pyserial (M3)" "missing - python -m pip install pyserial (discover/tests only)"; fi
+  if pv="$("$PYTHON" -c "import serial; print(serial.VERSION)" 2>/dev/null | tr -d '\r')"; then ok "pyserial" "$pv"
+  else wrn "pyserial" "missing - python -m pip install pyserial (discover/tests only)"; fi
 else
-  wrn "python" "not found (needed for M3 tests only)"
+  wrn "python" "not found (needed for board tests only)"
 fi
 
 # IDE path (stage 2d): VS Code + STM32CubeIDE for VS Code - optional for the script path

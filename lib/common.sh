@@ -143,7 +143,7 @@ require_vars() {
        'discover.sh $BOARD_ID' (writes $BENCH_DIR/$BOARD_ID.env)."
 }
 
-# ---- bench instance: developer settings, flash policy, board lock (M3) ----------------------
+# ---- bench instance: developer settings, flash policy, board lock (board stages) -------------------
 # Lines of <bench>/<id>.env that belong to the developer, not to discover.sh; discover.sh keeps them
 # when it rewrites the file:  FLASH_POLICY=ask|auto  (default ask)
 BENCH_DEV_KEYS="FLASH_POLICY"

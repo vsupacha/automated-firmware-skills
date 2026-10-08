@@ -5,7 +5,7 @@ A developer story, captured on 2026-10-07 with the `modus-pdl-edgitalk` skill on
 repo folder). Every command output below is real (trimmed; personal paths shown as `<you>`).
 Steps marked **[developer, in VS Code]** are done by hand in the IDE - Claude does not click there.
 
-The two paths are described in [workflow.md](workflow.md#two-paths-after-stage-2-code-it-yourself-or-let-the-agent-run-the-stages):
+The ways out of the pipeline are described in [workflow.md](workflow.md#three-ways-out-of-the-pipeline):
 the **IDE path** (you code, build, flash and debug in VS Code) and the **script path** (Claude runs
 the gated stages). This story stays on the IDE path and borrows the script path twice - to check
 the work and to see what flashing needs.
@@ -161,7 +161,9 @@ ACTION: SETUP flash.sh (stage 7 flash) belongs to milestone M3, which is not act
 or export FW_ACTIVE_MILESTONES="M1 M3" for one session
 ```
 
-Claude relays that line and waits. With M3 enabled it would run `discover.sh edgi-talk`, then ask
+Claude relays that line and waits. *(Captured before 2026-10-08. The board stages are now part of
+M1, so today `flash.sh` passes the milestone gate and stops at the developer's approval instead;
+the old shared stage numbers 6-8 are now 4-6.)* With the board stages enabled it would run `discover.sh edgi-talk`, then ask
 before every flash (board, app, hash), then `serial_test.py` with `tests/uart_btn_led.json` - and
 `uptime` can be added to that spec as one more step.
 
@@ -172,8 +174,8 @@ before every flash (board, app, hash), then `serial_test.py` with `tests/uart_bt
 | help, tools check, create | Claude | script (stages 0-2) |
 | open the app | `new_app.sh` | stage 2d, automatic |
 | read, edit, build, program, debug | you | IDE |
-| check build + layering on request | Claude | script (stages 3-4) on the same folder |
-| flash with identity gates, serial tests | Claude, after you enable M3 | script (stages 6-8) |
+| check build + layering on request | Claude | script (stages 3 and 9) on the same folder |
+| flash with identity gates, serial tests | Claude, after your yes to each flash | script (stages 4-6) |
 
 Switching never needs an export or a copy: the IDE and the scripts share one app folder, one
 `build/` and one set of tests.

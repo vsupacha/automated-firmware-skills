@@ -58,7 +58,7 @@ silkscreen, so console commands and tests say `led 1`, `btn1`.
 
 ## Checks
 
-- `lib/host_test.sh` (stage 5) compiles `lib/func` or an app's `func/` against the fake board and
+- `lib/host_test.sh` (stage 10, optional) compiles `lib/func` or an app's `func/` against the fake board and
   runs the unit tests: `HOST: PASS`.
-- `lib/check_layers.py` (stage 4) checks the include and `#if BOARD_*` rules above in an app:
+- `lib/check_layers.py` (stage 9) checks the include and `#if BOARD_*` rules above in an app:
   `LAYERS: PASS`.
