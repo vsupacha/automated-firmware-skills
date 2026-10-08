@@ -9,7 +9,10 @@ many sensors. Tool-independent hardware sheet.
 
 Sources: STM32CubeMX 6.18.1 board configurations `D42_Discovery_B-L475E-IOT01A1_STM32L475V_Board.ioc`
 and `D57_..._B-L475E-IOT01A2_...` (identical apart from the board name); STM32CubeL4 V1.18.2 BSP
-`Drivers/BSP/B-L475E-IOT01`.
+`Drivers/BSP/B-L475E-IOT01`. Board user manual: ST UM2153 "Discovery kit for IoT node,
+multichannel communication with STM32L4"
+(<https://www.st.com/resource/en/user_manual/um2153-discovery-kit-for-iot-node-multichannel-communication-with-stm32l4-stmicroelectronics.pdf>)
+- vendor documents are linked, not copied into the repo.
 
 "Verified" = seen on hardware with a dated log line in a profile README. "BSP" / "CubeMX board" =
 taken from ST's files, not yet checked by us on this board.
