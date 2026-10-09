@@ -41,3 +41,6 @@ quirks and the verification log of the `pio-arduino-rpipico2w` skill. Machine-re
     `LED led1=1`) and **the LED was seen lit by the user** - BOOTSEL run-time read and the
     CYW43439 LED are verified on hardware.
   - picotool reached "RP2350 Boot" without any driver install.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

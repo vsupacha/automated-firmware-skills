@@ -76,3 +76,6 @@ choose one before using them.
   external probes must support 1.8 V.
 - `device-configurator-cli --build` must be run **without** `--library` (fails with
   "No device support library information found").
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

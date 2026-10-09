@@ -25,40 +25,15 @@ Reference implementations:
 | [pio-arduino-unor4wifi](../skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino (renesas-ra), bossac | UNO R4 WiFi | RA4M1 through the ESP32-S3 USB bridge (1200 baud touch, no read-back); Arduino style like the BOX skill, `console_printf()` |
 | [scons-rtthread-visionboard](../skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons, GNU Arm 13.3, pyOCD (RT-Thread Studio SDK) | Vision Board (RA8D1) | IDE = RT-Thread Studio (`IDE_APP`); msh console; code flash only, read back |
 
-## Milestones: bottom-up, one firmware layer at a time
+## Milestones (summary)
 
-The milestones follow how an embedded developer brings up firmware - bottom-up, each layer proven
-**on the real board** before the next one is generated on top of it. The outcome of each milestone
-is a **collection of skills + scripts** that can do that milestone's jobs on its own; each layer's
-output (pin map, `board.h` API, component APIs) is the catalog the next layer's generation may use,
-so an agent never calls APIs that were not built and tested first.
-
-| Milestone | Builds | Outcome (skills + scripts) | Proven by (on the board) |
-| --- | --- | --- | --- |
-| **M1 bring-up** | toolchain, project, IDE, build, probe connection, flash, smoke test, debug attach | one skill per toolchain + framework + board (`<toolchain>-<framework>-<board>`) | smoke test PASS; debugger halts at `main` |
-| **M2 board support** | BSP drivers behind the `board.h` API, from vendor board configs > netlist > schematic > the developer | board-driver skills + the layer checks | per-peripheral tests (loopback, `WHO_AM_I`, LED seen) + `LAYERS: PASS` |
-| **M3 execution model** | bare-metal superloop, RTOS (FreeRTOS), RTOS + stack (Zephyr, RT-Thread) | execution skills + the trace tool | the same logic tests pass under each model; trace rules (order, latency, period, stack) PASS |
-| **M4 components** | middleware on M2 + M3: LVGL, USB device classes, file system, network stack ... | one skill per component (adapter to `board.h` + the execution model) | component demo test |
-| **M5 application + profiling** | application logic in `func/`, tested on the board with stub/driver inputs; time and memory per function (e.g. a digital filter) | profiling scripts | tests + budgets PASS (cycles, stack, RAM/flash) |
-
-Order: M3 (execution model) comes before M4 (components) because middleware depends on it - LVGL
-needs a tick and a lock, a network stack runs with or without an OS, USB needs ISR/task decisions.
-For Zephyr / RT-Thread the M2 work is mostly devicetree / Kconfig instead of hand-written drivers,
-so the execution model is recorded when the app is created even though it is proven in M3.
-
-**Testing runs through every milestone, on the target.** Each milestone ends with a test on the real
-board (`serial_test.py` + `tests/*.json`). Logic is validated on the board with stub or driver
-inputs injected through the console, not by running the code on the PC; `host_test.sh` stays an
-optional quick check. Timing is only *measured* on hardware (DWT cycle counter, `CCOUNT`, a timer);
-memory can be read without it (map file, `-fstack-usage`) - report *estimated* vs *measured*.
-
-**M3 trace (planned design).** Execution flow is checked from a binary event trace, not `printf`
-(a UART line costs milliseconds and changes the scheduling it measures): `trace(id, arg)` writes
-`{cycles, id, arg}` into a RAM ring buffer (`.noinit`, survives a reset) from ISRs, tasks and the
-RTOS trace hooks; after the run the buffer is read over the console (`trace dump`) or by the
-debugger (works after a fault), decoded with the event-id table shared by C and Python, and checked
-against rules next to the tests - `follows A->B within_us`, `period`, `never`, `stack_free_min_pct`.
-Each board supplies `board_cycles()`; the tracer reports its own overhead.
+Five milestones, bottom-up - each firmware layer is proven on the real board before the next one is
+generated on top of it: **M1 bring-up** (tools, project, IDE, build, connect, flash, test, debug),
+**M2 board support** (drivers behind `board.h`, layer checks), **M3 execution model** (bare metal /
+RTOS / Zephyr / RT-Thread, checked from an on-board trace), **M4 components** (LVGL, USB, file
+system, network ...), **M5 application + profiling**. Goals, outcomes, the trace design and the
+current status of every skill: [milestones.md](milestones.md). The stage table below says which
+milestone each stage belongs to; `milestones.env` says which milestones are active.
 
 ## Stages
 
@@ -228,6 +203,33 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
 - Report verification levels separately: source → generated → built → flashed → booted (READY) →
   tested (PASS n/m) → observed by a human. Add a dated line to `boards/<id>/<skill>/README.md`.
 
+## Common options
+
+- **`serial_test.py`**:
+  - `--interactive` adds the steps that need a person (press a button, look at an LED).
+  - `--only-interactive` runs just those steps.
+  - `--only <regex>` runs only the steps whose name matches.
+  - `--wait-port <s>` waits for the port to come back after a USB replug.
+  - `--wait-boot` listens for the boot banner instead of syncing with `info`.
+- **`clean.sh`**:
+  - Without `--yes` it is a dry run.
+  - The default deletes build outputs only; `--apps` also deletes whole apps (your source code) and
+    `.bench/`.
+- **Overrides**:
+
+  | Skill | Workspace | Boards folder | Board serial | Console port |
+  | --- | --- | --- | --- | --- |
+  | modus-pdl-edgitalk | `PSE84_WS` | `PSE84_BOARDS_DIR` | `PSE84_PROBE_SERIAL` | `PSE84_CONSOLE` |
+  | pio-arduino-rpipico2w | `PICO_WS` | `PICO_BOARDS_DIR` | `PICO_USB_SERIAL` | `PICO_CONSOLE` |
+  | cubemx2-hal2-stm32c562nucleo | `CUBE_WS` | `CUBE_BOARDS_DIR` | `CUBE_PROBE_SERIAL` | `CUBE_CONSOLE` |
+  | cubemx-hal-stm32l475iot | `L4_WS` | `L4_BOARDS_DIR` | `L4_PROBE_SERIAL` | `L4_CONSOLE` |
+  | pio-arduino-unor4wifi | `UNO_WS` | `UNO_BOARDS_DIR` | `UNO_USB_SERIAL` | `UNO_CONSOLE` |
+  | scons-rtthread-visionboard | `RTT_WS` | `RTT_BOARDS_DIR` | `RTT_PROBE_SERIAL` | `RTT_CONSOLE` |
+- **Your own board**: put its profile in `<project>/boards/<id>/<skill>/board.env` (copy
+  `boards/_template/`). The scripts find it before the repo's boards.
+- **Flashing**: always check the board, the app and the image hash yourself before `flash.sh --yes`.
+  The script checks identity, not intent.
+
 ## Repository layout
 
 ```
@@ -250,6 +252,6 @@ apps/.bench/<id>.env                                         per-PC instance dat
    `open_ide.sh` (stage 2d) hands apps to VS Code + the toolchain's extension (`IDE_EXT`).
 3. A `board.h` implementation per board under `templates/_common`, reusing `lib/func`.
 4. For each board: `boards/<id>/<skill>/` profile + verification log (`boards/_template/`).
-5. hello-world and uart-btn-led templates with the shared test specs; run all M1 stages on hardware.
+5. hello-world and push-to-light templates with the shared test specs; run all M1 stages on hardware.
 6. Add the skill to the tables in the top-level `README.md` and its boards to `boards/index.json`.
 7. `python tools/validate_skills.py` until `VALIDATE: PASS`.

@@ -27,7 +27,8 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
-            "uart-btn-led": "interactive"
+            "blink": "built",
+            "push-to-light": "interactive"
           },
           "log": "boards/edgi-talk/modus-pdl-edgitalk/README.md"
         }
@@ -49,7 +50,7 @@
           "level": "interactive",
           "date": "2026-10-03",
           "templates": {
-            "uart-btn-led": "interactive",
+            "push-to-light": "interactive",
             "button-led": "interactive"
           },
           "note": "verified on the AI Kit through the tesaiot profile (same kit, AI-Kit I/O)",
@@ -74,7 +75,7 @@
           "level": "interactive",
           "date": "2026-10-03",
           "templates": {
-            "uart-btn-led": "interactive",
+            "push-to-light": "interactive",
             "button-led": "interactive"
           },
           "note": "QWA309 SW4/SW5 untested: the DVP camera holds P17.5/P17.7 low",
@@ -99,7 +100,8 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
-            "uart-btn-led": "observed"
+            "blink": "built",
+            "push-to-light": "observed"
           },
           "log": "boards/nucleo-c562re/cubemx2-hal2-stm32c562nucleo/README.md"
         }
@@ -122,7 +124,8 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
-            "uart-btn-led": "observed"
+            "blink": "built",
+            "push-to-light": "observed"
           },
           "log": "boards/rpi-pico-2w/pio-arduino-rpipico2w/README.md"
         }
@@ -145,7 +148,8 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
-            "uart-btn-led": "observed"
+            "blink": "built",
+            "push-to-light": "observed"
           },
           "note": "2021 model only (not BOX-Lite / BOX-3)",
           "log": "boards/esp32-s3-box/pio-espidf-esp32s3box/README.md"
@@ -155,7 +159,8 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
-            "uart-btn-led": "observed"
+            "blink": "built",
+            "push-to-light": "observed"
           },
           "note": "Arduino-style code; 2021 model only (not BOX-Lite / BOX-3)",
           "log": "boards/esp32-s3-box/pio-arduino-esp32s3box/README.md"
@@ -180,7 +185,7 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "built",
-            "uart-btn-led": "built"
+            "push-to-light": "built"
           },
           "note": "M1 build stages only (create, build); hardware stages planned",
           "log": "boards/stm32n6570-dk/cubemx-hal-stm32n6570dk/README.md"
@@ -206,7 +211,8 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "built",
-            "uart-btn-led": "built"
+            "blink": "built",
+            "push-to-light": "built"
           },
           "note": "M1 build stages only (create, build); console is SWO output only; hardware stages planned",
           "log": "boards/stm32f407g-disc1/cubemx-hal-stm32f407disco/README.md"
@@ -233,9 +239,10 @@
           "date": "2026-10-08",
           "templates": {
             "hello-world": "unverified",
-            "uart-btn-led": "observed"
+            "blink": "built",
+            "push-to-light": "observed"
           },
-          "note": "M1 incl. board stages; uart-btn-led flashed, tests 13/13, interactive 5/5, LED2 seen by the owner; console RX by interrupt (no USART RX FIFO); hello-world not run yet",
+          "note": "M1 incl. board stages; push-to-light flashed, tests 13/13, interactive 5/5, LED2 seen by the owner; console RX by interrupt (no USART RX FIFO); hello-world not run yet",
           "log": "boards/b-l475e-iot01a/cubemx-hal-stm32l475iot/README.md"
         }
       }
@@ -258,7 +265,8 @@
           "date": "2026-10-09",
           "templates": {
             "hello-world": "tested",
-            "uart-btn-led": "observed"
+            "blink": "built",
+            "push-to-light": "observed"
           },
           "log": "boards/uno-r4-wifi/pio-arduino-unor4wifi/README.md"
         }
@@ -282,7 +290,8 @@
           "date": "2026-10-09",
           "templates": {
             "hello-world": "tested",
-            "uart-btn-led": "built"
+            "blink": "built",
+            "push-to-light": "built"
           },
           "log": "boards/vision-board/scons-rtthread-visionboard/README.md"
         }

@@ -159,7 +159,7 @@ No ESP-IDF calls, no C stdio (`printf`, `stdout`) - output goes through `console
   CR LF). `loop()` must not block: no long `delay()`, time things with `millis()`.
 - Keep the console protocol: `OK ...`, `ERR ...`, `EVT ...`, `<TAG> k=v ...`,
   `INFO ... board=<id> ...` then `READY` - tests depend on it.
-- Templates: `hello-world` (1 s print), `uart-btn-led` (console LED commands, BOOT toggles the LCD
+- Templates: `hello-world` (1 s print), `blink` (LED1 every 0.5 s), `push-to-light` (console LED commands, BOOT toggles the LCD
   backlight, `EVT` lines). `help.sh` lists them from `description.txt`.
 - Libraries: `lib_deps = owner/name @ 1.2.3` (exact version) in `platformio.ini`; wrap anything that
   touches hardware in `board/`.

@@ -43,3 +43,6 @@ quirks and the verification log of the `cubemx2-hal2-stm32c562nucleo` skill. Mac
   LD1 drive verified; the first attempt (before the spec fix) showed two toggles - the spec, not
   the firmware, was at fault. **Observed by the user:** LD1 went dark at the start, lit after the
   single B1 press.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

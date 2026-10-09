@@ -29,3 +29,6 @@ range). Hardware: [../README.md](../README.md).
     default and runs the scons sync itself: `.cproject` identical to Studio's synced one; a new app
     (`vb-sync`) built in Studio without a sync prompt (owner: build passed). scons + GCC 13.3.1
     (`vb-chk`) build PASS 0 warnings - not flashed.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

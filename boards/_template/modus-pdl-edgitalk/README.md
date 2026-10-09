@@ -16,7 +16,7 @@
    (`scripts/modus_diff.py`). If the clock tree differs, port it (reference/project.md).
    Do **not** flash until clocks + console + boot memory are confirmed for this board.
 6. **Overlay:** save the edited `design.modus` in `boards/<id>/modus-pdl-edgitalk/`, record both hashes in `board.env`.
-7. **Smoke test:** `new_app.sh <id> uart-btn-led-<id>` → build → (ask) flash → test.
+7. **Smoke test:** `new_app.sh <id> push-to-light-<id>` → build → (ask) flash → test.
 8. **Document** hardware in `boards/<id>/README.md` (pins, user I/O, on-board parts) and the
    BSP delta, tool quirks and a dated verification log in `boards/<id>/modus-pdl-edgitalk/README.md`
    (copy the Edgi-Talk structure).

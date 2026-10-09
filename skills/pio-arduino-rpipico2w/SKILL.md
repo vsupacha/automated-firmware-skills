@@ -142,7 +142,7 @@ Read `reference/layering.md` before writing code. Rules:
   `INFO ... board=<id> ...` then `READY` - tests depend on it.
 - Write/extend `tests/<app>.json` from the requirements before the code; gate board-dependent steps
   with `requires_re` (spec keys: `scripts/serial_test.py` docstring).
-- Templates: `hello-world` (1 s print), `uart-btn-led` (console LED commands, BOOTSEL toggles the
+- Templates: `hello-world` (1 s print), `blink` (LED1 every 0.5 s), `push-to-light` (console LED commands, BOOTSEL toggles the
   LED, `EVT` lines). `help.sh` lists them from `description.txt`.
 - Libraries: add `lib_deps = ...` with an exact version (`owner/name @ 1.2.3`), never unpinned.
 

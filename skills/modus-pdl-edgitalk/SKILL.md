@@ -194,10 +194,10 @@ Read `reference/layering.md` before writing code. Rules:
   dependent steps with `requires_re` (spec keys: `scripts/serial_test.py` docstring).
 - Templates: `<repo>/lib/func` (shared logic layer, copied into every app's `proj_cm33_ns/func`) +
   `templates/_common/` (`board/` layer) +
-  one app template on top: `uart-btn-led` (console + LED commands + buttons), `button-led`
+  one app template on top: `push-to-light` (console + LED commands + buttons), `button-led`
   (hold a button → its LED lights; reports silkscreen name + pin; `pins?` shows pin config).
   Board extras not in the BSP (QWA309 buttons) are configured at run time in `board.c`.
-- `hello-world` (1 s print), `dual-core-ipc` (CM33 console + CM55 worker over a shared-memory
+- `hello-world` (1 s print), `blink` (LED1 every 0.5 s), `dual-core-ipc` (CM33 console + CM55 worker over a shared-memory
   mailbox: `ipc?`, `ping <n>`, `led55 <1|2> on|off`; template `shared/` is copied to `<app>/shared`
   and `INCLUDES+=../shared` added to both cores). `help.sh` lists templates from `description.txt`.
 - Multi-core work (CM55 owns a peripheral, IPC mailbox): reference/layering.md "Dual-core".

@@ -59,17 +59,17 @@ files ("Processing project failed for 'proj_...'", no reason given). Pause sync 
 
 ## 3. "Create an app - I'll write the code myself"
 
-> **You:** Create a uart-btn-led app called my-edgi for the Edgi-Talk. I want to code it myself in VS Code.
+> **You:** Create a push-to-light app called my-edgi for the Edgi-Talk. I want to code it myself in VS Code.
 
-Claude runs `new_app.sh edgi-talk my-edgi` (the default template is `uart-btn-led`). In 3.5 minutes
+Claude runs `new_app.sh edgi-talk my-edgi` (the default template is `push-to-light`). In 3.5 minutes
 (first run: ModusToolbox downloads its libraries into `apps/mtb_shared`):
 
 ```
 ==> Project Creator: board KIT_PSE84_EVAL_EPC2 -> apps/my-edgi  (takes a few minutes)
 ==> Overlay design.modus -> config/design.modus
 ==> Regenerating GeneratedSource (device-configurator-cli, no --library)
-==> Applying template uart-btn-led
-==> Created apps/my-edgi  (board edgi-talk, template uart-btn-led)
+==> Applying template push-to-light
+==> Created apps/my-edgi  (board edgi-talk, template push-to-light)
 ==> make vscode (ModusToolbox: .vscode/ + my-edgi.code-workspace)
 VSCODE-FIX: done (13 files, TOOLCHAIN=GCC_ARM CONFIG=Debug)
 IDE: READY C:/Users/<you>/.../apps/my-edgi/my-edgi.code-workspace  (VS Code + Infineon ModusToolbox for VS Code)
@@ -164,7 +164,7 @@ or export FW_ACTIVE_MILESTONES="M1 M3" for one session
 Claude relays that line and waits. *(Captured before 2026-10-08. The board stages are now part of
 M1, so today `flash.sh` passes the milestone gate and stops at the developer's approval instead;
 the old shared stage numbers 6-8 are now 4-6.)* With the board stages enabled it would run `discover.sh edgi-talk`, then ask
-before every flash (board, app, hash), then `serial_test.py` with `tests/uart_btn_led.json` - and
+before every flash (board, app, hash), then `serial_test.py` with `tests/push_to_light.json` - and
 `uptime` can be added to that spec as one more step.
 
 ## What this story shows

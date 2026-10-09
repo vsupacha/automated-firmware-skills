@@ -156,7 +156,7 @@ Read `reference/layering.md` before writing code. Rules:
   idle task and trips the task watchdog.
 - Keep the console protocol: `OK ...`, `ERR ...`, `EVT ...`, `<TAG> k=v ...`,
   `INFO ... board=<id> ...` then `READY` - tests depend on it.
-- Templates: `hello-world` (1 s print), `uart-btn-led` (console LED commands, BOOT toggles the LCD
+- Templates: `hello-world` (1 s print), `blink` (LED1 every 0.5 s), `push-to-light` (console LED commands, BOOT toggles the LCD
   backlight, `EVT` lines). `help.sh` lists them from `description.txt`.
 - ESP-IDF components: add them to `PRIV_REQUIRES` in `src/CMakeLists.txt`; managed components
   (`idf_component.yml`) with exact versions only, and commit `dependencies.lock`.

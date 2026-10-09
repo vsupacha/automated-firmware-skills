@@ -152,7 +152,7 @@ Read `reference/layering.md` first. Rules:
   then wrap the generated handle in `board/`.
 - Console protocol: `OK ...`, `ERR ...`, `EVT ...`, `INFO ... board=<id>`, `READY` - printed over
   SWO; console commands cannot reach this board (no input path).
-- Templates: `hello-world`, `uart-btn-led` (B1 toggles LD3, EVT lines). Tests: `tests/<app>.json`
+- Templates: `hello-world`, `blink` (LED1 every 0.5 s), `push-to-light` (B1 toggles LD3, EVT lines). Tests: `tests/<app>.json`
   (they need console input - the board stages here would read SWO instead).
 
 **Check the layers (M2 - gated, stops with `ACTION: SETUP` until enabled):**

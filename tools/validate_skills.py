@@ -7,8 +7,8 @@ Usage:
 Checks
   skills    SKILL.md frontmatter (name = folder, description <= 1024 chars, no tags) and required
             sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT/IDE_APP, stage 2d), have a shebang and LF endings; board-stage
-            scripts are gated by M1; scripts/ and reference/ files named in SKILL.md exist; hello-world and
-            uart-btn-led templates with description.txt and valid tests/*.json; test specs of the
+            scripts are gated by M1; scripts/ and reference/ files named in SKILL.md exist; hello-world, blink and
+            push-to-light templates with description.txt and valid tests/*.json; test specs of the
             same template agree across skills (warning)
   boards    every board has README.md and per-skill profiles (board.env + README.md) of existing
             skills; BOARD_EXTENDS targets exist; boards/index.json matches the folders, its
@@ -43,7 +43,7 @@ BOARD_GATED_SCRIPTS = ["discover.sh", "flash.sh", "backup.sh", "identity_check.s
 REQUIRED_SECTIONS = ["Milestones, stage numbers and developer actions", "Help menu", "Stage 1",
                      "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Stage 7",
                      "Reporting", "Safety rules"]
-REQUIRED_TEMPLATES = ["hello-world", "uart-btn-led"]
+REQUIRED_TEMPLATES = ["hello-world", "blink", "push-to-light"]   # bring-up demos: UART, LED, button
 LEVELS = ["unverified", "built", "flashed", "tested", "interactive", "observed"]
 
 LEAKS = [

@@ -30,3 +30,6 @@ board id, define, labels, USB ids, expected loader identity, sketch offset). Har
   `4bc694b0...`): flash 10/10 pages + reset; automatic test PASS 13/13 (8 skipped: one LED, no
   button); interactive PASS 4/4 twice (`OK led1=1`, `OK led1=0`). **Observed by the user:** LED L
   (D13) on, then off.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

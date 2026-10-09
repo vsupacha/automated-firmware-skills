@@ -29,3 +29,6 @@ package and bundles, `MX_TEMPLATE_IOC`, `MX_CONFIG`). Hardware: [../README.md](.
   then connect under reset (`mode=UR reset=HWrst`): device ID 0x486, STM32N6xx rev Z, Cortex-M55,
   3.29 V. VS Code debug failed before the switch change ("Error in initializing ST-LINK device").
   Input for the board stages: discover/flash must connect under reset and check the boot mode first.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name); new template `blink` (LED1 every 0.5 s) - not built yet (STM32Cube_FW_N6 is not
+  installed on the PC that made the change).

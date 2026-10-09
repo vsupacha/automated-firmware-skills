@@ -28,3 +28,6 @@ expected identity) and `sdkconfig.board` (flash, PSRAM). Hardware: [../README.md
     disturbed); attempt 3 PASS 5/5: `EVT btn1=pressed name=BOOT pin=GPIO0 led1=1`,
     `EVT btn1=released`, `LED led1=1` - BOOT (GPIO0) run-time read + debounce verified.
     **Observed by the user:** the LCD backlight (LED1, GPIO45) lit after the BOOT press.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

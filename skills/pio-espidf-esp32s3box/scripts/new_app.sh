@@ -4,7 +4,7 @@
 # Usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template] [--no-open]
 #   --no-open      stage 2d (open_ide.sh) without a VS Code window (headless runs)
 #   workspace-dir  where apps live (default: $ESP_WS, "" = default)
-#   template       a folder under templates/ (default uart-btn-led); see help.sh for the list
+#   template       a folder under templates/ (default push-to-light); see help.sh for the list
 # Writes <workspace>/<app>/:
 #   platformio.ini        pinned platform, board, framework espidf
 #   CMakeLists.txt        ESP-IDF project file (project name = app name)
@@ -18,7 +18,7 @@ OPEN=1; ARGS=()
 for a in "$@"; do case "$a" in --no-open) OPEN=0;; --*) die "unknown option $a";; *) ARGS+=("$a");; esac; done
 set -- "${ARGS[@]}"
 [ $# -ge 2 ] || die "usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template] [--no-open]"
-load_board "$1"; APP="$2"; WS="${3:-$ESP_WS}"; TPL="${4:-uart-btn-led}"
+load_board "$1"; APP="$2"; WS="${3:-$ESP_WS}"; TPL="${4:-push-to-light}"
 require_vars BOARD_DEFINE PIO_PLATFORM PIO_BOARD PIO_FRAMEWORK PIO_ENV IDF_TARGET
 case "$APP" in *[!A-Za-z0-9_-]*|"") die "app name '$APP': use letters, digits, - and _";; esac
 [ -d "$SKILL_DIR/templates/$TPL" ] && [ "${TPL#_}" = "$TPL" ] \

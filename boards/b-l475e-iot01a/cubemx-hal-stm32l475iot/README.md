@@ -37,3 +37,6 @@ package and bundles, `MX_START`, `MX_CONFIG`, identity gate). Hardware: [../READ
   - serial test **RESULT: PASS 13/13** (7 skipped: one LED, one button, interactive steps).
   - interactive **RESULT: PASS 5/5**: B1 USER pressed by the owner -> `EVT btn1=pressed name=B1
     pin=PC13 led1=1`; the owner saw LED2 on after the press.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

@@ -25,3 +25,6 @@ package and bundles, `MX_START`, `MX_CONFIG`). Hardware: [../README.md](../READM
   - `uart-btn-led` (app `btn-f4`): create REGEN PASS, build PASS 0 warnings (text 15,648 B), ELF
     `6e81ee0f...`. All app sources compiled with -Wall -Wextra and `-DBOARD_STM32F407G_DISC1`.
   - Nothing flashed (M1); SWO output not yet seen on hardware.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

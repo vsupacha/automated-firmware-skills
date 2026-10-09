@@ -163,7 +163,7 @@ outside `board/`.
   file-static. `loop()` must not block: no long `delay()`, time things with `millis()`.
 - Keep the console protocol: `OK ...`, `ERR ...`, `EVT ...`, `<TAG> k=v ...`,
   `INFO ... board=<id> ...` then `READY` - tests depend on it.
-- Templates: `hello-world` (1 s print), `uart-btn-led` (console LED commands; `btns=0` on this
+- Templates: `hello-world` (1 s print), `blink` (LED1 every 0.5 s), `push-to-light` (console LED commands; `btns=0` on this
   board, so its button steps are skipped and two interactive steps ask the user to look at LED L).
   `help.sh` lists them from `description.txt`.
 - Libraries: `lib_deps = owner/name @ 1.2.3` (exact version) in `platformio.ini`; wrap anything that

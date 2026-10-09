@@ -6,6 +6,63 @@ RP2350 board with a CYW43439 Wi-Fi/Bluetooth module. Tool-independent hardware s
 | --- | --- | --- |
 | [pio-arduino-rpipico2w/](pio-arduino-rpipico2w/README.md) | `skills/pio-arduino-rpipico2w` (PlatformIO + arduino-pico) | verified on hardware |
 
+## Bring-up demos
+
+| Demo | Uses | `pio-arduino-rpipico2w` |
+| --- | --- | --- |
+| hello-world | console: USB CDC | tested |
+| blink | LED1 = LED (on the Wi-Fi module) | built |
+| push-to-light | BTN1 = BOOTSEL toggles LED1 | observed * |
+
+Levels: built < flashed < tested (automatic test PASS) < interactive (a person pressed a
+button) < observed (a person saw the LED). \* = verified under its earlier name `uart-btn-led`
+(renamed 2026-10-09, same code). Dated evidence: the profile README of each skill.
+
+## Required tools
+
+- PlatformIO Core 6.1 (pip or the VS Code extension), Git, Python 3 with pyserial.
+- The first build downloads the pinned platform + arduino-pico (~1.5 GB). On Windows set
+  `git config --global core.longpaths true` first.
+- Workspace path ≤100 characters, English characters only.
+
+## Commands
+
+```bash
+S=skills/pio-arduino-rpipico2w/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes [--uf2 <file.uf2>]` | `FLASH: PASS` |
+| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `rpi-pico-2w`. Templates: `hello-world`, `blink`, `push-to-light`. The board can be running a sketch
+or be in BOOTSEL: `flash.sh` reboots it into BOOTSEL itself.
+
+Example - BOOTSEL toggles the LED on a Pico 2 W:
+
+```bash
+S=skills/pio-arduino-rpipico2w/scripts
+bash $S/check_tools.sh rpi-pico-2w
+bash $S/discover.sh rpi-pico-2w
+bash $S/new_app.sh rpi-pico-2w btn-led "" push-to-light
+bash $S/build.sh apps/btn-led
+bash $S/flash.sh apps/btn-led --yes
+python $S/serial_test.py auto apps/btn-led/tests/push_to_light.json apps/btn-led/logs/test.log --board rpi-pico-2w --interactive
+```
+
+Run from the repo root in Git Bash. Exit code 10 = do what the `ACTION:` line says, then
+re-run; common options: [docs/workflow.md](../../docs/workflow.md#common-options).
+
+## Hardware
+
 Sources: Raspberry Pi Pico 2 W datasheet and pinout (raspberrypi.com/documentation/microcontrollers);
 arduino-pico core `variants/rpipico2w/pins_arduino.h`, `variants/generic/common.h`,
 `cores/rp2040/wiring_analog.cpp` (surveyed 2026-09-22 in the PIO LINX toolkit, Pico 2 W port).

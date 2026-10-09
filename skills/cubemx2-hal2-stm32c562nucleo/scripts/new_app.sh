@@ -3,7 +3,7 @@
 # no network needed (packs come from the local STM32Cube pack folder).
 # Usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template] [--ioc2 <file>] [--no-open]
 #   workspace-dir  where apps live (default: $CUBE_WS, "" = default)
-#   template       folder under templates/ (default uart-btn-led); see help.sh
+#   template       folder under templates/ (default push-to-light); see help.sh
 #   --ioc2 <file>  start from an existing .ioc2 (e.g. your own hardware config) instead of the
 #                  board default; it must target the profile's board/MCU
 #   --no-open      stage 2d without a VS Code window (headless runs)
@@ -20,7 +20,7 @@ while [ $# -gt 0 ]; do
   case "$1" in --ioc2) SRC_IOC2="$2"; shift;; --no-open) OPEN=0;; --*) die "unknown option $1";; *) POS+=("$1");; esac; shift
 done
 [ ${#POS[@]} -ge 2 ] || die "usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template] [--ioc2 <file>] [--no-open]"
-load_board "${POS[0]}"; APP="${POS[1]}"; WS="${POS[2]:-$CUBE_WS}"; TPL="${POS[3]:-uart-btn-led}"
+load_board "${POS[0]}"; APP="${POS[1]}"; WS="${POS[2]:-$CUBE_WS}"; TPL="${POS[3]:-push-to-light}"
 require_vars BOARD_DEFINE MX_BOARD_CPN MX_BOARD_PACK_VERSION MX_VERSION
 case "$APP" in *[!A-Za-z0-9_-]*|"") die "app name '$APP': use letters, digits, - and _";; esac
 [ -d "$SKILL_DIR/templates/$TPL" ] && [ "${TPL#_}" = "$TPL" ] \

@@ -9,6 +9,89 @@ not the ESP32-S3-BOX-3 (2023, other pins). Tool-independent hardware sheet.
 | [pio-espidf-esp32s3box/](pio-espidf-esp32s3box/README.md) | `skills/pio-espidf-esp32s3box` (PlatformIO + ESP-IDF) | verified on hardware (backlight seen) |
 | [pio-arduino-esp32s3box/](pio-arduino-esp32s3box/README.md) | `skills/pio-arduino-esp32s3box` (PlatformIO + Arduino) | verified on hardware (backlight seen) |
 
+## Bring-up demos
+
+| Demo | Uses | `pio-espidf-esp32s3box` | `pio-arduino-esp32s3box` |
+| --- | --- | --- | --- |
+| hello-world | console: USB Serial/JTAG | tested | tested |
+| blink | LED1 = LCD backlight | built | built |
+| push-to-light | BTN1 = BOOT toggles LED1 | observed * | observed * |
+
+Levels: built < flashed < tested (automatic test PASS) < interactive (a person pressed a
+button) < observed (a person saw the LED). \* = verified under its earlier name `uart-btn-led`
+(renamed 2026-10-09, same code). Dated evidence: the profile README of each skill.
+
+## Required tools
+
+### pio-espidf-esp32s3box
+
+- PlatformIO Core 6.2, Git, Python 3. The first build installs espressif32 6.12.0 + ESP-IDF 5.5
+  and sets up ESP-IDF's python environment. Discover/flash/test use PlatformIO's own python
+  (pyserial + esptool come with it).
+- Workspace path without spaces, ≤100 characters.
+
+### pio-arduino-esp32s3box
+
+- PlatformIO Core 6.2, Git, Python 3. The first build installs espressif32 6.12.0 +
+  arduino-esp32 2.0.17 (GCC 8.4). Discover/flash/test use PlatformIO's own python
+  (pyserial + esptool come with it).
+- Workspace path without spaces, ≤100 characters.
+
+## Commands
+
+### pio-espidf-esp32s3box
+
+```bash
+S=skills/pio-espidf-esp32s3box/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 5 backup (optional, factory firmware) | `bash $S/backup.sh <board>` | `BACKUP: PASS` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
+| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `esp32-s3-box`. Templates: `hello-world`, `blink`, `push-to-light` (LED1 = LCD backlight, BTN1 = BOOT).
+The app's `src/func` is the shared `lib/func`; ESP-IDF settings live in `sdkconfig.defaults`.
+
+### pio-arduino-esp32s3box
+
+```bash
+S=skills/pio-arduino-esp32s3box/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 5 backup (optional, factory firmware) | `bash $S/backup.sh <board>` | `BACKUP: PASS` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
+| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `esp32-s3-box`. Templates: `hello-world`, `blink`, `push-to-light` (LED1 = LCD backlight, BTN1 = BOOT).
+The app's `src/func` is the shared `lib/func`; ESP-IDF settings live in `sdkconfig.defaults`.
+
+Same commands and gates as pio-espidf-esp32s3box with `S=skills/pio-arduino-esp32s3box/scripts`;
+the code is Arduino style (`<Arduino.h>`, `setup()`/`loop()`, Print/Stream, `millis()`), and flash.sh
+writes four regions (bootloader, partitions, `boot_app0`, sketch).
+
+Run from the repo root in Git Bash. Exit code 10 = do what the `ACTION:` line says, then
+re-run; common options: [docs/workflow.md](../../docs/workflow.md#common-options).
+
+## Hardware
+
 Sources: Espressif esp-box repository, hardware overview of the ESP32-S3-BOX and the esp-bsp
 `esp-box` board support package; PlatformIO `espressif32` 6.12.0 board `esp32s3box`.
 

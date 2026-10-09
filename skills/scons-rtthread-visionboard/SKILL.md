@@ -154,7 +154,7 @@ Read `reference/layering.md` before writing code. Rules:
 - Keep the console protocol: `OK ...`, `ERR ...`, `EVT ...`, `<TAG> k=v ...`,
   `INFO ... board=<id> ...` then `READY`; msh adds its prompt `msh />` and answers unknown
   commands with `<cmd>: command not found.` - tests match without `^`.
-- Templates: `hello-world` (1 s print with `rt_thread_delay_until`), `uart-btn-led` (msh `info`,
+- Templates: `hello-world` (1 s print with `rt_thread_delay_until`), `blink` (LED1 every 0.5 s), `push-to-light` (msh `info`,
   `led <n> on|off|toggle`, `led`, `btn`; KEY0 toggles LED1, `EVT` lines).
 
 ```bash

@@ -4,7 +4,7 @@
 # Usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template] [--no-open]
 #   --no-open      stage 2d (open_ide.sh: Studio import) without opening RT-Thread Studio
 #   workspace-dir  where apps live (default: $RTT_WS, "" = default)
-#   template       a folder under templates/ (default uart-btn-led); see help.sh for the list
+#   template       a folder under templates/ (default push-to-light); see help.sh for the list
 # Writes <workspace>/<app>/ - a standalone RT-Thread Studio + scons project:
 #   the SDK project BSP_PROJECT (board/, ra/ ra_gen/ ra_cfg/ = FSP, rtconfig.h/.py, SConstruct,
 #   .project/.cproject/.settings = Studio project renamed to <app>), rt-thread/ (without docs and
@@ -17,7 +17,7 @@ OPEN=1; ARGS=()
 for a in "$@"; do case "$a" in --no-open) OPEN=0;; --*) die "unknown option $a";; *) ARGS+=("$a");; esac; done
 set -- "${ARGS[@]}"
 [ $# -ge 2 ] || die "usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template] [--no-open]"
-load_board "$1"; APP="$2"; WS="${3:-$RTT_WS}"; TPL="${4:-uart-btn-led}"
+load_board "$1"; APP="$2"; WS="${3:-$RTT_WS}"; TPL="${4:-push-to-light}"
 require_vars BOARD_DEFINE BSP_PROJECT
 case "$APP" in *[!A-Za-z0-9_-]*|"") die "app name '$APP': use letters, digits, - and _";; esac
 [ -d "$SKILL_DIR/templates/$TPL" ] && [ "${TPL#_}" = "$TPL" ] \

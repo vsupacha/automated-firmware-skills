@@ -33,3 +33,6 @@ define, labels, expected identity). Hardware: [../README.md](../README.md). Same
   uart-btn-led `51daf391...`. Flashed 4/4 each; hello-world test PASS 9/9; uart-btn-led automatic
   PASS 13/13, interactive PASS 5/5 (`EVT btn1=pressed name=BOOT pin=GPIO0 led1=1`, `LED led1=1`
   read back from the pin). **Observed by the user:** the LCD backlight lit after the BOOT press.
+- 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
+  name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
+  warnings. Both built only, not flashed (the earlier results above were with the old name).

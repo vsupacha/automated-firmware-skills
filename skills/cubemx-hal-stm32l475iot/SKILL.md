@@ -164,7 +164,7 @@ Read `reference/layering.md` first. Rules:
 - Never edit `mx/` outside USER CODE sections. Peripherals: enable them in `<app>.ioc`, regenerate,
   then wrap the generated handle in `board/`.
 - Console protocol: `READY`, `INFO app=.. board=<id>`, `OK ...`, `ERR ...`, `EVT ...` over the VCP.
-- Templates: `hello-world` (prints every 1 s), `uart-btn-led` (console `led`/`btn` commands, B1
+- Templates: `hello-world` (prints every 1 s), `blink` (LED1 every 0.5 s), `push-to-light` (console `led`/`btn` commands, B1
   toggles LED2). Tests: `tests/<spec>.json` - the same specs as the other skills.
 
 **Check the layers (M2 - gated, stops with `ACTION: SETUP` until enabled):**

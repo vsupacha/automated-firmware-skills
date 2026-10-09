@@ -162,7 +162,7 @@ Read `reference/layering.md` first. Rules:
 - Console protocol: `OK ...`, `ERR ...`, `EVT ...`, `<TAG> k=v ...`, `INFO ... board=<id>` then
   `READY`. Keep the main loop non-blocking: the UART is polled (no RX interrupt in the default
   project), so a 1 ms delay in the loop already loses characters.
-- Templates: `hello-world`, `uart-btn-led` (B1 toggles LD1). Tests: `tests/<app>.json`.
+- Templates: `hello-world`, `blink` (LED1 every 0.5 s), `push-to-light` (B1 toggles LD1). Tests: `tests/<app>.json`.
 
 **Check the layers (M2 - gated, stops with `ACTION: SETUP` until enabled):**
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS` (exit 2 = warnings to fix), and

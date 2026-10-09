@@ -33,7 +33,7 @@ automated-firmware-skills/              ← เปิด Claude Code ที่�
 | 1 | ตรวจชื่อโฟลเดอร์ + dev tools (MTB, ProgTools, GCC, Edge Protect, python/pyserial) | `scripts/check_tools.sh <board>` | `missing/bad=0` |
 | 2a | ค้นหาบอร์ดที่ต่อกับเครื่องนี้ (อ่านอย่างเดียว) แล้วบันทึก probe serial + COM port ของเครื่อง | `discover.sh <board>` | `IDENTITY: PASS`, `Saved ...` |
 | 2b | สร้าง project ด้วย Project Creator + overlay BSP (ไม่ต้องมีบอร์ด) | `new_app.sh <board> <app>` | `Created ...` |
-| 3 | เขียนโค้ดแยก layer: `board/` → `func/` → `main.c` และเขียน test spec จากโจทย์ | `templates/uart-btn-led/` | โค้ดไม่ข้าม layer |
+| 3 | เขียนโค้ดแยก layer: `board/` → `func/` → `main.c` และเขียน test spec จากโจทย์ | `templates/push-to-light/` | โค้ดไม่ข้าม layer |
 | 4 | build ทั้ง 3 core + sign + combined hex | `build.sh <app>` | `BUILD: PASS`, 0 warning |
 | 5 | flash (ต้องขออนุญาตผู้ใช้ก่อนทุกครั้ง) ตรวจ manifest, ตัวตนบอร์ด และ life cycle ก่อนเขียน | `flash.sh <app> --yes` | `FLASH: PASS` (exit 10 + `ACTION: POWER_CYCLE` = ให้ถอดเสียบ USB) |
 | 6 | ทดสอบผ่าน UART ตาม spec JSON (รันหลัง flash) | `serial_test.py auto <spec> <log> --board <board>` | `RESULT: PASS` |
@@ -62,7 +62,7 @@ SKILL.md                 คำสั่งสำหรับ Claude (อัง�
 (ข้อมูลบอร์ดย้ายไปอยู่ที่ <repo>/boards/<id>/ แล้ว)
 reference/               รายละเอียดแต่ละขั้น, ปัญหาที่เคยเจอและวิธีแก้
 scripts/                 สคริปต์ทุกขั้น (รันด้วย Git Bash)
-templates/<ชื่อ>/        template แอปแบบแบ่ง layer พร้อม test spec: uart-btn-led, button-led,
+templates/<ชื่อ>/        template แอปแบบแบ่ง layer พร้อม test spec: push-to-light, button-led,
                          hello-world, dual-core-ipc (CM33 console + CM55 ทำงานผ่าน mailbox)
 ```
 

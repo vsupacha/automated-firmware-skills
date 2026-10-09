@@ -5,7 +5,7 @@
 #        new_app.sh <board-id> <app-name> [workspace-dir] --example <id> [--example-commit <tag>]
 #   app-name       letters, digits, - and _ only
 #   workspace-dir  where apps + mtb_shared live (default: $PSE84_WS, "" = default)
-#   template       name under templates/ (default: uart-btn-led), or "none" = keep vendor code
+#   template       name under templates/ (default: push-to-light), or "none" = keep vendor code
 #   --example      start from an Infineon code example instead (list: examples.sh <board>);
 #                  pinned to its newest release for this BSP unless --example-commit is given.
 #                  The example's own code is kept (no layered template on top).
@@ -29,7 +29,7 @@ while [ $# -gt 0 ]; do
   esac; shift
 done
 [ -n "${POS[1]}" ] || die "usage: new_app.sh <board-id> <app-name> [workspace-dir] [template | --example <id>]"
-load_board "${POS[0]}"; APP="${POS[1]}"; WS="${POS[2]:-$PSE84_WS}"; TPL="${POS[3]:-uart-btn-led}"
+load_board "${POS[0]}"; APP="${POS[1]}"; WS="${POS[2]:-$PSE84_WS}"; TPL="${POS[3]:-push-to-light}"
 [ -n "$EXAMPLE" ] && TPL=none
 case "$APP" in *[!A-Za-z0-9_-]*|"") die "app name '$APP': use only letters, digits, - and _";; esac
 require_vars BSP_ID APP_TEMPLATE_REPO APP_TEMPLATE_COMMIT BOARD_DEFINE

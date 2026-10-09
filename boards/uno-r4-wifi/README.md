@@ -7,6 +7,66 @@ the USB bridge, the RA4M1 programmer and the WiFi/BLE radio. Tool-independent ha
 | --- | --- | --- |
 | [pio-arduino-unor4wifi/](pio-arduino-unor4wifi/README.md) | `skills/pio-arduino-unor4wifi` (PlatformIO + Arduino UNO R4 core) | verified on hardware (LED L seen) |
 
+## Bring-up demos
+
+| Demo | Uses | `pio-arduino-unor4wifi` |
+| --- | --- | --- |
+| hello-world | console: UART via the USB bridge | tested |
+| blink | LED1 = L (yellow) | built |
+| push-to-light | no user button: console LED commands only | observed * |
+
+Levels: built < flashed < tested (automatic test PASS) < interactive (a person pressed a
+button) < observed (a person saw the LED). \* = verified under its earlier name `uart-btn-led`
+(renamed 2026-10-09, same code). Dated evidence: the profile README of each skill.
+
+## Required tools
+
+- PlatformIO Core 6.2 (pip or the VS Code extension), Git, Python 3 (pyserial: PlatformIO's python
+  has it).
+- The first build downloads the pinned `renesas-ra` platform, the UNO R4 core, GCC 7.2.1 and
+  bossac. No driver needed on Windows (the board's USB bridge is a standard CDC port).
+- Workspace path ≤100 characters, English characters only.
+
+## Commands
+
+```bash
+S=skills/pio-arduino-unor4wifi/scripts
+```
+
+| Stage | Command | Gate |
+| --- | --- | --- |
+| 0 help | `bash $S/help.sh [--en]` | - |
+| 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
+| 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `Created ...` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + PlatformIO IDE | `IDE: READY` |
+| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
+| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
+| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
+
+Board: `uno-r4-wifi`. Templates: `hello-world`, `blink`, `push-to-light` (LED1 = L on D13; the board has no
+user button, so the button steps are skipped). The board's ESP32-S3 is the USB bridge: a 1200 baud
+touch starts its loader and bossac writes the sketch from 0x4000. That loader cannot read flash, so
+there is no backup and no read-back verify - the test's INFO line proves the image.
+
+Example - hello-world on a UNO R4 WiFi:
+
+```bash
+S=skills/pio-arduino-unor4wifi/scripts
+bash $S/check_tools.sh uno-r4-wifi
+bash $S/discover.sh uno-r4-wifi
+bash $S/new_app.sh uno-r4-wifi hello "" hello-world
+bash $S/build.sh apps/hello
+bash $S/flash.sh apps/hello --yes
+~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/hello/tests/hello_world.json apps/hello/logs/test.log --board uno-r4-wifi
+```
+
+Run from the repo root in Git Bash. Exit code 10 = do what the `ACTION:` line says, then
+re-run; common options: [docs/workflow.md](../../docs/workflow.md#common-options).
+
+## Hardware
+
 Sources: Arduino UNO R4 WiFi datasheet and schematics (docs.arduino.cc), the Arduino UNO R4 core
 1.4.1 variant `UNOWIFIR4` (`pins_arduino.h`, `variant.cpp`), PlatformIO `renesas-ra` 1.7.0 board
 `uno_r4_wifi`.

@@ -4,7 +4,7 @@
 # Needs no hardware and no network (STM32CubeMX + the STM32CubeN6 package are local).
 # Usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template] [--no-open]
 #   workspace-dir  where apps live (default: $N6_WS, "" = default)
-#   template       a folder under templates/ (default uart-btn-led); see help.sh for the list
+#   template       a folder under templates/ (default push-to-light); see help.sh for the list
 # Writes <workspace>/<app>/:
 #   <app>.ioc      STM32CubeMX configuration - the source of truth for clocks/peripherals (commit it)
 #   src/           <repo>/lib/func (func/) + templates/_common/src (board/, app_main.h) + template
@@ -19,7 +19,7 @@ OPEN=1; ARGS=()
 for a in "$@"; do case "$a" in --no-open) OPEN=0;; *) ARGS+=("$a");; esac; done
 set -- "${ARGS[@]}"
 [ $# -ge 2 ] || die "usage: new_app.sh <board-id> <app-name> [<workspace-dir>] [template]"
-load_board "$1"; APP="$2"; WS="${3:-$N6_WS}"; TPL="${4:-uart-btn-led}"
+load_board "$1"; APP="$2"; WS="${3:-$N6_WS}"; TPL="${4:-push-to-light}"
 require_vars BOARD_DEFINE MX_TEMPLATE_IOC FW_VERSION CUBEMX_VERSION
 case "$APP" in [A-Za-z]*) ;; *) die "app name '$APP' must start with a letter";; esac
 case "$APP" in *[!A-Za-z0-9_-]*) die "app name '$APP': use letters, digits, - and _";; esac
