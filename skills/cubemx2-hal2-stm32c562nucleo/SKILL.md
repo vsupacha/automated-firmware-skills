@@ -144,7 +144,7 @@ the STM32Cube bundle manager - don't install it yourself; never silently use ano
    `.vscode/settings.json` for cube-cmake, `.vscode/launch.json` = the extension's default ST-LINK
    launch). The developer can then build (CMake preset, same `mx/build/<preset>` as build.sh),
    flash + debug (F5) and edit `src/` in the IDE; hardware changes go through STM32CubeMX2 on the
-   `.ioc2` + `regen.sh`. **Gate:** `IDE: READY <workspace>` + `IDE: OPENED`; exit 10
+   `.ioc2` + `regen.sh`. **Gate:** `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10
    `ACTION: SETUP` = VS Code or the extension is missing (new_app.sh only reports it). See
    docs/workflow.md "IDE handoff".
 
@@ -195,6 +195,9 @@ device name, device ID; stops on signs of read-out protection) → `-c port=SWD 
 reset=HWrst -d <elf> -v -rst`. **Gate:** `FLASH: PASS` (`Download verified successfully`).
 
 ## Stage 6 - Test (after flashing)
+
+Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/workflow.md`
+"Test specs" in the repo root.
 
 ```bash
 python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive]

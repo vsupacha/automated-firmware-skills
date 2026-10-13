@@ -145,7 +145,7 @@ the user installs it in STM32CubeMX (Help > Manage embedded software packages) -
    cube-cmake, `.vscode/launch.json` = the extension's default ST-LINK launch), so the extension
    configures and indexes the project without a prompt. The developer can then build (CMake
    preset, same `mx/build/<preset>` as build.sh), flash + debug (F5) and edit `src/` in the IDE.
-   **Gate:** `IDE: READY <workspace>` + `IDE: OPENED`; exit 10 `ACTION: SETUP` = VS Code or the
+   **Gate:** `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or the
    extension is missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
 ## Stage 3 - Code in layers

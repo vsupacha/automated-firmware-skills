@@ -141,7 +141,7 @@ needing admin rights yourself. **Gate:** `missing/bad=0`; report every WARN (ref
    - **Gate:** `IDENTITY: PASS` + `Saved ...`. On FAIL stop and report (wrong board/probe, probe
      busy in another tool, locked chip). Re-run after changing board or USB port.
    - No board yet? Skip to step 2 - creating and building need no hardware.
-2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>] [template]`
+2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
    - clones the pinned template app, Project Creator with the base BSP (auto-detects the BSP
      folder), optional pinned BSP replacement (`BSP_SOURCE=git:...`), checks BSP version and the
      **base `design.modus` sha256**, applies overlays (hash-checked), regenerates
@@ -168,7 +168,7 @@ needing admin rights yourself. **Gate:** `missing/bad=0`; report every WARN (ref
   it (CY_TOOLS_PATHS in every task, TOOLCHAIN=GCC_ARM CONFIG=Debug, Build & Program / Quick Program
   and per-core tasks, absolute openocdPath, gccPath, clangd instead of cpptools IntelliSense), so
   the Assistant does not ask. A newer extension that still asks: accept its fix.
-  **Gate:** `IDE: READY <workspace>` + `IDE: OPENED`; exit 10 `ACTION: SETUP` = VS Code or the
+  **Gate:** `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or the
   extension is missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
 ## Stage 3 - Code in layers
@@ -230,6 +230,9 @@ verify, reset. Never flash a single-core hex; boot order is S-M33 → NS-M33 →
 user to unplug/replug USB, wait for their OK, then test with `--wait-port 60`.
 
 ## Stage 6 - Test (after flashing)
+
+Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/workflow.md`
+"Test specs" in the repo root.
 
 ```bash
 python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive] [--wait-port 60]

@@ -135,7 +135,8 @@ def check_skills():
             ok(len(desc) <= 1024, f"skills/{name}/SKILL.md: description is {len(desc)} characters (limit 1024)")
             ok(not re.search(r"<[A-Za-z/]", desc), f"skills/{name}/SKILL.md: description contains a tag")
         if tool:                                    # files it names + script hygiene only
-            for ref in sorted(set(re.findall(r"\b((?:scripts|web|examples|reference)/[\w.-]+\.(?:sh|py|md|html|json))\b", text))):
+            # paths of this skill only (not "<other-skill>/scripts/x.py")
+            for ref in sorted(set(re.findall(r"(?<![\w/.-])((?:scripts|web|examples|reference|prompts|reports|limits)/[\w.-]+\.(?:sh|py|md|html|json))\b", text))):
                 ok((sd / ref).is_file(), f"skills/{name}/SKILL.md names {ref}, which does not exist")
             for f in sorted((sd / "scripts").glob("*")):
                 if f.suffix in (".sh", ".py"):

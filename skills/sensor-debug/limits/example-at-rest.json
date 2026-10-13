@@ -1,0 +1,13 @@
+{
+  "_doc": "Example plausibility limits for typical environment and motion sensors, board lying still on a desk at room temperature. Field names = TAG.key as the firmware prints them; make one file per board/app and tune it with evidence (date and board in 'why'). Physics only - no board facts here.",
+  "fields": {
+    "ENV.t":    {"min": 5,     "max": 55,     "sd_max": 0.3, "why": "air temperature sensor; a running board warms it by several C"},
+    "ENV.rh":   {"min": 5,     "max": 95,     "sd_max": 0.5, "why": "relative humidity"},
+    "ENV.p":    {"min": 80000, "max": 106000, "sd_max": 15,  "why": "pressure in Pa (sea level ~101325, about -12 Pa per m altitude)"},
+    "IMU.amag": {"min": 950,   "max": 1050,   "sd_max": 5,   "why": "|acceleration| at rest = 1 g in mg; outside = moving or wrong range scaling"},
+    "IMU.gx":   {"min": -3000, "max": 3000,   "sd_max": 800, "why": "gyro zero-rate offset at rest (mdps)"},
+    "IMU.gy":   {"min": -3000, "max": 3000,   "sd_max": 800, "why": "gyro zero-rate offset at rest (mdps)"},
+    "IMU.gz":   {"min": -3000, "max": 3000,   "sd_max": 800, "why": "gyro zero-rate offset at rest (mdps)"},
+    "MAG.bmag": {"min": 20000, "max": 70000,  "sd_max": 500, "why": "|B| of the Earth's field in nT (25-65 uT); far above = a board-fixed offset (hard-iron) to calibrate"}
+  }
+}

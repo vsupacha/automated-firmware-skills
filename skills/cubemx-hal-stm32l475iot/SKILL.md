@@ -148,7 +148,7 @@ for all users) or **LOCAL** (per user). Read-only. **Gate:** `missing/bad=0`.
    cube-cmake, `.vscode/launch.json` = the extension's default ST-LINK launch), so the extension
    configures and indexes the project without a prompt (seen 2026-10-07). The developer can then
    build (CMake preset, same `mx/build/Debug` as build.sh), flash + debug (F5) and edit `src/`.
-   **Gate:** `IDE: READY <workspace>` + `IDE: OPENED`; exit 10 `ACTION: SETUP` = VS Code or the
+   **Gate:** `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or the
    extension is missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
 ## Stage 3 - Code in layers
@@ -198,6 +198,9 @@ protection) → `-c port=SWD sn=<sn> mode=UR reset=HWrst -d <elf> -v -rst`. **Ga
 (`Download verified successfully`).
 
 ## Stage 6 - Test (after flashing)
+
+Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/workflow.md`
+"Test specs" in the repo root.
 
 ```bash
 python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive]

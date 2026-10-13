@@ -117,7 +117,7 @@ Changing git config (`core.longpaths`) is the user's call - ask.
      Sketch mode: USB IDs + serial (chip type is checked by flash.sh in BOOTSEL).
    - **Gate:** `IDENTITY: PASS` + `Saved ...`. More than one board: `--serial` (it never guesses).
    - No board yet? Skip to step 2.
-2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>] [template]`
+2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
    - writes `platformio.ini` (pinned platform commit, board, core, `-D<BOARD_DEFINE>`,
      `-Wall -Wextra` for `src/` only), copies `templates/_common/src` + the template's `src/` and
      `tests/`, records `pico-app.env`. No network needed.
@@ -128,7 +128,7 @@ Changing git config (`core.longpaths`) is the user's call - ask.
    PlatformIO IDE picks up `platformio.ini`. The developer can then Build (same env and
    `.pio/build/<env>` as build.sh), Upload, open the Serial Monitor and edit `src/` from the
    PlatformIO toolbar (PlatformIO IDE writes its own `.vscode/` - git-ignored). **Gate:**
-   `IDE: READY <workspace>` + `IDE: OPENED`; exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
+   `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
    missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
 ## Stage 3 - Code in layers
@@ -182,6 +182,9 @@ CDC port is back (bench `CONSOLE_PORT` updated if the COM number changed).
 - ask the user to unplug, hold BOOTSEL, plug in, release, then re-run.
 
 ## Stage 6 - Test (after flashing)
+
+Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/workflow.md`
+"Test specs" in the repo root.
 
 ```bash
 python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive]

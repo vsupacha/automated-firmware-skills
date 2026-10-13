@@ -122,7 +122,7 @@ Missing pieces are installed in Studio's SDK Manager by the user - never by you.
 
 ## Stage 2 - Create the project and open it in the IDE
 
-1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>] [template] [--no-open]`
+1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
    - copies the SDK project `vision_board_blink_led` (without pictures/Keil files), `rt-thread/`
      (without documentation/examples) and `libraries/HAL_Drivers`, then `templates/_common/src` +
      the template's `src/` and `tests/` (about 15 s, 38 MB).
@@ -137,7 +137,7 @@ Missing pieces are installed in Studio's SDK Manager by the user - never by you.
    <app>`: a headless Eclipse import into the Studio workspace `<apps>/.rtstudio` (once per app,
    ~15 s; impossible while Studio runs - then `ACTION: SETUP` says File > Import), then starts
    Studio on that workspace (`--no-open`: import only). **Gate:** `IDE: READY <workspace>` +
-   `IDE: OPENED`. In Studio: Build (hammer, into `Debug/`), RT-Thread Settings (rewrites
+   `IDE: OPENED` (`IDE: not opened` with `--no-open`). In Studio: Build (hammer, into `Debug/`), RT-Thread Settings (rewrites
    `rtconfig.h` - then re-run build.sh), Download/Debug (pyOCD). **Studio's Download writes
    `rtthread.hex`, which contains the FSP option-setting sections** - tell the developer; the
    script path never writes them.
@@ -192,6 +192,9 @@ of app.hex read back (attach) and compared. **Gate:** `FLASH: PASS (... bytes re
 Option-setting memory, data flash and the QSPI flash are never written.
 
 ## Stage 6 - Test (after flashing)
+
+Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/workflow.md`
+"Test specs" in the repo root.
 
 ```bash
 python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive]

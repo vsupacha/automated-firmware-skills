@@ -188,6 +188,34 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
 - Console protocol (test contract): `READY`, `INFO app=.. v=.. board=<id> ...`, `OK ...`,
   `ERR <reason>`, `EVT ...`, `<TAG> k=v ...`.
 
+## Test specs (`tests/*.json`)
+
+Every template ships its test contract in `tests/<name>.json`; the engine is `lib/fwtest.py`
+(each skill's `serial_test.py` is a thin wrapper). Keys:
+
+| Key | Meaning |
+| --- | --- |
+| `baud` | console baud rate (default 115200) |
+| `boot` `{expect, timeout}` | boot marker for `--wait-boot` (e.g. `READY`) |
+| `sync` `{send, expect}` | default `--sync`: send `info` every second until `READY` |
+| `steps[]` | in order; each has a `name` and any of the keys below |
+| `send` | a line to send (CR appended) |
+| `expect` | substrings that must **all** appear, in any order, in lines received during the step |
+| `expect_re` | Python regexes that must each match some received line (`re.search`) |
+| `timeout` / `pause` | seconds to wait for the expectations (default 2) / after the step (default 0.3) |
+| `interactive` + `prompt` | needs a person (`--interactive`); `{btn1}`... become the board's `BTN_LABELS` |
+| `requires_re` | skip the step unless a line seen so far matches (board capabilities, e.g. `leds=[2-9]`) |
+
+Writing specs:
+- **JSON escaping:** a backslash in a regex must be doubled (`"\\d+"`); `"\b"` is a JSON backspace,
+  not a word boundary - prefer character classes (`[0-9]`, `[^0-9]`) where they read as well.
+- **`INFO app=<name>`** is the template's `APP_NAME`, not the app folder: the specs match it. Keep it
+  (or change the spec with it) when you copy a template into an app with another name.
+- **Timing is not measured.** `expect` only proves that lines arrived within `timeout`; a period
+  (e.g. blink every 0.25 s) is checked through the INFO line the firmware reports, and a step
+  timeout only gives a loose upper bound. Measured intervals are a planned engine feature.
+- Lines may follow a shell prompt (RT-Thread `msh />`), so specs for such consoles match without `^`.
+
 ## Hardware-dependent testing
 
 - **Board type vs bench instance:** what is the same for every copy of a board is in `boards/`;

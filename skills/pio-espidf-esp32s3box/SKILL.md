@@ -130,7 +130,7 @@ to install it - don't install it yourself. Changing git config is the user's cal
      firmware restarts) - say so.
    - **Gate:** `IDENTITY: PASS` (chip ESP32-S3, MAC = USB serial, flash = profile, secure boot and
      flash encryption disabled) + `Saved ...` (bench file). Several boards: `--serial`.
-2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>] [template]`
+2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
    - copies `<repo>/lib/func` to `src/func`, `templates/_common` (board layer, `src/CMakeLists.txt`,
 `sdkconfig.defaults`) and the template's `src/` + `tests/`, appends the board's `sdkconfig.board`,
 writes `CMakeLists.txt`, `platformio.ini`, `esp-app.env`. No network needed.
@@ -141,7 +141,7 @@ writes `CMakeLists.txt`, `platformio.ini`, `esp-app.env`. No network needed.
    PlatformIO IDE picks up `platformio.ini`. The developer can then Build (same env and
    `.pio/build/<env>` as build.sh), Upload, open the Serial Monitor and edit `src/` from the
    PlatformIO toolbar (PlatformIO IDE writes its own `.vscode/` - git-ignored). **Gate:**
-   `IDE: READY <workspace>` + `IDE: OPENED`; exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
+   `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
    missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
 ## Stage 3 - Code in layers
@@ -196,6 +196,9 @@ serial → esptool identity (as discover) → `write_flash` at the offsets from 
 **Gate:** `FLASH: PASS (3/3 regions ...)`. Never use `pio run -t upload` (no gates).
 
 ## Stage 6 - Test (after flashing)
+
+Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/workflow.md`
+"Test specs" in the repo root.
 
 ```bash
 ~/.platformio/penv/Scripts/python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive]

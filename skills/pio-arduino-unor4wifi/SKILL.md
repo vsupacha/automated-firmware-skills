@@ -133,7 +133,7 @@ don't install it yourself. Changing git config is the user's call - ask.
      over SWD. The sketch's INFO line (`board=uno-r4-wifi`) is the target proof after flashing.
    - **Gate:** `IDENTITY: PASS` (PID 1002, loader + device as the profile, security false, nothing
      locked) + `Saved ...` (bench file). Several boards: `--serial`.
-2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>] [template]`
+2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
    - copies `templates/_common/src` (board + func layers) and the template's `src/` + `tests/`,
      writes `platformio.ini` and `arduino-app.env`. No network needed.
    - **Gate:** `Created ...`.
@@ -143,7 +143,7 @@ don't install it yourself. Changing git config is the user's call - ask.
    PlatformIO IDE picks up `platformio.ini`. The developer can then Build (same env and
    `.pio/build/<env>` as build.sh), Upload, open the Serial Monitor and edit `src/` from the
    PlatformIO toolbar (PlatformIO IDE writes its own `.vscode/` - git-ignored). **Gate:**
-   `IDE: READY <workspace>` + `IDE: OPENED`; exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
+   `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
    missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
 ## Stage 3 - Code in layers
@@ -205,6 +205,9 @@ line of Stage 6 is the proof the image runs. **Gate:** `FLASH: PASS (firmware.bi
 Never use `pio run -t upload` (no gates).
 
 ## Stage 6 - Test (after flashing)
+
+Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/workflow.md`
+"Test specs" in the repo root.
 
 ```bash
 ~/.platformio/penv/Scripts/python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive]

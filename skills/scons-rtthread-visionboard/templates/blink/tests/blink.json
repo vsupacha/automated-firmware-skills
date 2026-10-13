@@ -7,6 +7,6 @@
     {"name": "LED1 on+off 1", "expect": ["BLINK led1=1", "BLINK led1=0"], "timeout": 1.5, "pause": 0},
     {"name": "LED1 on+off 2", "expect": ["BLINK led1=1", "BLINK led1=0"], "timeout": 1.5, "pause": 0},
     {"name": "console alive", "send": "foo", "expect": ["command not found"]},
-    {"name": "LED1 blinks (look)", "interactive": true, "prompt": "Look at the board: LED1 should blink twice a second - tell Claude", "expect": ["BLINK led1=1", "BLINK led1=0"], "timeout": 5}
+    {"name": "LED1 blinks (look)", "interactive": true, "prompt": "Look at the board: LED1 should toggle every 0.5 s (0.5 s on, 0.5 s off) - tell Claude", "expect": ["BLINK led1=1", "BLINK led1=0"], "timeout": 5}
   ]
 }

@@ -35,6 +35,8 @@ M1 per skill - the bring-up demos are `hello-world` (UART), `blink` (LED) and `p
 | cubemx-hal-stm32f407disco | yes | planned (SWO console) |
 
 Next: `debug.sh` (M1 stage 7), board stages for N6 / F4, then M2 board drivers and the M3 trace.
+Doc/engine items from the clean-room runs: measured intervals in the test engine (a blink period is
+only checked through the INFO line today); SKILL.md stage headings numbered like the shared stages.
 
 ## Milestones: bottom-up, one firmware layer at a time
 
