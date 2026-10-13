@@ -69,7 +69,7 @@ templates/<ชื่อ>/        template แอปแบบแบ่ง layer �
 ## เมนูวิธีใช้ และ example ของ ModusToolbox
 
 - พิมพ์ **"ขอวิธีใช้หน่อย"** หรือ "มีคำสั่งอะไรบ้าง" — Claude จะแสดงรายการคำสั่งพร้อมตัวอย่าง (มาจาก `scripts/help.sh`)
-- **"ขอรายการ example ของ tesaiot"** / **"มี example bluetooth ไหม"** — ดึงรายการ code example ของ Infineon ที่รองรับบอร์ดนั้น (`examples.sh`)
+- **"ขอรายการ example ของ edgi-talk"** / **"มี example bluetooth ไหม"** — ดึงรายการ code example ของ Infineon ที่รองรับบอร์ดนั้น (`examples.sh`)
 - **"เริ่มจาก example btstack-findme"** — สร้างแอปจาก example โดยล็อกเวอร์ชันทั้ง example และ BSP (`new_app.sh ... --example <id>`)
   example ที่ปรับ BSP เอง (เช่น Bluetooth) ใช้กับ Edgi-Talk ที่มี overlay ไม่ได้โดยตรง ต้องรวมการตั้งค่าเอง
 

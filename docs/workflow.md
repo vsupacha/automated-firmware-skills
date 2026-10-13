@@ -4,7 +4,7 @@ Every skill in `skills/` drives one toolchain with one framework for one board, 
 **`<toolchain>-<framework>-<board>`** (lowercase, hyphens only between the three parts), e.g.
 `cubemx-hal-stm32f407disco`, `cubemx2-hal2-stm32c562nucleo`, `pio-espidf-esp32s3box`,
 `modus-pdl-edgitalk`. Related boards of the same MCU may share a skill as extra board profiles
-(`boards/<id>/<skill>/`), e.g. KIT_PSE84_AI and TESAIoT under `modus-pdl-edgitalk`.
+(`boards/<id>/<skill>/`), e.g. another PSOC Edge E84 kit under `modus-pdl-edgitalk`.
 All skills follow the same milestones, stage numbers, script names, gate lines and exit codes, so
 an agent (or a developer) can drive any board the same way and a port to another MCU/toolchain is
 proven by the **same tests**. These board skills are the M1 outcome; skills of the later milestones
@@ -14,7 +14,7 @@ Reference implementations:
 
 | Skill | Toolchain | Board | Notes |
 | --- | --- | --- | --- |
-| [modus-pdl-edgitalk](../skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox, make, OpenOCD | Edgi-Talk, TESAIoT | vendor IDE toolchain, external probe |
+| [modus-pdl-edgitalk](../skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox, make, OpenOCD | Edgi-Talk | vendor IDE toolchain, external probe |
 | [cubemx2-hal2-stm32c562nucleo](../skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 CLI, CMake, STM32CubeProgrammer | NUCLEO-C562RE | code generator, on-board ST-LINK |
 | [pio-arduino-rpipico2w](../skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO, picotool | Pico 2 W | native USB, no probe |
 | [pio-espidf-esp32s3box](../skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF, esptool | ESP32-S3-BOX | USB Serial/JTAG, no probe; shares `lib/func` |
@@ -147,11 +147,15 @@ Rules for `open_ide.sh <app> [--no-open]`:
 | --- | --- | --- |
 | `SETUP` | install or change the developer's system | ModusToolbox Setup (Infineon account, admin), VS Code + the toolchain extension, STM32CubeMX2 / STM32Cube for VS Code bundles and packs (licence acceptance), PlatformIO, drivers (WinUSB/Zadig), `git core.longpaths`, moving a workspace off an unsafe path |
 | `CONNECT` | plug something in / boot mode | board or probe USB, Pico BOOTSEL held at power-up |
-| `POWER_CYCLE` | unplug + replug | TESAIoT display firmware after flashing |
-| `JUMPER` | switches, solder bridges, accessories | QWA309 CS switch, unplug the DVP camera, Nucleo SB8 (LD1 vs D13) |
+| `POWER_CYCLE` | unplug + replug | a board whose display firmware needs a power cycle after flashing |
+| `JUMPER` | switches, solder bridges, accessories | Nucleo SB8 (LD1 vs D13), unplug an accessory that holds a button line |
 | `APPROVE` | irreversible or destructive step | flash (overwrites firmware), `clean.sh --apps`, backups |
 | `CHOOSE` | the developer must pick | several boards connected (`--serial`) |
 | `PRESS` / `OBSERVE` | inside interactive tests (`ACTION >>>` lines of `serial_test.py`) | press SW1/B1/BOOTSEL, look at an LED |
+
+When several choices are pending at once (a new app: board, skill, template, next step), the agent
+may offer the [web-wizard](../skills/web-wizard/SKILL.md) tool skill - one browser form instead of
+console questions - with the user's consent; the answers still go through the gated scripts.
 
 **Never** done by a skill, even when asked inside a script run (stop and hand over): change device
 life cycle / read-out protection / option bytes / OTP / eFuses / secure boot, upgrade probe firmware

@@ -31,7 +31,7 @@ project-creator-cli -b <BSP_ID> --app-path <cached template@commit> -d <workspac
 - The BSP folder under `bsps/` is auto-detected (profile `BSP_DIR` only produces a WARN if different).
 - `BSP_SOURCE=git:<repo>@<commit>:<subdir>` replaces the vendor BSP with a pinned folder from
   another repo (vendor BSP kept in `<app>/logs/bsp-vendor-<dir>`), then `make getlibs`. Use only
-  when a board vendor's BSP differs a lot (TESAIoT's modified `TARGET_KIT_PSE84_AI`); first
+  when a board vendor's BSP differs a lot (a partner board's modified `TARGET_<kit>`); first
   compare it with the stock BSP. An older BSP copied wholesale keeps its old library versions
   and 3.6-era configurator files - prefer porting the deltas (below). Not yet tested on hardware.
 - Version gate: `props.json` core version vs `BSP_VERSION` (WARN); sha256 of the base
@@ -49,8 +49,8 @@ project-creator-cli -b <BSP_ID> --app-path <cached template@commit> -d <workspac
 
 - `examples.sh` reads Infineon's code-example manifest (`mtb-ce-manifest-fv2.xml`, cached 1 day
   in `~/.cache/modus-pdl-edgitalk`) and keeps examples whose releases list the BSP's kit capability
-  (`kit_pse84_ai`, `kit_pse84_eval_epc2`) and need tools ≤ the installed version. Partner examples
-  (Avnet, `kit-pse84-ai-sensor-*`) come from other manifests and are not listed.
+  (e.g. `kit_pse84_eval_epc2`) and need tools ≤ the installed version. Partner examples come
+  from other manifests and are not listed.
 - `new_app.sh --example` runs Project Creator in clone mode with app **and** BSP pinned
   (`--app-uri/--app-commit` require `--board-uri/--board-commit`; the BSP is pinned to
   `TARGET_<BSP_ID>@release-v<BSP_VERSION>`, override with `BSP_URI`/`BSP_COMMIT`).
@@ -59,7 +59,7 @@ project-creator-cli -b <BSP_ID> --app-path <cached template@commit> -d <workspac
   `design.modus` hash differs from the profile: a WARN on boards without overlay, a STOP on boards
   with an overlay (Edgi-Talk) - there, merge the example's BSP changes with the board overlay by
   hand (Device Configurator), then record the result. Verified 2026-10-03: btstack-findme on
-  `tesaiot` created + built PASS (not flashed: needs a phone app to test).
+  an E84 board without overlay created + built PASS (not flashed: needs a phone app to test).
 
 ## Library drift
 

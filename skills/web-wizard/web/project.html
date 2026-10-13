@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New App Wizard</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1d232b; --muted: #66707c; --line: #e2e5ea;
+    --accent: #1f6feb; --accent-bg: #eef4ff; --ok: #1a7f37; --bad: #cf222e; --warn: #9a6700;
+    --mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1216; --panel: #171b21; --text: #e6e9ee; --muted: #8b95a1; --line: #2a3038;
+            --accent: #58a6ff; --accent-bg: #16243a; --ok: #3fb950; --bad: #f85149; --warn: #d29922; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  h1 { font-size: 17px; margin: 0; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; padding: 16px;
+         max-width: 1280px; margin: 0 auto; }
+  @media (max-width: 960px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+          padding: 14px; margin-bottom: 14px; }
+  .card h2 { font-size: 14px; margin: 0 0 4px; }
+  .card .hint { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+  .choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .choice { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--line);
+            border-radius: 8px; padding: 9px 10px; cursor: pointer; min-width: 0; }
+  .choice:hover { border-color: var(--accent); }
+  .choice.on { border-color: var(--accent); background: var(--accent-bg); }
+  .choice.off { opacity: .55; cursor: not-allowed; }
+  .choice input { margin-top: 3px; }
+  .choice .t { font-weight: 600; overflow-wrap: anywhere; }
+  .choice .d { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+  .badge { font: 11px var(--mono); padding: 0 6px; border-radius: 999px; border: 1px solid var(--line);
+           margin-left: 4px; white-space: nowrap; }
+  .badge.observed, .badge.interactive, .badge.tested { color: var(--ok); border-color: var(--ok); }
+  .badge.flashed, .badge.built { color: var(--accent); border-color: var(--accent); }
+  .badge.unverified { color: var(--warn); border-color: var(--warn); }
+  label.field { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text] { width: 100%; font: 14px var(--mono); padding: 7px 9px; border-radius: 6px;
+         border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  input[type=text].bad { border-color: var(--bad); }
+  .opt { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 13px; }
+  aside .sticky { position: sticky; top: 16px; }
+  pre { font: 12px/1.4 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;
+        background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+  #check .pass { color: var(--ok); } #check .blk { color: var(--bad); } #check .act { color: var(--warn); }
+  .buttons { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  button { font: 13px system-ui, sans-serif; padding: 8px 14px; border-radius: 6px; cursor: pointer;
+           border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #done { display: none; text-align: center; padding: 60px 16px; }
+  #done h2 { font-size: 18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>New app wizard</h1>
+  <p>Choose once here instead of answering questions one by one in the console. Submit hands the answers back to Claude Code; nothing is built or flashed by this page.</p>
+</header>
+<main id="form">
+  <section>
+    <div class="card"><h2>1. Board</h2><p class="hint">Boards with a profile in this repo (boards/index.json).</p><div class="choices" id="boards"></div></div>
+    <div class="card"><h2>2. Skill (toolchain + framework)</h2><p class="hint">The skills that have a profile for this board; the badge is the best level verified on hardware.</p><div class="choices" id="skills"></div></div>
+    <div class="card"><h2>3. App</h2>
+      <label class="field" for="app">App name (letters, digits, - and _)</label><input type="text" id="app" placeholder="my-app">
+      <p class="hint" style="margin-top:10px">Template - the bring-up demos are hello-world (UART), blink (LED) and push-to-light (button lights an LED)</p>
+      <div class="choices" id="templates"></div></div>
+    <div class="card"><h2>4. What next</h2><div class="choices" id="actions"></div>
+      <label class="opt" id="ideOpt"><input type="checkbox" id="openIde"> also open the app in the IDE</label></div>
+  </section>
+  <aside><div class="sticky">
+    <div class="card"><h2>Commands</h2><pre id="cmd"></pre></div>
+    <div class="card"><h2>Gate check</h2><p class="hint">The checks new_app.sh runs first (read-only). "Check tools" also runs the skill's check_tools.sh (a few seconds, read-only).</p><pre id="check">not run yet</pre>
+      <div class="buttons"><button type="button" id="btnCheck">Check</button>
+        <button type="button" id="btnTools">Check tools</button>
+        <button type="button" class="primary" id="btnSubmit">Submit</button>
+        <button type="button" id="btnCancel">Cancel</button></div></div>
+  </div></aside>
+</main>
+<div id="done"><h2 id="doneTitle">Sent to Claude Code</h2><p>You can close this tab and return to the conversation.</p></div>
+<script>
+"use strict";
+const ACTIONS = [
+  { id: "generate_ide", t: "Generate, then open in the IDE", d: "Create the app and open it in the skill's IDE. You build, flash and debug there." },
+  { id: "build", t: "Generate + build", d: "Create the app and build it (0-warning gate). No flashing." },
+  { id: "build_flash_test", t: "Generate + build + flash + test", d: "Also flash THIS board once and run the automatic test. Choosing this approves that one flash.", board: true },
+];
+const S = { board: "", skill: "", app: "", template: "", action: "generate_ide", openIde: false, lastCheck: null };
+let D;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const badge = (lv) => lv ? `<span class="badge ${esc(lv)}">${esc(lv)}</span>` : "";
+
+function choice(container, { name, value, checked, disabled, title, desc, onchange }) {
+  const el = document.createElement("label");
+  el.className = "choice" + (checked ? " on" : "") + (disabled ? " off" : "");
+  el.innerHTML = `<input type="radio" name="${esc(name)}" value="${esc(value)}" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""}>
+    <span><span class="t">${title}</span><br><span class="d">${desc || ""}</span></span>`;
+  if (!disabled) el.querySelector("input").addEventListener("change", () => onchange());
+  container.appendChild(el);
+}
+
+const board = () => D.boards[S.board];
+const skill = () => D.skills[S.skill];
+const profile = () => board()?.profiles[S.skill] || {};
+
+function fix() {   // keep the selection consistent after a change
+  const profs = Object.keys(board()?.profiles || {});
+  if (!profs.includes(S.skill)) S.skill = profs[0] || "";
+  const tpls = Object.keys(skill()?.templates || {});
+  if (!tpls.includes(S.template)) S.template = tpls.includes("hello-world") ? "hello-world" : tpls[0] || "";
+  if (S.action === "build_flash_test" && !skill()?.board_stages) S.action = "build";
+}
+
+function commands() {
+  if (!S.skill) return [];
+  const sc = `skills/${S.skill}/scripts`, app = S.app || "<app>";
+  const gen = `bash ${sc}/new_app.sh ${S.board} ${app} "" ${S.template}` +
+              (S.action === "generate_ide" || S.openIde ? "" : " --no-open");
+  const out = [gen];
+  if (S.action !== "generate_ide") out.push(`bash ${sc}/build.sh apps/${app}`);
+  if (S.action === "build_flash_test") {
+    const spec = (skill().templates[S.template]?.tests || [])[0] || "<spec>.json";
+    out.push(`bash ${sc}/discover.sh ${S.board}        # only if this PC has no bench file yet`,
+             `bash ${sc}/flash.sh apps/${app} --yes`,
+             `python ${sc}/serial_test.py auto apps/${app}/tests/${spec} apps/${app}/logs/test.log --board ${S.board}`);
+  }
+  return out;
+}
+
+function render() {
+  fix();
+  $("boards").innerHTML = "";
+  Object.entries(D.boards).forEach(([id, b]) => choice($("boards"), { name: "board", value: id, checked: S.board === id,
+    title: esc(b.name), desc: `${esc(id)} · ${esc(b.family)} (${esc(b.mcu)})`, onchange: () => { S.board = id; render(); } }));
+  $("skills").innerHTML = "";
+  Object.entries(board()?.profiles || {}).forEach(([id, p]) => choice($("skills"), { name: "skill", value: id, checked: S.skill === id,
+    title: `${esc(id)} ${badge(p.level)}`, desc: `IDE: ${esc(D.skills[id].ide)}` + (D.skills[id].board_stages ? "" : "<br>board stages planned (build only)"),
+    onchange: () => { S.skill = id; render(); } }));
+  $("templates").innerHTML = "";
+  Object.entries(skill()?.templates || {}).forEach(([id, t]) => choice($("templates"), { name: "tpl", value: id, checked: S.template === id,
+    title: `${esc(id)} ${badge((profile().templates || {})[id] || "unverified")}`, desc: esc(t.description),
+    onchange: () => { S.template = id; render(); } }));
+  $("actions").innerHTML = "";
+  ACTIONS.forEach((a) => choice($("actions"), { name: "act", value: a.id, checked: S.action === a.id,
+    disabled: a.board && !skill()?.board_stages, title: esc(a.t), desc: esc(a.d) + (a.board && !skill()?.board_stages ? "<br>not available: this skill's board stages are planned" : ""),
+    onchange: () => { S.action = a.id; render(); } }));
+  $("ideOpt").style.display = S.action === "generate_ide" ? "none" : "";
+  $("cmd").textContent = commands().join("\n");
+  S.lastCheck = null;
+}
+
+function appValid() {
+  const ok = /^[A-Za-z0-9_-]+$/.test(S.app);
+  $("app").classList.toggle("bad", !ok);
+  return ok;
+}
+
+async function check(tools) {
+  $("check").textContent = tools ? "running check_tools.sh ..." : "checking ...";
+  const r = await fetch("/check", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ board: S.board, skill: S.skill, app: S.app, template: S.template, tools: !!tools }) });
+  const j = await r.json();
+  S.lastCheck = j;
+  $("check").innerHTML = j.lines.map((l) => `<span class="${l.startsWith("PASS") || l.startsWith("OK") ? "pass" : l.startsWith("BLOCKED") || l.startsWith("BAD") ? "blk" : /^(ACTION|WARN)/.test(l) ? "act" : ""}">${esc(l)}</span>`).join("\n") || "(no output)";
+  return j.rc === 0;
+}
+
+async function submit() {
+  if (!appValid()) { $("app").focus(); return; }
+  if (!(await check(false))) return;            // never hand back a selection the gates refuse
+  const answers = { mode: "project", board: S.board, skill: S.skill, app: S.app, template: S.template,
+    action: S.action, open_ide: S.action === "generate_ide" || S.openIde, commands: commands(), check: S.lastCheck };
+  await fetch("/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(answers) });
+  $("form").style.display = "none"; $("done").style.display = "block";
+}
+
+async function cancel() {
+  await fetch("/cancel", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  $("doneTitle").textContent = "Cancelled"; $("form").style.display = "none"; $("done").style.display = "block";
+}
+
+(async () => {
+  D = await (await fetch("/data.json")).json();
+  S.board = D.default_board; S.skill = D.default_skill; S.app = D.default_app; $("app").value = S.app;
+  $("app").addEventListener("input", (e) => { S.app = e.target.value.trim(); appValid(); $("cmd").textContent = commands().join("\n"); });
+  $("openIde").addEventListener("change", (e) => { S.openIde = e.target.checked; $("cmd").textContent = commands().join("\n"); });
+  $("btnCheck").onclick = () => check(false); $("btnTools").onclick = () => check(true);
+  $("btnSubmit").onclick = submit; $("btnCancel").onclick = cancel;
+  render();
+})();
+</script>
+</body>
+</html>

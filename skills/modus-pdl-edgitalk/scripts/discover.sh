@@ -21,7 +21,7 @@ info "KitProg3 probes on this PC"
 ports="$("$PYTHON" -c 'from serial.tools import list_ports
 for p in list_ports.comports():
     if p.vid == 0x04B4 and p.serial_number: print(p.serial_number, p.device)' | tr -d '\r')"
-[ -n "$ports" ] || need_user CONNECT "no KitProg3 found - plug the board's debug USB port (Edgi-Talk: CN12, AI Kit: KitProg3 USB-C), then re-run discover.sh"
+[ -n "$ports" ] || need_user CONNECT "no KitProg3 found - plug the board's debug USB port (Edgi-Talk: CN12), then re-run discover.sh"
 echo "$ports" | sed 's/^/    serial+COM: /'
 
 if [ -z "$SERIAL" ]; then
@@ -32,7 +32,7 @@ fi
 COM="$(echo "$ports" | awk -v s="$SERIAL" 'toupper($1)==toupper(s){print $2}')"
 [ -n "$COM" ] || die "probe $SERIAL has no USB-UART port"
 # One physical board = one board id. Several boards share the same MPN, so the identity
-# check cannot tell an Edgi-Talk from an AI Kit - a mix-up here would flash the wrong image.
+# check cannot tell one E84 board from another - a mix-up here would flash the wrong image.
 for f in "$BENCH_DIR"/*.env; do
   [ -f "$f" ] || continue
   other="$(basename "$f" .env)"

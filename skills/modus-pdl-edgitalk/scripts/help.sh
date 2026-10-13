@@ -30,7 +30,7 @@ PSOC Edge E84 firmware skill - what you can ask (say it in your own words)
   "check my tools"                         -> check_tools.sh <board>
   "find the board(s) I plugged in"         -> discover.sh <board> [--serial <probe>]
  Explore
-  "list ModusToolbox examples for tesaiot" -> examples.sh <board> [words]
+  "list ModusToolbox examples for edgi-talk"-> examples.sh <board> [words]
   "examples about bluetooth / wifi / ml"   -> examples.sh <board> ble | --category Wi-Fi
   "tell me about btstack-findme"           -> examples.sh <board> --detail <id>
  Create + build
@@ -55,7 +55,7 @@ skill modus-pdl-edgitalk (PSOC Edge E84) - สั่ง Claude ได้ด้�
   "ตรวจเครื่องมือให้หน่อย"                  -> check_tools.sh <board>
   "หาบอร์ดที่เสียบอยู่"                       -> discover.sh <board> [--serial <probe>]
  ดูตัวอย่างของ ModusToolbox
-  "ขอรายการ example ของ tesaiot"            -> examples.sh <board> [คำค้น]
+  "ขอรายการ example ของ edgi-talk"          -> examples.sh <board> [คำค้น]
   "มี example เกี่ยวกับ bluetooth ไหม"       -> examples.sh <board> ble   หรือ --category Wi-Fi
   "อธิบาย btstack-findme หน่อย"              -> examples.sh <board> --detail <id>
  สร้างแอป + build

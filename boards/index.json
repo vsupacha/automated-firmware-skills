@@ -35,55 +35,6 @@
       }
     },
     {
-      "id": "kit-pse84-ai",
-      "name": "Infineon PSOC Edge E84 AI Kit",
-      "aliases": [
-        "KIT_PSE84_AI",
-        "PSOC Edge E84 AI Kit",
-        "PSE84 AI Kit",
-        "E84 AI Kit"
-      ],
-      "mcu": "PSE846GPS2DBZC4A",
-      "mcu_family": "Infineon PSOC Edge E84",
-      "profiles": {
-        "modus-pdl-edgitalk": {
-          "level": "interactive",
-          "date": "2026-10-03",
-          "templates": {
-            "push-to-light": "interactive",
-            "button-led": "interactive"
-          },
-          "note": "verified on the AI Kit through the tesaiot profile (same kit, AI-Kit I/O)",
-          "log": "boards/kit-pse84-ai/modus-pdl-edgitalk/README.md"
-        }
-      }
-    },
-    {
-      "id": "tesaiot",
-      "name": "TESAIoT PSOC Edge E84 DevKit",
-      "aliases": [
-        "TESAIoT",
-        "TESAIoT DevKit",
-        "TESAIoT PSOC Edge E84 DevKit",
-        "QWA309"
-      ],
-      "extends": "kit-pse84-ai",
-      "mcu": "PSE846GPS2DBZC4A",
-      "mcu_family": "Infineon PSOC Edge E84",
-      "profiles": {
-        "modus-pdl-edgitalk": {
-          "level": "interactive",
-          "date": "2026-10-03",
-          "templates": {
-            "push-to-light": "interactive",
-            "button-led": "interactive"
-          },
-          "note": "QWA309 SW4/SW5 untested: the DVP camera holds P17.5/P17.7 low",
-          "log": "boards/tesaiot/modus-pdl-edgitalk/README.md"
-        }
-      }
-    },
-    {
       "id": "nucleo-c562re",
       "name": "ST NUCLEO-C562RE",
       "aliases": [

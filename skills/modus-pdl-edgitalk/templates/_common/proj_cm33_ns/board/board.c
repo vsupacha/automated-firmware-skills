@@ -3,9 +3,10 @@
 *
 * Layer 1 - BSP adaptation. Maps the generic board API onto the BSP aliases
 * generated from design.modus (CYBSP_USER_LEDx, CYBSP_USER_BTNx,
-* CYBSP_DEBUG_UART) plus board extras that are not in the BSP (QWA309 base
-* board buttons). BSP pins are configured by cybsp_init(); extras are
-* configured here at run time. Missing aliases simply shrink the tables.
+* CYBSP_DEBUG_UART) plus board extras that are not in the BSP (none on the
+* Edgi-Talk; add them to the tables with runtime_init = true). BSP pins are
+* configured by cybsp_init(); extras are configured here at run time. Missing
+* aliases simply shrink the tables.
 *******************************************************************************/
 #include "board.h"
 
@@ -13,9 +14,6 @@
 
 #include "cybsp.h"
 #include "retarget_io_init.h"
-#if defined(BOARD_HAS_QWA309)
-#include "gpio_pse84_bga_220.h"
-#endif
 
 /* Boot the CM55 image placed after the MCUboot header in m55_nvm */
 #define CM55_BOOT_WAIT_TIME_USEC    (10U)
@@ -55,14 +53,6 @@ static const board_pin_t buttons[] =
 #endif
 #if defined(CYBSP_USER_BTN2_PORT) && (BOARD_BSP_BUTTONS >= 2U)
     { CYBSP_USER_BTN2_PORT, CYBSP_USER_BTN2_PORT_NUM, CYBSP_USER_BTN2_PIN, false },
-#endif
-#if defined(BOARD_HAS_QWA309)
-    /* QWA309 SW4 / SW5: active low, need the MCU pull-up. The AI-Kit BSP drives
-     * these nets as DVP camera outputs (CYBSP_DVP_CAM_RESET / _PWDN), and P17.5
-     * is also the USB-host VBUS enable - buttons, camera and USB host exclude
-     * each other. */
-    { P17_5_PORT, 17U, P17_5_PIN, true },
-    { P17_7_PORT, 17U, P17_7_PIN, true },
 #endif
 };
 

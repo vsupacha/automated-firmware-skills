@@ -79,6 +79,12 @@ Milestone **M1 bring-up** is active: 10 skills, board stages verified on 8 board
 | [pio-arduino-unor4wifi](skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino UNO R4 core | Renesas RA4M1 | [UNO R4 WiFi](boards/uno-r4-wifi/README.md) |
 | [scons-rtthread-visionboard](skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons (RT-Thread Studio SDK) | Renesas RA8D1 | [Vision Board](boards/vision-board/README.md) |
 
+**Tool skills** (shared by all board skills, no board of their own):
+
+| Tool skill | What it does |
+| --- | --- |
+| [web-wizard](skills/web-wizard/SKILL.md) | answer many questions on one browser page: a new-app wizard (board, skill, template with its verified level, next step, gate check) and a generic question form |
+
 ## IDEs
 
 Every app a skill creates opens in the toolchain vendor's IDE (stage 2d, `open_ide.sh`), on the same

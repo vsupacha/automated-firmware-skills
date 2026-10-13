@@ -5,11 +5,13 @@ Usage:
   python tools/validate_skills.py [--quiet]
 
 Checks
-  skills    SKILL.md frontmatter (name = folder, description <= 1024 chars, no tags) and required
+  skills    board skills (with templates/): SKILL.md frontmatter (name = folder, description <= 1024
+            chars, no tags) and required
             sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT/IDE_APP, stage 2d), have a shebang and LF endings; board-stage
             scripts are gated by M1; scripts/ and reference/ files named in SKILL.md exist; hello-world, blink and
             push-to-light templates with description.txt and valid tests/*.json; test specs of the
-            same template agree across skills (warning)
+            same template agree across skills (warning). Tool skills (no templates/, e.g. web-wizard):
+            frontmatter, files named in SKILL.md, shebang + LF in scripts/
   boards    every board has README.md and per-skill profiles (board.env + README.md) of existing
             skills; BOARD_EXTENDS targets exist; boards/index.json matches the folders, its
             evidence levels are consistent and dated in the profile log, aliases are unambiguous
@@ -30,6 +32,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 # <toolchain>-<framework>-<board>: at least three lowercase parts joined by "-"
 SKILL_NAME_RE = re.compile(r"^[a-z0-9]+-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$")
+# tool skills (no templates/: shared helpers such as web-wizard): lowercase words joined by "-"
+TOOL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)+$")
 REQUIRED_SCRIPTS = ["env.sh", "help.sh", "check_tools.sh", "new_app.sh", "open_ide.sh", "build.sh",
                     "clean.sh"]
 # stage 2d (IDE handoff): VS Code extension ids a skill may name in env.sh IDE_EXT, or a standalone
@@ -110,9 +114,15 @@ def tracked_files():
 def check_skills():
     skills = sorted(d for d in (ROOT / "skills").iterdir() if d.is_dir())
     specs = {}                                   # (template, spec file) -> {skill: json}
+    board_skills, tool_skills = [], []
     for sd in skills:
         name = sd.name
-        ok(SKILL_NAME_RE.match(name), f"skills/{name}: folder name must be <toolchain>-<framework>-<board> (lowercase, '-' between parts)")
+        tool = not (sd / "templates").is_dir()
+        (tool_skills if tool else board_skills).append(name)
+        if tool:
+            ok(TOOL_NAME_RE.match(name), f"skills/{name}: tool skill folder name must be lowercase words joined by '-'")
+        else:
+            ok(SKILL_NAME_RE.match(name), f"skills/{name}: folder name must be <toolchain>-<framework>-<board> (lowercase, '-' between parts)")
         md = sd / "SKILL.md"
         if not ok(md.is_file(), f"skills/{name}: no SKILL.md"):
             continue
@@ -124,6 +134,15 @@ def check_skills():
             ok(desc, f"skills/{name}/SKILL.md: empty description")
             ok(len(desc) <= 1024, f"skills/{name}/SKILL.md: description is {len(desc)} characters (limit 1024)")
             ok(not re.search(r"<[A-Za-z/]", desc), f"skills/{name}/SKILL.md: description contains a tag")
+        if tool:                                    # files it names + script hygiene only
+            for ref in sorted(set(re.findall(r"\b((?:scripts|web|examples|reference)/[\w.-]+\.(?:sh|py|md|html|json))\b", text))):
+                ok((sd / ref).is_file(), f"skills/{name}/SKILL.md names {ref}, which does not exist")
+            for f in sorted((sd / "scripts").glob("*")):
+                if f.suffix in (".sh", ".py"):
+                    data = f.read_bytes()
+                    ok(b"\r\n" not in data, f"{rel(f)}: CRLF line endings (keep scripts LF)")
+                    ok(data.startswith(b"#!"), f"{rel(f)}: no shebang line")
+            continue
         heads = re.findall(r"^#{2,3} +(.+)$", text, re.M)
         for sec in REQUIRED_SECTIONS:
             ok(any(sec in h for h in heads), f"skills/{name}/SKILL.md: missing section '{sec} ...'")
@@ -201,7 +220,7 @@ def check_skills():
                f"tests drift: {tname}/tests/{jname} in {sk} vs {base_skill}:"
                + (f" missing {missing}" if missing else "") + (f" extra {extra}" if extra else "")
                + (f" changed {changed}" if changed else ""), warn)
-    return [s.name for s in skills]
+    return board_skills, tool_skills
 
 
 # ------------------------------------------------------------------------------------- boards
@@ -279,7 +298,7 @@ def check_boards(skill_names):
 
 
 # --------------------------------------------------------------------------------------- docs
-def check_docs(files, skill_names):
+def check_docs(files, skill_names, tool_names=()):
     for md in [f for f in files if f.suffix == ".md"]:
         text = read(md)
         text = re.sub(r"```.*?```", "", text, flags=re.S)
@@ -305,6 +324,8 @@ def check_docs(files, skill_names):
         ok(f"skills/{s}/SKILL.md" in readme, f"README.md: skill {s} not in the skills table", warn)
         ok(f"skills/{s}/SKILL.md" in read(wf) if wf.is_file() else False,
            f"docs/workflow.md: skill {s} not in the reference table", warn)
+    for s in tool_names:
+        ok(f"skills/{s}/SKILL.md" in readme, f"README.md: tool skill {s} not listed", warn)
 
 
 # ---------------------------------------------------------------------------------- manifests
@@ -352,17 +373,17 @@ def check_leaks(files):
 def main(argv):
     quiet = "--quiet" in argv
     files = tracked_files()
-    skill_names = check_skills()
+    skill_names, tool_names = check_skills()
     check_boards(skill_names)
-    check_docs(files, skill_names)
-    check_manifests(skill_names)
+    check_docs(files, skill_names, tool_names)
+    check_manifests(skill_names + tool_names)
     check_leaks(files)
     for e in errors:
         print(f"ERROR {e}")
     if not quiet:
         for w in warnings:
             print(f"WARN  {w}")
-    summary = f"{checks} checks, {len(skill_names)} skills, {len(files)} files"
+    summary = f"{checks} checks, {len(skill_names)} skills + {len(tool_names)} tools, {len(files)} files"
     if errors:
         print(f"VALIDATE: FAIL ({len(errors)} errors, {len(warnings)} warnings; {summary})")
         return 1

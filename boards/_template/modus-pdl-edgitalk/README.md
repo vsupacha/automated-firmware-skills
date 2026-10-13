@@ -5,7 +5,7 @@
    they go (probe USB-UART or header), LED/button pins and active levels, crystal (ECO)
    frequency and any external clock, external flash/RAM parts.
 2. **Pick the base BSP** with the same MPN/EPC (`project-creator-cli --list-boards`):
-   `KIT_PSE84_EVAL_EPC2`, `KIT_PSE84_EVAL_EPC4`, `KIT_PSE84_AI`, ...
+   `KIT_PSE84_EVAL_EPC2`, `KIT_PSE84_EVAL_EPC4`, ...
 3. **Copy `boards/_template/`** to `boards/<id>/`, fill `README.md` (hardware) and
    `modus-pdl-edgitalk/board.env`. Unknown values → `# UNVERIFIED`.
 4. **Probe first:** `discover.sh <id>` (read-only) lists probes and prints the detected device -

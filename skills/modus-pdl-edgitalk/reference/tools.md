@@ -31,7 +31,7 @@ Thai Windows user name → install ModusToolbox outside the home folder and use 
 
 - Profiles record `MTB_TOOLS_VERSION` they were proven with. A mismatch is a WARN, not a stop:
   build once, compare the generated code and library versions, then record the result.
-- TESAIoT upstream documents ModusToolbox **3.6 only**. We deliberately use 3.9 (3.6 has
+- Some partner SDKs document ModusToolbox **3.6 only**. We deliberately use 3.9 (3.6 has
   KitProg/driver problems on lab PCs). Expect configurator-format or library differences. Don't
   import a 3.6-era BSP wholesale (old libraries come with it): start from the current vendor BSP
   and port the deltas (reference/project.md). If you must open a 3.6-era `design.modus` in 3.9,

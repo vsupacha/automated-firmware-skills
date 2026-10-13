@@ -4,13 +4,13 @@ Source: Infineon's code-example manifest (the same one Project Creator reads),
 cached for a day. Called by examples.sh, which supplies the BSP of a board profile.
 
 Usage:
-  python examples.py --bsp KIT_PSE84_AI [--tools 3.9] [--cache DIR] [--refresh]
+  python examples.py --bsp KIT_PSE84_EVAL_EPC2 [--tools 3.9] [--cache DIR] [--refresh]
                      [--category TEXT] [words ...]          # list (filter by words)
-  python examples.py --bsp KIT_PSE84_AI --detail <id>        # one example in detail
-  python examples.py --bsp KIT_PSE84_AI --resolve <id>       # "uri commit" for new_app.sh
+  python examples.py --bsp KIT_PSE84_EVAL_EPC2 --detail <id>        # one example in detail
+  python examples.py --bsp KIT_PSE84_EVAL_EPC2 --resolve <id>       # "uri commit" for new_app.sh
 
 An example is listed when one of its releases names the BSP's kit capability
-(e.g. kit_pse84_ai) and needs ModusToolbox tools <= --tools.
+(e.g. kit_pse84_eval_epc2) and needs ModusToolbox tools <= --tools.
 """
 import argparse
 import html
@@ -74,7 +74,7 @@ def plain(s):
     return re.sub(r"\s+", " ", html.unescape(s)).strip()
 
 
-cap = args.bsp.lower()                      # KIT_PSE84_AI -> kit_pse84_ai
+cap = args.bsp.lower()                      # KIT_PSE84_EVAL_EPC2 -> kit_pse84_eval_epc2
 tools = vtuple(args.tools)
 apps = []
 for app in ET.parse(manifest_path()).getroot().iter("app"):

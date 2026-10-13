@@ -7,7 +7,7 @@
 * so porting to another PSOC Edge E84 board touches this folder (plus the BSP).
 *
 * Board selection: the build passes -DBOARD_<ID> (set by new_app.sh from the
-* board profile): BOARD_EDGI_TALK, BOARD_KIT_PSE84_AI, BOARD_TESAIOT.
+* board profile): BOARD_EDGI_TALK.
 * Names are the SILKSCREEN names users see, not the BSP macro names.
 *******************************************************************************/
 #ifndef BOARD_H
@@ -23,22 +23,6 @@
     #define BOARD_BSP_BUTTONS   (1U)
     #define BOARD_BTN_NAMES     "SW2"
     #define BOARD_LED_NAMES     "LED1", "LED2", "LED3"
-
-#elif defined(BOARD_TESAIOT)
-    /* TESAIoT DevKit = PSOC Edge E84 AI Kit + QWA309 base board.
-     * AI-Kit I/O from the BSP, plus the base-board buttons configured at run time. */
-    #define BOARD_NAME          "tesaiot"
-    #define BOARD_HAS_QWA309    (1)
-    #define BOARD_BTN_NAMES     "SW1", "SW4", "SW5"
-    #define BOARD_LED_NAMES     "LED1", "LED2", "RGB_RED", "RGB_BLUE", "RGB_GREEN"
-
-#elif defined(BOARD_KIT_PSE84_AI)
-    /* Infineon PSOC Edge E84 AI Kit, on-board I/O only.
-     * CYBSP_USER_BTN1 = CYBSP_SW1 = user button P7.0, silkscreen "SW1" on the
-     * kit in our lab (SW2 there is RESET; TESAIoT SDK docs say "SW2" - trust the board). */
-    #define BOARD_NAME          "kit-pse84-ai"
-    #define BOARD_BTN_NAMES     "SW1"
-    #define BOARD_LED_NAMES     "LED1", "LED2", "RGB_RED", "RGB_BLUE", "RGB_GREEN"
 
 #else
     #define BOARD_NAME          "generic-pse84"

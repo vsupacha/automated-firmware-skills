@@ -1,0 +1,18 @@
+{
+  "title": "Bring-up choices",
+  "questions": [
+    {"id": "demo", "header": "Demo", "question": "Which bring-up demo should the new app start from?",
+     "options": [
+       {"label": "hello-world", "description": "Console only: prints \"hello, world\" every second"},
+       {"label": "blink", "description": "LED1 toggles every 0.5 s"},
+       {"label": "push-to-light", "description": "A button press toggles LED1; console LED commands"}]},
+    {"id": "path", "header": "Path", "question": "Who drives the next stages?", "other": false,
+     "options": [
+       {"label": "IDE path", "description": "You build, flash and debug in the IDE"},
+       {"label": "Script path", "description": "Claude runs build, flash and test behind their gates"}]},
+    {"id": "checks", "header": "Checks", "question": "Which checks should run after the build?", "multi": true,
+     "options": [
+       {"label": "Automatic serial test", "description": "tests/<spec>.json on the board"},
+       {"label": "Interactive steps", "description": "You press a button or look at an LED"}]}
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 name: modus-pdl-edgitalk
-description: End-to-end firmware workflow for Infineon PSOC Edge E84 (PSE84) boards - RT-Thread Edgi-Talk, TESAIoT DevKit, KIT_PSE84_AI / KIT_PSE84_EVAL - with native ModusToolbox on Windows - check dev tools and folder paths, discover the KitProg3 board, create a Project Creator app with a board BSP overlay, write layered code (board -> func -> main), build, flash with identity/life-cycle gates via OpenOCD, run automated UART tests, list and start from Infineon ModusToolbox code examples, and clean build outputs. Use when asked to create, build, flash (แฟลช) or test PSOC Edge / PSE84 / E84 firmware (บอร์ด PSOC Edge), list or start from ModusToolbox examples for E84, port an app to another E84 board, add an E84 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for PSoC 6 or other MCU families.
+description: End-to-end firmware workflow for Infineon PSOC Edge E84 (PSE84) boards - RT-Thread Edgi-Talk (other E84 boards through their own profiles) - with native ModusToolbox on Windows - check dev tools and folder paths, discover the KitProg3 board, create a Project Creator app with a board BSP overlay, write layered code (board -> func -> main), build, flash with identity/life-cycle gates via OpenOCD, run automated UART tests, list and start from Infineon ModusToolbox code examples, and clean build outputs. Use when asked to create, build, flash (แฟลช) or test PSOC Edge / PSE84 / E84 firmware (บอร์ด PSOC Edge), list or start from ModusToolbox examples for E84, port an app to another E84 board, add an E84 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for PSoC 6 or other MCU families.
 ---
 
 # PSOC Edge E84 firmware workflow
@@ -61,7 +61,7 @@ any other stage just because help was asked.
 When the user asks what ModusToolbox examples exist for E84 / a board ("ขอรายการ example",
 "มี example bluetooth ไหม"), run `examples.sh <board> [words]` (needs GitHub; cached 1 day) and
 show the list; `--detail <id>` for one example. Ask which board if it is not clear - the list
-depends on the BSP (`kit-pse84-ai`/`tesaiot` → KIT_PSE84_AI, `edgi-talk` → KIT_PSE84_EVAL_EPC2).
+depends on the BSP (`edgi-talk` → KIT_PSE84_EVAL_EPC2).
 
 `$SKILL` below = the folder containing this SKILL.md. Always quote: `bash "$SKILL/scripts/x.sh"`.
 This skill is part of the automated-firmware-skills repo and needs the repo layout:
@@ -95,12 +95,10 @@ boards, next to the workspace - survives skill updates), then `<repo>/boards` (o
 | id | board | base BSP | status |
 | --- | --- | --- | --- |
 | `edgi-talk` | RT-Thread Edgi-Talk | `KIT_PSE84_EVAL_EPC2` 1.4.0 + clock overlay | verified on HW |
-| `kit-pse84-ai` | PSOC Edge E84 AI Kit, on-board I/O only | `KIT_PSE84_AI` 1.4.0, no overlay | verified on HW |
-| `tesaiot` | TESAIoT DevKit = AI Kit + QWA309 base board (`BOARD_EXTENDS=kit-pse84-ai`, adds SW4/SW5) | inherited | AI-Kit I/O verified; SW4/SW5 blocked by camera |
 
 `BOARD_EXTENDS=<parent>` in `board.env` loads the parent profile first; the child sets only what
 differs (`BOARD_ID`, `BOARD_DEFINE`, `BTN_LABELS`, extras). C code sees only `-DBOARD_<ID>`;
-`board/board.h` maps it to names and extras (e.g. `BOARD_HAS_QWA309`).
+`board/board.h` maps it to names and extras (e.g. a button that is not in the BSP).
 
 Unknown board → `boards/_template/modus-pdl-edgitalk/README.md`. Empty profile values make scripts stop with a
 message naming the missing variable - fill them, don't guess silently.
@@ -113,14 +111,6 @@ Polarity always from the BSP: `CYBSP_LED_STATE_ON` (1 on all three), `CYBSP_BTN_
 | Board | Switch (silkscreen → pin) | LEDs (→ pin) |
 | --- | --- | --- |
 | Edgi-Talk | **SW2** = `CYBSP_USER_BTN1` (`CYBSP_SW2`) P8[3], pull-up. `CYBSP_USER_BTN2` (SW4, P8[7]) is an eval-kit leftover - **not populated**. | LED1 red P16[7], LED2 green P16[6], LED3 blue P16[5] (`CYBSP_USER_LED1..3`) |
-| KIT_PSE84_AI (on-board) | **SW1** = user button = `CYBSP_USER_BTN1` (`CYBSP_SW1`) P7[0]; SW2 = RESET. Verified on our kit 2026-10-03 - the TESAIoT SDK docs call the user button "SW2": trust the silkscreen of the board in front of you | LED1 P10[7], LED2 P10[5] (no TCPWM route), RGB red/blue/green P20[6]/P20[5]/P20[4] = `CYBSP_USER_LED3/4/5` (TCPWM0 grp1 lines 265/264/263 → hardware dimming) |
-| QWA309 base board (TESAIoT) | **SW4** P17.5, **SW5** P17.7 - not in the BSP: configure at run time (`Cy_GPIO_Pin_FastInit(..., CY_GPIO_DM_PULLUP, 1, HSIOM_SEL_GPIO)`), active low, debounce ≥50 ms. Older docs call them SW9/SW10 or SW5/SW6. **P17.5 is also the USB-host VBUS enable** (buttons and USB joystick are exclusive) and both nets are the DVP camera RESET/PWDN lines: **with the camera plugged in they read 0 permanently** (seen 2026-10-03) - unplug the camera to use SW4/SW5. **QWA309 has a CS select switch that enables its I2C**: with it selected the base-board buttons and CapSense work; without it the TESAIoT base firmware prints `PSOC,ERR,<ms>,I2C,START-W,...` every 100 ms and sees no presses (reported by the lab, 2026-10-03). Check that switch first when base-board I/O is dead. CapSense BTN0/BTN1 + slider = PSoC 4000T @0x08 on the CM55-owned display/touch I2C (P17.0/P17.1) - not GPIO. | No discrete GPIO LEDs. DFR0522 16×8 RGB matrix @0x10 on the header I2C (SCB5, shared with display/touch, owned by CM55) |
-
-QWA309 extras for later groups: pots VR1..VR4 = P15.4..P15.7 (SAR GPIO ch 4..7, knob map
-{5,4,6,7} - VR1/VR2 traces swapped), header GPIO P13.0/3/4/5/6/7, header PWM P13.3 (+P13.4
-complement), header UART SCB9 P15.0 RX / P15.1 TX. Source: TESAIoT SDK docs J4, J5 and
-"Peripherals at a glance" - https://tesaiot.github.io/tesaiot-pse84-devkit-sdk/sdk/mtb-mpy/index.html
-(add-on boards may carry their own "SW1"; always say which board a button is on).
 
 ## Stage 1 - Tools and folder paths
 
@@ -196,7 +186,7 @@ Read `reference/layering.md` before writing code. Rules:
   `templates/_common/` (`board/` layer) +
   one app template on top: `push-to-light` (console + LED commands + buttons), `button-led`
   (hold a button → its LED lights; reports silkscreen name + pin; `pins?` shows pin config).
-  Board extras not in the BSP (QWA309 buttons) are configured at run time in `board.c`.
+  Board extras not in the BSP are configured at run time in `board.c`.
 - `hello-world` (1 s print), `blink` (LED1 every 0.5 s), `dual-core-ipc` (CM33 console + CM55 worker over a shared-memory
   mailbox: `ipc?`, `ping <n>`, `led55 <1|2> on|off`; template `shared/` is copied to `<app>/shared`
   and `INCLUDES+=../shared` added to both cores). `help.sh` lists templates from `description.txt`.
@@ -272,11 +262,11 @@ bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>] --yes    # delete (ask the
 
 Every board needs its own bench entry: `discover.sh <board-id> --serial <probe>` (with more than
 one probe connected, discover refuses to guess). All E84 boards report the same MPN, so the
-identity check cannot tell an Edgi-Talk from an AI Kit: the probe serial is the only link. One
-serial may be registered to only one board id (`kit-pse84-ai` and `tesaiot` are the same AI Kit -
-pick one). Flash/test then pick the right probe/COM port by board id; `flash.sh` refuses an app
-made for another board. Verified 2026-10-03: Edgi-Talk + TESAIoT connected together, hello-world
-built, flashed and tested PASS on both from a fresh workspace.
+identity check cannot tell one E84 board from another: the probe serial is the only link. One
+serial may be registered to only one board id. Flash/test then pick the right probe/COM port by
+board id; `flash.sh` refuses an app made for another board. Verified 2026-10-03 with two E84
+boards connected together: hello-world built, flashed and tested PASS on both from a fresh
+workspace.
 
 ## Sharing (committing to the repo)
 

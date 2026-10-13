@@ -86,7 +86,7 @@ DET_DIR="$(basename "${bsps[0]}")"
 BSP_DIR="$DET_DIR"; BSP="$APPDIR/bsps/$BSP_DIR"
 
 # 3. optional BSP replacement from a pinned git source: BSP_SOURCE=git:<repo-url>@<commit>:<subdir>
-# Use when the board vendor ships a modified BSP (e.g. TESAIoT's TARGET_KIT_PSE84_AI).
+# Use when the board vendor ships a modified BSP (e.g. a partner board's TARGET_<kit> folder).
 # Prefer porting deltas onto the current vendor BSP instead (reference/project.md): an old BSP
 # copied wholesale drags old library versions with it.
 case "$BSP_SOURCE" in
