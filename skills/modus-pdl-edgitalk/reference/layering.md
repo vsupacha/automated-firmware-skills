@@ -40,7 +40,7 @@ Input: CR or LF terminates a line; characters are echoed. Keep lines < 64 chars.
 2. Add `board_xxx()` functions in `board/` hiding the PDL calls.
 3. Add `func/xxx.c/.h` service with init/poll/get API (no blocking > 1 ms in poll).
 4. Register console commands in `main.c`; print with the protocol above.
-5. Add test steps to `tests/<app>.json` (automatic first, interactive only if a human is needed).
+5. Add test steps to `tests/<spec>.json` (named after the template, e.g. `push_to_light.json`) (automatic first, interactive only if a human is needed).
 
 ## Dual-core (CM33 NS + CM55)
 

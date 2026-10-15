@@ -40,3 +40,10 @@ package and bundles, `MX_START`, `MX_CONFIG`, identity gate). Hardware: [../READ
 - 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
   name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
   warnings. Both built only, not flashed (the earlier results above were with the old name).
+- 2026-10-16 clean-room run (`skills/cleanroom-test/reports/2026-10-16-l475-debug.md`): app from
+  `push-to-light` + a `stats` command, flashed by the session (FLASH: PASS), **RESULT: PASS 15/15**
+  (7 skipped: second LED/button, interactive); stage 7 debug: `debug.sh status` -> Cortex-M4 r0p1,
+  running, fault none; `debug.sh run` -> `scenarios/push-to-light.json` **DEBUG: PASS 7/7** and the
+  agent's own `stats.json` 9/9 (break, argc/argv, `g_cmd_count` watchpoints, CFSR/HFSR 0). Core on
+  AP 0 (no `DEBUG_APID`). With the NUCLEO-C562RE also plugged in, discover picks this probe by its
+  ST-LINK board name.

@@ -23,8 +23,10 @@ static const uint8_t     NUM_LEDS    = sizeof(LEDS) / sizeof(LEDS[0]);
 static const board_pin_t LEDS[]      = { { 0, true, "-" } };
 static const uint8_t     NUM_LEDS    = 0;
 #endif
-static const board_pin_t BUTTONS[]   = { { 0, false, "-" } };   /* placeholder: no user button */
-static const uint8_t     NUM_BUTTONS = 0;
+/* User buttons: none on the UNO R4 WiFi (only RESET). A board with buttons sets BOARD_NUM_BUTTONS
+ * and a BUTTONS[] table; with 0 the button functions below compile to "no such button" (no
+ * comparisons against a count of 0, which -Wtype-limits / -Wlogical-op flag as always false). */
+#define BOARD_NUM_BUTTONS 0
 
 void board_init()
 {
@@ -34,10 +36,12 @@ void board_init()
         pinMode(LEDS[i].pin, OUTPUT);   /* digitalRead of an output reads the port pin: read-back works */
         digitalWrite(LEDS[i].pin, LEDS[i].active_high ? LOW : HIGH);
     }
-    for (uint8_t i = 0; i < NUM_BUTTONS; i++)
+#if BOARD_NUM_BUTTONS > 0
+    for (uint8_t i = 0; i < BOARD_NUM_BUTTONS; i++)
     {
         pinMode(BUTTONS[i].pin, BUTTONS[i].active_high ? INPUT_PULLDOWN : INPUT_PULLUP);
     }
+#endif
 }
 
 Stream &board_console()
@@ -78,12 +82,13 @@ const char *board_led_name(uint8_t n)
 
 uint8_t board_button_count()
 {
-    return NUM_BUTTONS;
+    return BOARD_NUM_BUTTONS;
 }
 
+#if BOARD_NUM_BUTTONS > 0
 bool board_button_read(uint8_t n)
 {
-    if ((n < 1) || (n > NUM_BUTTONS))
+    if ((n < 1) || (n > BOARD_NUM_BUTTONS))
     {
         return false;
     }
@@ -93,10 +98,26 @@ bool board_button_read(uint8_t n)
 
 const char *board_button_name(uint8_t n)
 {
-    return ((n >= 1) && (n <= NUM_BUTTONS)) ? BUTTONS[n - 1].name : "?";
+    return ((n >= 1) && (n <= BOARD_NUM_BUTTONS)) ? BUTTONS[n - 1].name : "?";
 }
 
 uint8_t board_button_pin(uint8_t n)
 {
-    return ((n >= 1) && (n <= NUM_BUTTONS)) ? BUTTONS[n - 1].pin : 0;
+    return ((n >= 1) && (n <= BOARD_NUM_BUTTONS)) ? BUTTONS[n - 1].pin : 0;
 }
+#else
+bool board_button_read(uint8_t)
+{
+    return false;                       /* no such button */
+}
+
+const char *board_button_name(uint8_t)
+{
+    return "?";
+}
+
+uint8_t board_button_pin(uint8_t)
+{
+    return 0;
+}
+#endif

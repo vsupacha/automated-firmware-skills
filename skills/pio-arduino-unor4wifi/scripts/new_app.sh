@@ -48,8 +48,10 @@ platform = $PIO_PLATFORM
 board = $PIO_BOARD
 framework = $PIO_FRAMEWORK
 build_flags = -D$BOARD_DEFINE
-; warnings for our own code only (src/), not for the framework
+; warnings for our own code only (src/), not for the framework; renesas-ra's builder passes -w
+; (suppress ALL warnings) to every file - remove it, or the 0-warning build gate sees nothing
 build_src_flags = -Wall -Wextra
+build_unflags = -w
 monitor_speed = ${CONSOLE_BAUD:-115200}
 EOF
 

@@ -22,6 +22,7 @@ require_safe_path "$APPDIR" "app" 100
 . "$APPDIR/arduino-app.env"
 ENV="$APP_PIO_ENV"; OUT="$APPDIR/.pio/build/$ENV"
 mkdir -p "$APPDIR/logs"; LOG="$APPDIR/logs/build-$(ts).log"
+fw_warn_gate_start "$APPDIR"      # warnings of an earlier run are counted again
 
 [ $CLEAN = 1 ] && { info "pio run -t clean"; "$PIO" run -d "$APPDIR" -e "$ENV" -t clean >>"$LOG" 2>&1; }
 info "pio run -e $ENV  (log $LOG; the first build installs the platform + arduino-esp32 if missing)"
@@ -33,6 +34,7 @@ tr -d '\r' <"$LOG" >"$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 # warnings in our own sources (<app>/src/) vs the framework (whose libraries have src/ folders too)
 srcw="$(grep -E "(^|[/\\\\]$(basename "$APPDIR")[/\\\\])src[/\\\\][^:]*:[0-9]+:[0-9]+: warning:" "$LOG" | sort -u)"
 nsrc=$(printf '%s' "$srcw" | grep -c . ); nall=$(grep -c ': warning:' "$LOG")
+fw_warn_gate_end "$APPDIR" "$nsrc" "$rc"
 errs=$(grep -c ': error:' "$LOG")
 have=1; fresh=1
 for f in firmware.bin firmware.elf bootloader.bin partitions.bin; do

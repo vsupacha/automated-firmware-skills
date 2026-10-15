@@ -20,6 +20,7 @@ require_safe_path "$APPDIR" "app" 120
 . "$APPDIR/pico-app.env"
 ENV="$APP_PIO_ENV"; OUT="$APPDIR/.pio/build/$ENV"
 mkdir -p "$APPDIR/logs"; LOG="$APPDIR/logs/build-$(ts).log"
+fw_warn_gate_start "$APPDIR"      # warnings of an earlier run are counted again
 
 [ $CLEAN = 1 ] && { info "pio run -t clean"; "$PIO" run -d "$APPDIR" -e "$ENV" -t clean >>"$LOG" 2>&1; }
 info "pio run -e $ENV  (log $LOG; the first build installs the platform + arduino-pico, ~1.5 GB)"
@@ -31,6 +32,7 @@ tr -d '\r' <"$LOG" >"$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 # warnings in our own sources (src/) vs the framework
 srcw="$(grep -E '(^|[/\\])src[/\\][^:]*:[0-9]+:[0-9]+: warning:' "$LOG" | sort -u)"
 nsrc=$(printf '%s' "$srcw" | grep -c . ); nall=$(grep -c ': warning:' "$LOG")
+fw_warn_gate_end "$APPDIR" "$nsrc" "$rc"
 errs=$(grep -c ': error:' "$LOG")
 # SCons relinks only when an object changed: an unchanged firmware after exit 0 is up to date
 have=1; fresh=1

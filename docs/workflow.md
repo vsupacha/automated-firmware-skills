@@ -43,13 +43,13 @@ Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own 
 | --- | --- | --- | --- | --- | --- |
 | **M1 bring-up** | 0 | help | `help.sh [--en]` | - | no |
 | | 1 | setup | `check_tools.sh <board>` | `missing/bad=0` | no |
-| | 2 | create | `new_app.sh <board> <app> [ws] [template]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
+| | 2 | create | `new_app.sh <board> <app> [ws\|""] [template] [--no-open]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
 | | 2d | open in IDE | `open_ide.sh <app> [--no-open]` (new_app.sh runs it) - see [IDE handoff](#ide-handoff-stage-2d) | `IDE: READY` | no |
 | | 3 | build | `build.sh <app>` | `BUILD: PASS` + manifest | no |
 | | 4 | connect | `discover.sh <board>` | `IDENTITY: PASS` | yes |
 | | 5 | flash | `flash.sh <app> --yes` (**ask the developer first**) | `FLASH: PASS` | yes |
 | | 6 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]` | `RESULT: PASS` | yes |
-| | 7 | debug | `debug.sh` *(planned)*: GDB server, attach, halt at `main`, fault registers, backtrace | `DEBUG: ...` | yes + probe |
+| | 7 | debug | `debug.sh status <board>` (read-only core + fault registers) and `debug.sh run <app> <scenario.json>` (attach, scripted break / watch / step / print / read) - STM32 skills C5 + L475 so far; engine `lib/fwdebug.py` | `DEBUG: STATUS ...` / `DEBUG: PASS` | yes + probe |
 | **M2 board support** | 8 | board drivers | *(planned)*: pin/peripheral map from the board sources, `board.h` drivers, per-peripheral `tests/*.json` (run with stage 6) | `RESULT: PASS` per peripheral | yes |
 | | 9 | layer check | `python lib/check_layers.py <app>` | `LAYERS: PASS` | no |
 | | 10 | host test *(optional)* | `bash lib/host_test.sh [<app>]`: `func/` with a fake `board.h` on the PC | `HOST: PASS` | no |
@@ -187,6 +187,13 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
   `*_poll()`, an RTOS wraps them in tasks) - this is what makes the M3 execution models mechanical.
 - Console protocol (test contract): `READY`, `INFO app=.. v=.. board=<id> ...`, `OK ...`,
   `ERR <reason>`, `EVT ...`, `<TAG> k=v ...`.
+
+**Build gate across runs.** `BUILD: PASS` needs 0 warnings in the app's own sources. An
+incremental build only recompiles changed files, so `build.sh` keeps `<app>/logs/.warnings-pending`
+after a build with warnings and makes the next build a clean rebuild until a build passes with none
+(an unchanged re-run can no longer pass). `--allow-warnings` passes the gate but keeps the mark.
+Every skill must also make sure the compiler is allowed to warn at all - e.g. PlatformIO's
+renesas-ra builder passes `-w`, which the UNO R4 skill removes with `build_unflags = -w`.
 
 ## Test specs (`tests/*.json`)
 

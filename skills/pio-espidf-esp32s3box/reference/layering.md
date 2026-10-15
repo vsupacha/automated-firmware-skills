@@ -15,6 +15,8 @@ Call chain: ROM → 2nd-stage bootloader → ESP-IDF start-up → FreeRTOS `main
 
 Rules
 - Dependency direction is strictly downward; `func/` and `app_main.c` include no ESP-IDF or
+  The application layer may call the `board.h` API directly (e.g. `board_millis()`) as well as
+  `func/` - "downward" means it never reaches below `board.h` (no vendor HAL calls).
   FreeRTOS headers (`check_layers.py` flags them). Time and yielding go through `board_millis()` and
   `board_delay_ms()`.
 - A board difference goes in `board/` (the `#if` I/O tables in board.c, `BOARD_NAME` in board.h) or

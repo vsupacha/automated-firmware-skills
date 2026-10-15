@@ -24,7 +24,8 @@ button) < observed (a person saw the LED). \* = verified under its earlier name 
 - STM32CubeMX2 1.1.1 and the STM32Cube bundles (installed with STM32Cube for VS Code / the bundle
   manager): GNU Tools for STM32 14.3.1+st.2, CMake 4.4.0+st.1, Ninja 1.13.2+st.1,
   STM32CubeProgrammer 2.23.0; packs stm32c5xx_dfp / hal_drivers / templates 2.1.0 and the
-  NUCLEO-C562RE board pack 2.1.0 (`check_tools.sh` lists what is missing).
+  NUCLEO-C562RE board pack 2.1.0 (`check_tools.sh` lists what is missing); for `debug.sh run`
+  also the ST-LINK GDB server 7.14.0+st.2 bundle (GDB comes with GNU Tools for STM32).
 - Workspace path without spaces, ≤100 characters.
 
 ## Commands
@@ -44,6 +45,8 @@ S=skills/cubemx2-hal2-stm32c562nucleo/scripts
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 5 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
 | 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 7 debug (read-only status) | `bash $S/debug.sh status <board>` - no reset, no halt | `DEBUG: STATUS running fault=none` |
+| 7 debug (scenario) | `bash $S/debug.sh run apps/<app> skills/cubemx2-hal2-stm32c562nucleo/scenarios/push-to-light.json` - halts the core while attached | `DEBUG: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `nucleo-c562re`. Templates: `hello-world`, `blink`, `push-to-light`. The app's `<app>.ioc2` is created

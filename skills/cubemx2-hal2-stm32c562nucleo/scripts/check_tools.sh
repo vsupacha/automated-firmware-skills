@@ -50,6 +50,11 @@ for pk in $PACKS; do
   else bad "pack ${pk#*/}" "missing - open the board once in STM32CubeMX2 (or 'mx pack-manager') to install it"; fi
 done
 
+# Debug (stage 7, debug.sh run only): GDB from the GCC bundle + ST-LINK_gdbserver bundle
+gdbs="$STM32CUBE_ROOT/bundles/stlink-gdbserver/$GDBSERVER_VERSION/bin/ST-LINK_gdbserver.exe"
+if [ -x "$GCC_BIN/arm-none-eabi-gdb.exe" ] && [ -x "$gdbs" ]; then ok "GDB + ST-LINK_gdbserver (debug)" "$GCC_VERSION + $GDBSERVER_VERSION  ($(fw_scope "$gdbs"))"
+else wrn "GDB + ST-LINK_gdbserver (debug)" "not found ($GCC_BIN/arm-none-eabi-gdb.exe, $gdbs) - debug.sh run only; install the stlink-gdbserver $GDBSERVER_VERSION bundle"; fi
+
 # python + pyserial
 if [ -n "$PYTHON" ]; then
   ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')  ($(fw_scope "$PYTHON"))"

@@ -24,7 +24,8 @@ button) < observed (a person saw the LED). \* = verified under its earlier name 
 - Windows with Git for Windows (Git Bash); Python 3 with pyserial (hardware stages).
 - STM32CubeMX 6.18.1 (installed for all users or per user - both are found) with the
   STM32Cube_FW_L4 V1.18.2 package, and the STM32Cube bundles GNU Tools for STM32 14.3.1+st.2,
-  CMake 4.4.0+st.1, Ninja 1.13.2+st.1, STM32CubeProgrammer 2.23.0.
+  CMake 4.4.0+st.1, Ninja 1.13.2+st.1, STM32CubeProgrammer 2.23.0; for `debug.sh run` also the
+  ST-LINK GDB server 7.14.0+st.2 bundle (GDB comes with GNU Tools for STM32).
 - Workspace path without spaces, ≤100 characters.
 
 ## Commands
@@ -44,6 +45,8 @@ S=skills/cubemx-hal-stm32l475iot/scripts
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 5 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
 | 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 7 debug (read-only status) | `bash $S/debug.sh status <board>` - no reset, no halt | `DEBUG: STATUS running fault=none` |
+| 7 debug (scenario) | `bash $S/debug.sh run apps/<app> skills/cubemx-hal-stm32l475iot/scenarios/push-to-light.json` - halts the core while attached | `DEBUG: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `b-l475e-iot01a`. Templates: `hello-world`, `blink`, `push-to-light` (B1 USER toggles LED2). The

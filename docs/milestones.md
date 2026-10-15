@@ -9,6 +9,14 @@ An AI assistant can change one project and show that it works once. This repo ai
 milestone ships **open, re-runnable proof** that a firmware layer works - across boards and
 toolchains - which a team, a teacher or an auditor can check without trusting the agent.
 
+**Division of work.** Firmware is built bottom-up, one layer at a time, each proven on the board
+before the next goes on top. The **scripts own the gates** (tools, identity, build manifest, flash,
+tests, layer rules) and never change between runs. The **AI customizes and integrates**: it picks a
+proven template or component, adapts it to the board (pins from the board sheet, options from the
+user), wires it into the layer above, and then lets the scripts prove the result. It never invents
+an API from a layer that has not passed its gates, and it never replaces a gate with its own
+judgement.
+
 1. **Evidence is a repo artifact, not a chat answer.** Every milestone ends in gate lines, a
    manifest (tool versions, image hashes), a test spec and a dated verification-log line. Anyone
    re-runs them with the plain bash/Python scripts - offline, without an agent or an account.
@@ -31,7 +39,7 @@ it there (or for one shell: `export FW_ACTIVE_MILESTONES="M1 M2"`).
 
 | Milestone | State |
 | --- | --- |
-| **M1 bring-up** | active - 10 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 8 boards; `debug.sh` and the bring-up certificate planned |
+| **M1 bring-up** | active - 10 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 8 boards; `debug.sh` (status + scripted break / watch / step) in the STM32 C5 and L475 skills; bring-up certificate planned |
 | **M2 board support** | layer check (`check_layers.py`) and host test (`host_test.sh`) implemented, gated; `parts.json` + board-driver stage planned |
 | **M3 execution model** | planned (design: [trace](#m3-trace-planned-design) below) |
 | **M4 components** | planned |
@@ -58,15 +66,95 @@ M1 per skill - the bring-up demos are `hello-world` (UART), `blink` (LED) and `p
 | cubemx-hal-stm32n6570dk | yes | planned (dev boot mode, connect under reset) |
 | cubemx-hal-stm32f407disco | yes | planned (SWO console) |
 
-Next:
-1. **Finish M1:** `debug.sh` (stage 7, halt at `main`), board stages for N6 / F4, and the **bring-up
-   certificate** per board in `boards/README.md`, generated from `index.json`, the build manifests
-   and the clean-room reports.
-2. **Start M2:** `boards/<id>/parts.json` (parts and pins with source + verification level) and the
-   board-driver stage, first on a board with sensors (B-L475E-IOT01A).
-3. Engine items from the clean-room runs: measured intervals in the test engine (a blink period is
-   only checked through the INFO line today); SKILL.md stage headings numbered like the shared
-   stages; a bounded-read command in sensor-debug ("read N s, report resets and errors").
+Next: finish M1 (the M1 items of the roadmap below, then the bring-up certificate), then start M2
+on a board with sensors (B-L475E-IOT01A). The roadmap lists every planned item per milestone.
+
+## Roadmap per milestone
+
+Each item names what the **AI** customizes or integrates and the **gate** (a script, a test spec or
+a recorded fact) that proves it. Items run bottom-up: a milestone's items build only on layers whose
+gates already passed. `(cr)` = found by a clean-room run.
+
+### Every milestone - evidence rules
+
+- **One observable outcome per step.** Each change states its finish line (the gate line or test
+  that proves it) before the AI starts; a step ends with that evidence, not with "it should work".
+- **Separate results, never merged:** `BUILD:` (it compiles) ≠ `FLASH:` (the image was written and,
+  where the chip allows, read back) ≠ `BOOT:` (the board printed its boot marker within a bounded
+  time) ≠ `RESULT:` (behaviour tested) ≠ observed by a person.
+- **Gaps are visible:** skipped or unavailable checks are counted and printed (`SKIPPED n`), never
+  folded into a PASS; machine-readable results (`--json`) next to the gate lines.
+- **Status per recorded fact or command** in board profiles: `verified` (it ran, with a dated log
+  line) / `user-confirmed` / `inferred` / `unavailable` - next to the demo levels.
+- **Generated blocks between markers** in READMEs and profiles, so a script can refresh its section
+  without touching hand-written notes.
+- **Policy that can only tighten:** a committed per-board policy (e.g. never auto-flash this board)
+  that `FLASH_POLICY` in a bench file cannot loosen; the bench lock also notices when another
+  session reflashed the board.
+- **Long runs are bounded:** soak tests, trace captures and profiling runs have an iteration or
+  time limit and stop after repeated failures; unattended runs never flash.
+
+### M1 bring-up - a board and its toolchain, proven
+
+| Item | AI customizes / integrates | Gate |
+| --- | --- | --- |
+| Hardware assumptions check | lists boot pins, straps, clocks, console path and debug path from the board sheet and BSP before any code; unconfirmed facts go to the user | every assumption `verified` or answered, recorded in the board sheet |
+| `BOOT:` gate after flash | - (script) | boot marker within N s after reset, separate from `FLASH:` |
+| Test engine: `SKIPPED`, `--json`, measured intervals, values captured in one step and compared in a later one `(cr)` | - (engine) | the same specs report skips, emit JSON, and can check a period (e.g. blink 0.5 s ± tolerance) |
+| `debug.sh` | - (script) | attach **without** reset or programming by default; halt at `main` on request; refuses to reset or reflash while a fault's state is being kept, unless the user agrees. Done for STM32 (C5, L475: `status` + scenarios); next: other probes (pyOCD, OpenOCD, esptool/JTAG), halt at `main`, scenario checks "no change" and values compared across steps, offline scenario check `(cr)` |
+| Board stages for N6 / F4 | adapts discover/flash to the board's boot mode and console (dev boot mode, SWO) | `IDENTITY:` / `FLASH:` / `BOOT:` / `RESULT:` on the board |
+| Bring-up certificate | - (generated) | per board: demo levels up to observed, pinned-tools manifest, IDE and script path, clean-room report |
+| SKILL.md stage numbers = shared stages `(cr)` | - (docs) | validator: headings match the stage table |
+
+### M2 board support - drivers behind `board.h`, proven per peripheral
+
+| Item | AI customizes / integrates | Gate |
+| --- | --- | --- |
+| `boards/<id>/parts.json` | extracts parts, buses, addresses and pins from the vendor board configuration > netlist > schematic; asks for anything else | every entry has a source and a status; conflicts listed, never guessed |
+| Driver contract per peripheral | fills a template: modes, calling context, bus ownership, error codes, a deadline on every wait, retries, state after a failure | the contract is reviewed before code |
+| Driver | reuses the vendor HAL/BSP driver where it fits, else writes device logic over a bus interface; pins stay in `board/` | build 0 warnings + `LAYERS: PASS` |
+| Per-peripheral test | writes the test spec: ID read, value plausibility (sensor-debug limits), failure path (absent device, timeout) | `RESULT: PASS` on the board; ACK alone is not proof - bus traffic or values compared with the datasheet |
+| Regression | one test per fixed bug | the test fails before the fix and passes after |
+
+### M3 execution model - the same logic under different models
+
+| Item | AI customizes / integrates | Gate |
+| --- | --- | --- |
+| Execution layer templates | bare-metal superloop, FreeRTOS, RT-Thread / Zephyr variants of the same app | the M1/M2 tests pass under each model |
+| Trace ring buffer + rules | inserts trace points at the integration points (ISR entry, task switch, queue) | trace rules (`follows A->B within_us`, `period`, `never`, stack margin) PASS |
+| Execution-model checklist | checks priorities (direction), stack units, queue ownership, timer and ISR context, drift of relative delays | checklist answered per port; one end-to-end data path ported and passing first |
+
+### M4 components - middleware integrated on proven layers
+
+| Item | AI customizes / integrates | Gate |
+| --- | --- | --- |
+| Component adapter | adapts LVGL, USB device classes, a file system or a network stack to `board.h` + the execution model, with versions pinned | build + layer check |
+| Component demo test | wires the component into a demo app with a console contract | the same demo test PASS on at least two boards |
+| Intermediate description | for generated or converted designs: one source-of-truth file with a status per item (direct, approximate, custom, unknown); the user signs off every approximate item | no `unknown` left; approximations accepted by the user |
+
+### M5 application + profiling - logic tested on the board, budgets as gates
+
+| Item | AI customizes / integrates | Gate |
+| --- | --- | --- |
+| Application logic in `func/` | writes the logic against proven APIs only; stub/driver inputs through the console | tests PASS on the board |
+| Profiling gates | adds measurement points (cycle counter, GPIO markers) | `PROFILE: PASS` against budgets; supply, flags, workload and method recorded; a gain smaller than the run-to-run variation counts as no gain |
+| Instruments | logic analyser / power meter captures with stated channels, rate, trigger and tolerance | saved raw capture + bounded script; feeds the profiling gate |
+
+### Export / port - the same tests elsewhere
+
+| Item | AI customizes / integrates | Gate |
+| --- | --- | --- |
+| `port.sh --to <skill>:<board>` | ports one layer at a time: image → console → one service, register values checked against the target's reference manual | baseline captured on the source board with the same specs; each check passed / failed / unverified on the target |
+| `export_app.sh` | packs the app with its skills, scripts and tests | the exported project builds and tests on its own |
+
+### Tool skills
+
+| Item | Gate |
+| --- | --- |
+| hw-troubleshooting: `CASE.md` per investigation (symptom, hypotheses with verdicts, captures, next check); keep the live fault before any reset; outcome = verified fix / mitigation / unresolved | the original reproducer re-run after the fix, with the same capture setup |
+| sensor-debug: bounded read ("read N s, report resets and errors") `(cr)` | `DEBUG:` gate line |
+| sensor-debug: own gate prefix (its `DEBUG:` lines clash with `debug.sh`) `(cr)` | renamed gate line, old one accepted for a release |
+| cleanroom-test: a run per new skill, template or board profile | report with triage in `reports/` |
 
 ## Milestones: bottom-up, one firmware layer at a time
 

@@ -140,7 +140,7 @@ Read `reference/layering.md` before writing code. Rules:
 - `src/main.cpp` - `setup()`/`loop()` wiring + application logic. Uses `func/` and `board_init()`.
 - Keep the console protocol: `OK ...`, `ERR ...`, `EVT ...`, `<TAG> k=v ...`,
   `INFO ... board=<id> ...` then `READY` - tests depend on it.
-- Write/extend `tests/<app>.json` from the requirements before the code; gate board-dependent steps
+- Write/extend `tests/<spec>.json` (named after the template, e.g. `push_to_light.json`) from the requirements before the code; gate board-dependent steps
   with `requires_re` (spec keys: `scripts/serial_test.py` docstring).
 - Templates: `hello-world` (1 s print), `blink` (LED1 every 0.5 s), `push-to-light` (console LED commands, BOOTSEL toggles the
   LED, `EVT` lines). `help.sh` lists them from `description.txt`.

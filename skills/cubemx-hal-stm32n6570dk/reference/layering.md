@@ -18,6 +18,8 @@ Call chain (mx/FSBL/Src/main.c, overlay in USER CODE sections):
 
 Rules
 - Dependency direction is strictly downward; `func/` and `app_main.c` never include HAL headers.
+  The application layer may call the `board.h` API directly (e.g. `board_millis()`) as well as
+  `func/` - "downward" means it never reaches below `board.h` (no vendor HAL calls).
 - A board difference goes in `board/` (an `#elif` I/O table) or in the board's `.ioc` - never
   `#ifdef` in `func/`.
 - Hardware owned by CubeMX (clocks, peripherals, their pins) is configured in `<app>.ioc` (FSBL

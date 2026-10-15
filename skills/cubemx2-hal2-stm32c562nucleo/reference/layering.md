@@ -14,6 +14,8 @@ Call chain: generated `main()` → `mx_system_init()` → `app_main()` (inserted
 
 Rules
 - Dependency direction is strictly downward; `func/` and `app_main.c` never include HAL/LL headers.
+  The application layer may call the `board.h` API directly (e.g. `board_millis()`) as well as
+  `func/` - "downward" means it never reaches below `board.h` (no vendor HAL calls).
 - A board difference goes in `board/` (an `#elif` user-I/O table) or in the board's `.ioc2`
   configuration - never `#ifdef` in `func/`.
 - Hardware owned by CubeMX (clocks, peripherals, their pins) is configured in the `.ioc2` and used
@@ -41,4 +43,4 @@ Rules
 2. `regen.sh <app>` - the generated `mx_<periph>.c/.h` appear under `mx/generated/hal/`.
 3. Wrap it in `board/` (`board_xxx()` using the generated handle getter).
 4. Add a `func/xxx.c/.h` service if it is reusable; register console commands in `app_main.c`.
-5. Add test steps to `tests/<app>.json`; build, flash, test.
+5. Add test steps to `tests/<spec>.json` (named after the template, e.g. `push_to_light.json`); build, flash, test.

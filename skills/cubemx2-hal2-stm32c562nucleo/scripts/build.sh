@@ -25,6 +25,7 @@ if [ "$APPDIR/$APP_IOC2" -nt "$APPDIR/mx/CMakeLists.txt" ]; then
 fi
 export PATH="$GCC_BIN:$CMAKE_BIN:$NINJA_BIN:$PATH"
 mkdir -p "$APPDIR/logs"; LOG="$APPDIR/logs/build-$(ts).log"
+fw_warn_gate_start "$APPDIR"      # warnings of an earlier run are counted again
 OUTDIR="$APPDIR/mx/build/$APP_PRESET"; ELF="$OUTDIR/$APP_SW_PROJECT.elf"
 
 info "cmake --preset $APP_PRESET  (log $LOG)"
@@ -40,6 +41,7 @@ tr -d '\r' <"$LOG" >"$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 # warnings in our own sources (../src) vs generated/vendor code
 srcw="$(grep -E '(\.\./src/|[/\\]src[/\\](board|func)[/\\]|[/\\]src[/\\]app_main\.c).*: warning:' "$LOG" | sort -u)"
 nsrc=$(printf '%s' "$srcw" | grep -c .); nall=$(grep -c ': warning:' "$LOG"); errs=$(grep -c ': error:' "$LOG")
+fw_warn_gate_end "$APPDIR" "$nsrc" "$rc"
 echo "cmake exit=$rc  time=${secs}s  warnings(src)=$nsrc  warnings(all)=$nall  errors=$errs"
 [ -n "$srcw" ] && echo "$srcw" | head -20
 if [ $rc -ne 0 ] || [ ! -f "$ELF" ]; then

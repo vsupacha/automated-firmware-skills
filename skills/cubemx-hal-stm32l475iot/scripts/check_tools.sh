@@ -55,6 +55,11 @@ for t in "GNU Tools for STM32|$GCC_BIN/arm-none-eabi-gcc.exe|$GCC_VERSION" "CMak
   if [ -x "$exe" ]; then ok "$name" "$ver  ($(fw_scope "$exe"))"; else bad "$name" "$ver not found ($exe) - install the STM32Cube bundle (STM32Cube for VS Code / bundle manager)"; fi
 done
 
+# Debug (stage 7, debug.sh run only): GDB from the GCC bundle + ST-LINK_gdbserver bundle
+gdbs="$STM32CUBE_ROOT/bundles/stlink-gdbserver/$GDBSERVER_VERSION/bin/ST-LINK_gdbserver.exe"
+if [ -x "$GCC_BIN/arm-none-eabi-gdb.exe" ] && [ -x "$gdbs" ]; then ok "GDB + ST-LINK_gdbserver (debug)" "$GCC_VERSION + $GDBSERVER_VERSION  ($(fw_scope "$gdbs"))"
+else wrn "GDB + ST-LINK_gdbserver (debug)" "not found ($GCC_BIN/arm-none-eabi-gdb.exe, $gdbs) - debug.sh run only; install the stlink-gdbserver $GDBSERVER_VERSION bundle"; fi
+
 # python + pyserial (VCP discovery and serial tests)
 if [ -n "$PYTHON" ]; then
   ok "python" "$("$PYTHON" --version 2>&1 | tr -d '\r')  ($(fw_scope "$PYTHON"))"

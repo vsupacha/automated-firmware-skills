@@ -46,3 +46,9 @@ quirks and the verification log of the `cubemx2-hal2-stm32c562nucleo` skill. Mac
 - 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
   name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
   warnings. Both built only, not flashed (the earlier results above were with the old name).
+- 2026-10-16 `push-to-light` flashed (FLASH: PASS), first image under the new template name;
+  console `info` -> `INFO app=push-to-light ... leds=1 btns=1`. Stage 7 debug: `debug.sh status`
+  -> Cortex-M33 r0p4, running, fault none (hot plug, no reset, no halt); `debug.sh run` with
+  `scenarios/push-to-light.json` -> **DEBUG: PASS 7/7** (break `cmd_led` from the console line,
+  argc/argv, step 2, `uwTick` hardware watchpoint 513824 -> 513825, CFSR/HFSR 0), console
+  answered normally after the detach. ST-LINK_gdbserver needs `-m 1` (core on AP 1, `DEBUG_APID`).

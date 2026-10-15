@@ -27,7 +27,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | --- | --- | --- |
 | `hello-world` | toolchain, clock, console: prints "hello, world" every 1 s | a console (UART, USB CDC, SWO) |
 | `blink` | GPIO output: LED1 toggles every 0.5 s, reported as `BLINK led1=0\|1` | one LED |
-| `push-to-light` | GPIO input + console commands: a button press toggles LED1 (`EVT` lines), `led`/`btn` commands | one button + one LED |
+| `push-to-light` | GPIO input + console commands: a button press toggles LED1 (`EVT` lines), console commands `led <n> on|off|toggle` + `led?`/`btn?` (RT-Thread msh: `led`/`btn`) | one button + one LED |
 
 | Board | Skill | hello-world | blink | push-to-light |
 | --- | --- | --- | --- | --- |

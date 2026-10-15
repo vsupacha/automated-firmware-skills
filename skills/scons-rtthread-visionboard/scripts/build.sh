@@ -26,6 +26,7 @@ require_vars CODE_FLASH_START CODE_FLASH_END
 [ -n "$(scons_version)" ] || need_user SETUP "RT-Thread env (scons) not found in $RTT_STUDIO_HOME - run check_tools.sh"
 [ -x "$GCC_BIN/arm-none-eabi-gcc.exe" ] || need_user SETUP "GNU Arm $GCC_VERSION not found ($GCC_BIN) - install it in RT-Thread Studio's SDK Manager, then re-run"
 mkdir -p "$APPDIR/logs" "$APPDIR/build"; LOG="$APPDIR/logs/build-$(ts).log"; ELF="$APPDIR/rtthread.elf"
+fw_warn_gate_start "$APPDIR"      # warnings of an earlier run are counted again
 
 [ $CLEAN = 1 ] && { info "scons -c"; scons_run "$APPDIR" -c >>"$LOG" 2>&1; }
 info "scons -j8 (GCC $GCC_VERSION, log $LOG)"
@@ -37,6 +38,7 @@ tr -d '\r' <"$LOG" >"$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 # warnings in our own sources (src/), errors anywhere
 srcw="$(grep -E "(^|[/\\\\])src[/\\\\][^:]*:[0-9]+:[0-9]+: warning:" "$LOG" | sort -u)"
 nsrc=$(printf '%s' "$srcw" | grep -c . ); nall=$(grep -c ': warning:' "$LOG"); errs=$(grep -c ': error:' "$LOG")
+fw_warn_gate_end "$APPDIR" "$nsrc" "$rc"
 fresh=1; [ -f "$ELF" ] && [ "$(date -r "$ELF" +%s)" -ge "$start" ] || fresh=0
 echo "scons exit=$rc  time=${secs}s  warnings(src)=$nsrc  warnings(all)=$nall  errors=$errs  elf=$([ $fresh = 1 ] && echo rebuilt || echo up-to-date)"
 grep -A1 -E '^ +text' "$LOG" | tail -2 | sed 's/^/  /'

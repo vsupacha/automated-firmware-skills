@@ -21,6 +21,7 @@ grep -q "fw-skill overlay" "$APPDIR/mx/FSBL/CMakeLists.txt" || die "mx/ is not h
 [ "$APPDIR/$APP.ioc" -nt "$APPDIR/mx/mx.ioc" ] && echo "WARN: $APP.ioc is newer than mx/ - run regen.sh if the hardware configuration changed"
 export PATH="$GCC_BIN:$CMAKE_BIN:$NINJA_BIN:$PATH"
 mkdir -p "$APPDIR/logs"; LOG="$APPDIR/logs/build-$(ts).log"
+fw_warn_gate_start "$APPDIR"      # warnings of an earlier run are counted again
 OUTDIR="$APPDIR/mx/FSBL/build"; ELF="$OUTDIR/mx_FSBL.elf"
 
 info "cmake --preset Debug + build (FSBL)  (log $LOG)"
@@ -36,6 +37,7 @@ tr -d '\r' <"$LOG" >"$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 # warnings in our own sources (<app>/src, also seen as mx/FSBL/../../src) vs generated/HAL code
 srcw="$(grep -E "([/\\\\]$APP[/\\\\]|\.\./)src[/\\\\][^:]*:[0-9]+:[0-9]+: warning:" "$LOG" | sort -u)"
 nsrc=$(printf '%s' "$srcw" | grep -c .); nall=$(grep -c ': warning:' "$LOG"); errs=$(grep -c ': error:' "$LOG")
+fw_warn_gate_end "$APPDIR" "$nsrc" "$rc"
 echo "cmake exit=$rc  time=${secs}s  warnings(src)=$nsrc  warnings(all)=$nall  errors=$errs"
 [ -n "$srcw" ] && echo "$srcw" | head -20
 if [ $rc -ne 0 ] || [ ! -f "$ELF" ]; then

@@ -82,6 +82,8 @@ test app afterwards (`clean.sh --apps` dry run first, or ask) - it is git-ignore
 | `reports/README.md` | report format; one `reports/<date>-<skill>.md` per run |
 | `reports/2026-10-14-bringup-demo.md` | first run: blink on pio-arduino-unor4wifi, all stages PASS, 11 findings triaged |
 | `reports/2026-10-14-sensor-debug.md` | sensor-debug + phase_diff on a NUCLEO-C562RE, read-only: 8 stages, 10 findings (6 script fixes re-tested on the board) |
+| `reports/2026-10-16-c5-bringup.md` | C5 bring-up with the board plugged in: build-gate bypass in all skills + hidden `-w` on the UNO R4 found and fixed |
+| `reports/2026-10-16-l475-debug.md` | L475 bring-up + ST-LINK debug (status, ready-made and own scenario) in two phases around a session flash: all PASS, 14 findings (5 script fixes re-tested on two boards) |
 
 Origin: adapted from the TESAIoT project's cleanroom-test (same method; entry point, write limits
 and prompts changed for this repo).

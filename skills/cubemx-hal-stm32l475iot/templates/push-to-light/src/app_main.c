@@ -7,7 +7,8 @@
 * push-to-light demo (same console contract as the other skills' template):
 *   - console commands over the ST-LINK virtual COM port (see help)
 *   - BTNn press toggles LEDn and reports an EVT line (B-L475E-IOT01A: B1 USER -> LED2)
-* The console is polled continuously (the UART has no RX interrupt); buttons are
+* The console is polled from the main loop (board.c receives by USART1 interrupt into a ring
+* buffer - the L4 USART has no RX FIFO); buttons are
 * debounced every BUTTON_POLL_MS from the 1 ms tick.
 *******************************************************************************/
 #include <stdio.h>

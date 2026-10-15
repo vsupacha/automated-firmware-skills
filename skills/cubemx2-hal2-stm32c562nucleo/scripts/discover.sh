@@ -18,14 +18,18 @@ bench_lock "$BOARD_ID" discover.sh
 info "ST-LINK probes on this PC"
 mapfile -t SNS < <(probe_serials)
 [ ${#SNS[@]} -gt 0 ] || need_user CONNECT "no ST-LINK found - plug the board's ST-LINK USB in and close tools that hold it (STM32CubeIDE, a debugger), then re-run discover.sh"
-for s in "${SNS[@]}"; do echo "    $s  VCP=$(find_console_port "$s" | tr -d '\r')"; done
+BOARDS="$(fw_stlink_boards "$PROGRAMMER")"       # "<sn> <ST-LINK board name>" per probe
+for s in "${SNS[@]}"; do echo "    $s  VCP=$(find_console_port "$s" | tr -d '\r')  board=$(echo "$BOARDS" | awk -v s="$s" 'toupper($1)==toupper(s){print $2}')"; done
 if [ -n "$WANT" ]; then
   printf '%s\n' "${SNS[@]}" | grep -qix "$WANT" || die "no ST-LINK with serial $WANT"
   SN="$WANT"
 elif [ ${#SNS[@]} -eq 1 ]; then
   SN="${SNS[0]}"
+elif [ -n "$EXPECTED_STLINK_BOARD" ] && [ "$(echo "$BOARDS" | awk -v b="$EXPECTED_STLINK_BOARD" '$2==b' | wc -l)" -eq 1 ]; then
+  SN="$(echo "$BOARDS" | awk -v b="$EXPECTED_STLINK_BOARD" '$2==b{print $1}')"
+  info "${#SNS[@]} ST-LINKs connected - $SN is the only one reporting board $EXPECTED_STLINK_BOARD"
 else
-  need_user CHOOSE "${#SNS[@]} ST-LINKs connected - ask which one is '$BOARD_ID', then re-run with --serial <sn> (list above)"
+  need_user CHOOSE "${#SNS[@]} ST-LINKs connected - ask which one is '$BOARD_ID' (board= column; external probes report none), then re-run with --serial <sn> (list above)"
 fi
 COM="$(find_console_port "$SN" | tr -d '\r')"
 

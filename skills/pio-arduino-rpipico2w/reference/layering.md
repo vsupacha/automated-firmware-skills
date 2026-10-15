@@ -43,5 +43,5 @@ after the sketch started, so the boot banner is usually missed - tests sync with
 2. Add `board_xxx()` in `board/` hiding pins and core calls.
 3. Add `func/xxx.cpp/.h` with init/poll/get (no blocking > 1 ms in poll).
 4. Register console commands in `main.cpp`; print with the protocol above.
-5. Add test steps to `tests/<app>.json` (automatic first; interactive only when a human is needed).
+5. Add test steps to `tests/<spec>.json` (named after the template, e.g. `push_to_light.json`) (automatic first; interactive only when a human is needed).
 6. Libraries: `lib_deps = owner/name @ x.y.z` (exact version) in `platformio.ini`.

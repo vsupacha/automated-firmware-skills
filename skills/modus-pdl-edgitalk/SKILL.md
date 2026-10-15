@@ -153,7 +153,7 @@ needing admin rights yourself. **Gate:** `missing/bad=0`; report every WARN (ref
      newest release for that BSP (`--example-commit <tag>` to choose); overlays/regeneration/board
      define as usual, but the example's code is kept - no layered template. Before flashing, read
      the example README's hardware needs (radio, display, buttons, phone app...) and compare with
-     `boards/<id>/README.md`; write `tests/<app>.json` from the README's expected UART output.
+     `boards/<id>/README.md`; write `tests/<spec>.json` (named after the template, e.g. `push_to_light.json`) from the README's expected UART output.
    - Never hand-edit `GeneratedSource/`; edit `design.modus` and regenerate with
      `device-configurator-cli --build <design.modus>` (no `--library`).
 - **Open in the IDE (stage 2d, automatic):** at the end, `new_app.sh` runs
@@ -180,7 +180,7 @@ Read `reference/layering.md` before writing code. Rules:
 - `main.c` - wiring + application logic. Uses `func/` (and `board_init`) only.
 - Keep `proj_cm33_s` (secure) untouched. Keep the console protocol stable: `OK ...`, `ERR ...`,
   `EVT ...`, `<TAG> k=v ...`, `INFO ... board=<id> leds=N btns=M` then `READY` - tests depend on it.
-- Write/extend `tests/<app>.json` from the task requirements before the code; gate board-
+- Write/extend `tests/<spec>.json` (named after the template, e.g. `push_to_light.json`) from the task requirements before the code; gate board-
   dependent steps with `requires_re` (spec keys: `scripts/serial_test.py` docstring).
 - Templates: `<repo>/lib/func` (shared logic layer, copied into every app's `proj_cm33_ns/func`) +
   `templates/_common/` (`board/` layer) +

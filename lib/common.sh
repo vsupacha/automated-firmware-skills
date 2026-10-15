@@ -318,6 +318,101 @@ fw_new_app_ide() {
   return 0
 }
 
+# Build warning gate across runs: an incremental build only recompiles changed files, so a
+# re-run after "BUILD: WARNINGS" would see 0 warnings and pass (found by a clean-room run,
+# 2026-10-16). fw_warn_gate_start (after LOG=) forces a clean rebuild while warnings are pending;
+# fw_warn_gate_end <app-dir> <warnings> <rc> (after counting) records them, and clears the mark
+# only after a successful build with none.
+fw_warn_gate_start() {
+  local pending="$1/logs/.warnings-pending"
+  if [ -f "$pending" ] && [ "${CLEAN:-0}" = 0 ]; then
+    info "the previous build had warnings ($(head -1 "$pending")) - clean rebuild so they are counted again"
+    CLEAN=1
+  fi
+}
+fw_warn_gate_end() {
+  local pending="$1/logs/.warnings-pending"
+  if [ "${2:-0}" -gt 0 ]; then
+    echo "$2 warning(s), $(date '+%Y-%m-%d %H:%M')" >"$pending"
+  elif [ "${3:-1}" -eq 0 ]; then
+    rm -f "$pending"
+  fi
+}
+
+# fw_stlink_boards <STM32_Programmer_CLI>: "<probe serial> <board name>" per connected ST-LINK
+# (the on-board ST-LINK reports its board, e.g. NUCLEO-C562RE; an external probe reports none -> "-")
+fw_stlink_boards() {
+  "$1" -l st-link 2>&1 | tr -d '\r' | awk '/ST-LINK SN/{if(sn)print sn, (b?b:"-"); sn=$NF; b=""} /Board Name/{b=$NF} END{if(sn)print sn, (b?b:"-")}'
+}
+
+# fw_stlink_debug status <board-id> | run <app-dir> <scenario.json> [--port N]
+# Stage 7 (debug) for the STM32 skills, engine lib/fwdebug.py. The skill's debug.sh sources env.sh,
+# sets DEBUG_APP_ENV (the app's record file, e.g. l4-app.env) and defines debug_app_elf (prints the
+# ELF of $APPDIR after that file is sourced), then calls this. Needs from env.sh / the profile:
+# PROGRAMMER, GCC_BIN, STM32CUBE_ROOT, GDBSERVER_VERSION, probe_serials, load_board; optional
+# DEBUG_APID in board.env (the core's access port: 1 on the STM32C5, default 0).
+fw_stlink_debug() {
+  local mode="$1" py="$REPO_ROOT/lib/fwdebug.py"; shift || true
+  case "$mode" in
+  status)
+    [ $# -ge 1 ] || die "usage: debug.sh status <board-id>"
+    load_board "$1"
+    require_vars PROBE_SERIAL EXPECTED_DEVICE_ID
+    probe_serials | grep -qix "$PROBE_SERIAL" \
+      || need_user CONNECT "ST-LINK $PROBE_SERIAL not connected - plug the board in (or run discover.sh after changing board/USB port)"
+    bench_lock "$BOARD_ID" debug.sh
+    mkdir -p "$BENCH_DIR"; local log="$BENCH_DIR/$BOARD_ID.debug-status.log" out dev fw
+    out="$("$PROGRAMMER" -c port=SWD sn="$PROBE_SERIAL" mode=HOTPLUG \
+            -r32 0xE000ED00 4 -r32 0xE000EDF0 4 -r32 0xE000ED28 20 2>&1 | tr -d '\r')"
+    echo "$out" >"$log"
+    dev="$(echo "$out" | sed -n 's/^Device ID *: *//p' | head -1)"
+    [ "$(echo "$dev" | tr a-f A-F)" = "$(echo "$EXPECTED_DEVICE_ID" | tr a-f A-F | sed 's/^0X/0x/')" ] \
+      || die "device id '$dev' is not $EXPECTED_DEVICE_ID - not this board (log $log)"
+    _dbg_word() { echo "$out" | sed -n "s/^$1 : *//p" | head -1; }
+    fw="$(_dbg_word 0xE000ED28) $(_dbg_word 0xE000ED38)"    # CFSR HFSR DFSR MMFAR | BFAR (4 words per line)
+    set -- $fw
+    [ -n "$(_dbg_word 0xE000ED00)" ] && [ -n "$(_dbg_word 0xE000EDF0)" ] && [ $# -ge 5 ] \
+      || die "registers not readable (log $log)"
+    echo "board=$BOARD_ID device=$dev probe=ST-LINK (hot plug: no reset, no halt)"
+    "$PYTHON" "$(winpath "$py")" decode --cpuid "$(_dbg_word 0xE000ED00)" --dhcsr "$(_dbg_word 0xE000EDF0)" \
+      --cfsr "$1" --hfsr "$2" --mmfar "$4" --bfar "$5"
+    ;;
+  run)
+    local scen="" port=61234 elf gdb server log
+    APPDIR=""
+    while [ $# -gt 0 ]; do
+      case "$1" in --port) port="$2"; shift;; --*) die "unknown option $1";; *) if [ -z "$APPDIR" ]; then APPDIR="$1"; else scen="$1"; fi;; esac; shift
+    done
+    [ -n "$APPDIR" ] && [ -f "$APPDIR/$DEBUG_APP_ENV" ] && [ -f "$scen" ] \
+      || die "usage: debug.sh run <app-dir> <scenario.json> [--port N]"
+    APPDIR="$(cd "$APPDIR" && pwd)"
+    # shellcheck disable=SC1090
+    . "$APPDIR/$DEBUG_APP_ENV"
+    load_board "$APP_BOARD"
+    require_vars PROBE_SERIAL GDBSERVER_VERSION
+    elf="$(debug_app_elf)"
+    [ -f "$elf" ] || die "no ELF $elf - run build.sh"
+    gdb="$GCC_BIN/arm-none-eabi-gdb.exe"
+    server="$STM32CUBE_ROOT/bundles/stlink-gdbserver/$GDBSERVER_VERSION/bin/ST-LINK_gdbserver.exe"
+    [ -x "$gdb" ] && [ -x "$server" ] \
+      || need_user SETUP "GDB or ST-LINK_gdbserver $GDBSERVER_VERSION missing in the STM32Cube bundles - install them with the STM32CubeIDE for VS Code extension"
+    probe_serials | grep -qix "$PROBE_SERIAL" \
+      || need_user CONNECT "ST-LINK $PROBE_SERIAL not connected - plug the board in (or run discover.sh)"
+    bench_lock "$BOARD_ID" debug.sh
+    mkdir -p "$APPDIR/logs"; log="$APPDIR/logs/debug-$(ts).log"
+    info "attach (no reset) to board $BOARD_ID with $(basename "$elf"); the core is halted while GDB is attached"
+    # -g = attach to the running target, -d = SWD, -m = the core's access port; no -k (reset), no --halt
+    "$PYTHON" "$(winpath "$py")" run --gdb "$(winpath "$gdb")" --elf "$(winpath "$elf")" \
+      --server "\"$(cygpath -w "$server")\" -p $port -d -g -m ${DEBUG_APID:-0} -i $PROBE_SERIAL -cp \"$(cygpath -w "$(dirname "$PROGRAMMER")")\"" \
+      --port "$port" --scenario "$(winpath "$scen")" --log "$(winpath "$log")" \
+      ${CONSOLE_PORT:+--console "$CONSOLE_PORT"} </dev/null
+    ;;
+  *)
+    die "usage: debug.sh status <board-id> | debug.sh run <app-dir> <scenario.json> [--port N]"
+    ;;
+  esac
+}
+
 # fw_vscode_cube_setup <mx-dir>: pre-write the STM32CubeIDE for VS Code project setup of a
 # generated CMake project, from the board profile, so the extension opens it as an already
 # configured STM32Cube project (no "configure discovered projects?" prompt) with the pinned bundle

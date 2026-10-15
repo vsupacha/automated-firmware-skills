@@ -33,3 +33,7 @@ board id, define, labels, USB ids, expected loader identity, sketch offset). Har
 - 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
   name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
   warnings. Both built only, not flashed (the earlier results above were with the old name).
+- 2026-10-16 the build gate saw no warnings at all: PlatformIO's renesas-ra builder passes `-w` to
+  every file. new_app.sh now writes `build_unflags = -w`; that showed 4 warnings in `board.cpp`
+  (comparisons against a button count of 0), fixed by a compile-time "no button" case. blink and
+  push-to-light rebuilt: 0 warnings in src/ (framework warnings are not gated) - built only.

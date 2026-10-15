@@ -33,7 +33,7 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
 | M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 steps 2-4 (+ `regen.sh`, `open_ide.sh`), Stage 4 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 2 step 1, Stage 5, Stage 6 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | Stage 2 step 1, Stage 5, Stage 6, Stage 6b |
 | M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
@@ -211,6 +211,38 @@ B1 USER, look at LED2) only with `--interactive`, after telling the user exactly
 button press must come within 30 s. **Gate:** `RESULT: PASS`. `led?` reads the GPIO output
 register back.
 
+## Stage 6b - Debug through the ST-LINK (shared stage 7)
+
+Read-only status - hot-plug connect, **no reset, no halt** (the firmware keeps running):
+```bash
+bash "$SKILL/scripts/debug.sh" status <board-id>
+```
+Prints CPUID, DHCSR (running / halted / sleeping / lockup) and the fault registers decoded (CFSR,
+HFSR; MMFAR / BFAR only when CFSR marks them valid); raw output in `<apps>/.bench/<board>.debug-status.log`.
+The connect sets "debug in low power mode" in the MCU's debug unit (a debug setting, not program
+memory; it is cleared by a power cycle). Which app the board runs: its console `info` line (Stage 6
+or sensor-debug `send info`); whether it is exactly this ELF: only `debug.sh run` (it halts). **Gate:** `DEBUG: STATUS <state> fault=<none|...>`; exit 1 = a fault or
+lockup is latched - keep the board as it is (no reset, no flash) and report the decoded bits.
+
+Scripted breakpoint / watch / step session:
+```bash
+bash "$SKILL/scripts/debug.sh" run <app> <scenario.json> [--port N]
+```
+ST-LINK_gdbserver **attaches** (no reset, no programming) and GDB first reads the app's loadable
+segments back from the MCU: a board that runs another image stops with "flash the app first" (that
+flash needs the developer's yes). Then the scenario's steps run - `break` (+ a console line sent
+while running), `print`, `step`, `watch` (a hardware watchpoint), `read` (memory or a fault
+register) - each with an expectation. Ready-made: `$SKILL/scenarios/push-to-light.json` (for an app
+made from push-to-light: the `led 1 on` command reaches `cmd_led`, its arguments, the HAL tick,
+no fault). Keys: header of `<repo>/lib/fwdebug.py`. **The core is halted while GDB is attached -
+tell the developer first**; the engine always detaches, so the firmware runs on (after
+push-to-light.json LED1 stays on). An app's own scenarios go into `<app>/scenarios/`.
+**Gate:** `DEBUG: PASS (n/m steps, log <app>/logs/debug-<ts>.log)`.
+Halting changes timing: keep timing checks in Stage 6 tests, not in scenarios.
+
+With several ST-LINKs plugged in, `discover.sh` picks the one whose on-board ST-LINK reports
+this board (`EXPECTED_STLINK_BOARD`); otherwise it asks (`ACTION: CHOOSE`, `board=` column).
+
 ## Stage 7 - Clean
 
 ```bash
@@ -243,6 +275,8 @@ newly verified.
   chosen by the user) or a board whose ST-LINK board / device name / ID don't match.
 - Never change option bytes, read-out protection (RDP) or security settings; never mass-erase or
   upgrade the ST-LINK firmware without asking.
-- Ask before every flash and before `clean.sh --yes`.
+- Ask before every flash and before `clean.sh --yes`. Say before `debug.sh run` that it halts the
+  core while attached; never reset, reflash or detach-and-reset a board whose fault state is
+  being kept (Stage 6b exit 1) unless the developer agrees.
 - CubeMX runs headless through its own java on scripts the skill writes; the scripts end that java
   process tree themselves - never kill other STM32CubeMX / STM32CubeIDE processes.

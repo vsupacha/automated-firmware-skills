@@ -18,6 +18,7 @@ done
 APPDIR="$(cd "$APPDIR" && pwd)"
 require_safe_path "$APPDIR" "app" 120
 mkdir -p "$APPDIR/logs"; LOG="$APPDIR/logs/build-$(ts).log"
+fw_warn_gate_start "$APPDIR"      # warnings of an earlier run are counted again
 M="$APPDIR/build/manifest.txt"; HEX="$APPDIR/build/app_combined.hex"
 rm -f "$M"                                   # no manifest unless this build passes
 [ $CLEAN = 1 ] && { info "make clean"; mtb_make "$APPDIR" clean >>"$LOG" 2>&1 || die "make clean failed ($LOG)"; }
@@ -30,6 +31,7 @@ marker="$(mktemp)"; t0=$SECONDS
 mtb_make "$APPDIR" build -j8 >>"$LOG" 2>&1; rc=$?
 dt=$((SECONDS-t0))
 warn=$(grep -E ':[0-9]+:[0-9]+: warning:|ld(\.exe)?: warning:' "$LOG" | sort -u | wc -l)
+fw_warn_gate_end "$APPDIR" "$warn" "$rc"
 errs=$(grep -E ':[0-9]+:[0-9]+: (fatal )?error:' "$LOG" | sort -u | wc -l)
 signed=$(grep -c 'command "sign" succeeded' "$LOG")
 fresh=0; [ -f "$HEX" ] && [ "$HEX" -nt "$marker" ] && fresh=1
