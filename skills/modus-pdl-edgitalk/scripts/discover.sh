@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 2a: find the board connected to THIS PC and record it as a bench instance.
+# Stage 4: find the board connected to THIS PC and record it as a bench instance.
 # Usage: discover.sh <board-id> [--serial <probe-serial>]
 # Lists KitProg3 probes (fw-loader + USB-UART ports). With one probe it is selected
 # automatically; with several, pass --serial. Then runs the read-only identity check and,

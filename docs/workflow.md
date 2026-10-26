@@ -43,8 +43,10 @@ Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own 
 | --- | --- | --- | --- | --- | --- |
 | **M1 bring-up** | 0 | help | `help.sh [--en]` | - | no |
 | | 1 | setup | `check_tools.sh <board>` | `missing/bad=0` | no |
+| | 1b | tool updates | `update_tools.sh <board> [--apply --yes]` (STM32 CubeMX skills so far) - see [Tool updates](#tool-updates) | `UPDATE: NONE` / `UPDATE: APPLIED n` | no |
 | | 2 | create | `new_app.sh <board> <app> [ws\|""] [template] [--no-open]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
 | | 2d | open in IDE | `open_ide.sh <app> [--no-open]` (new_app.sh runs it) - see [IDE handoff](#ide-handoff-stage-2d) | `IDE: READY` | no |
+| | 2e | code | edit `src/` in layers (board > func > app) - the developer in the IDE or the agent; rules: [board-api.md](board-api.md) | stage 3 build + stage 9 layer check | no |
 | | 3 | build | `build.sh <app>` | `BUILD: PASS` + manifest | no |
 | | 4 | connect | `discover.sh <board>` | `IDENTITY: PASS` | yes |
 | | 5 | flash | `flash.sh <app> --yes` (**ask the developer first**) | `FLASH: PASS` | yes |
@@ -59,6 +61,11 @@ Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own 
 | all | 14 | export | `export_app.sh <app>` *(planned)*: standalone AI-assisted project - see [three ways out](#three-ways-out-of-the-pipeline) | `EXPORT: PASS` | no |
 | | 15 | port | `port.sh <app> --to <skill>:<board>` *(planned)* | target passes its milestones with the **same** `tests/*.json` | target |
 | | 16 | clean | `clean.sh [--apps] [--yes]` | `CLEAN: done` | no |
+
+Every board skill's SKILL.md uses these shared stage numbers in its `## Stage <n>` headings (the
+validator checks them). `<app>` in a command after stage 2 is the **app folder** that `new_app.sh` prints (`Created <folder>`), as a path -
+`apps/my-app`, or `C:/fw-ws/my-app` with a per-PC [apps workspace](#apps-workspace); a bare app name is rejected
+with a usage line. `<board>` is a board id from `boards/index.json`.
 
 Stage 4 (connect) may run before stage 2 - it only needs the board, not an app.
 
@@ -150,7 +157,7 @@ Rules for `open_ide.sh <app> [--no-open]`:
 | `POWER_CYCLE` | unplug + replug | a board whose display firmware needs a power cycle after flashing |
 | `JUMPER` | switches, solder bridges, accessories | Nucleo SB8 (LD1 vs D13), unplug an accessory that holds a button line |
 | `APPROVE` | irreversible or destructive step | flash (overwrites firmware), `clean.sh --apps`, backups |
-| `CHOOSE` | the developer must pick | several boards connected (`--serial`) |
+| `CHOOSE` | the developer must pick | several boards connected (`--serial`); the apps workspace of a new PC ([Apps workspace](#apps-workspace)) |
 | `PRESS` / `OBSERVE` | inside interactive tests (`ACTION >>>` lines of `serial_test.py`) | press SW1/B1/BOOTSEL, look at an LED |
 
 When several choices are pending at once (a new app: board, skill, template, next step), the agent
@@ -242,6 +249,74 @@ Writing specs:
 - Report verification levels separately: source → generated → built → flashed → booted (READY) →
   tested (PASS n/m) → observed by a human. Add a dated line to `boards/<id>/<skill>/README.md`.
 
+## Apps workspace
+
+The apps workspace is the folder where `new_app.sh` creates apps and where `.bench/` (this PC's
+probe serials and console ports) lives. Build outputs stay inside each app, so the IDE and the
+scripts keep sharing one folder. The scripts use the first of these that is set:
+
+1. the workspace argument of `new_app.sh` / `clean.sh` (this app or this run only);
+2. the skill's `<PREFIX>_WS` variable ([overrides](#common-options));
+3. **this PC's workspace**: `FW_WS` in the environment, else `FW_WS=` in `~/.fw-skills.env`
+   (`FW_SETTINGS` names another file). The file is per PC: never in git, never synced;
+4. `<project>/apps`: the repo's `apps/` inside the repo checkout, else `./apps`.
+
+`lib/fw_workspace.sh` shows the workspace in use (`WORKSPACE: <dir> (<source>)`) and saves the choice
+for this PC: `bash lib/fw_workspace.sh set C:/fw-ws` (`unset` goes back to `<project>/apps`).
+
+**Asked once per PC.** When nothing above chose a workspace and `<project>/apps` is in a synced
+folder (Dropbox, OneDrive, Google Drive) or makes the app path longer than the toolchain allows,
+`new_app.sh` creates nothing and stops with `ACTION: CHOOSE` (exit 10). The agent asks the developer,
+runs `fw_workspace.sh set` with the answer and re-runs `new_app.sh`:
+
+- **outside the synced folder** (recommended, e.g. `C:/fw-ws`): no locked files while generating or
+  building, build outputs are not synced, short paths. The apps then live only on this PC - commit
+  real projects to git; test apps are never committed anyway.
+- **keep `<project>/apps`**: apps sync with the repo folder; pause sync if generation or a build
+  fails on locked files, and keep app names short when the path is long.
+
+Why the path length matters: Windows tools fail beyond 260 characters, and CMake (STM32 skills)
+repeats the app path inside `mx/build/.../CMakeFiles/` because `src/` sits outside `mx/`. With a
+98-character app folder the deepest object file was 248 characters. Each skill's `new_app.sh`
+therefore limits the app path (100 for the CubeMX classic, PlatformIO ESP32/UNO and RT-Thread skills, 110 for
+CubeMX2, 120 for ModusToolbox and the Pico).
+
+`.bench/` follows the workspace: after changing it, run `discover.sh <board>` again before flashing.
+`serial_test.py`, sensor-debug and web-wizard read the same setting (`lib/fwpaths.py`).
+
+## Tool updates
+
+Every board profile pins the tool versions its bring-up was proven with (CubeMX, firmware package,
+bundles, PlatformIO platform, ModusToolbox tools, and `IDE_EXT_VERSION` for the VS Code extension).
+Vendors update these on their own, so a proven board can break without any change in this repo.
+
+| Tool | How it changes | What breaks | Risk |
+| --- | --- | --- | --- |
+| VS Code extension (STM32CubeIDE for VS Code, ModusToolbox for VS Code, PlatformIO IDE) | **silently**, VS Code auto-updates extensions; only one version stays installed | the IDE path: files the skills pre-write for the extension (`mx/.settings/*.store.json`, `launch.json`, ModusToolbox `vscode_fix.py`, which copies the 1.12.0 rules) may no longer match - prompts come back, debug launch fails | **high** |
+| STM32Cube bundles (GCC, CMake, Ninja, Programmer, gdbserver, clangd) | the extension's bundle manager adds versions side by side | nothing while the pinned one stays; a removed pin fails build / flash / debug | medium |
+| STM32CubeMX / CubeMX2, firmware packages | installer / updater by the developer; one CubeMX version at a time | regen output (headless script commands, generated code), syscalls paths | medium |
+| ModusToolbox tools, PlatformIO platforms, RT-Thread Studio SDK | installer / `pio pkg update`; usually side by side | build flags, BSP layout, `make vscode` format | medium |
+| VS Code itself, Git for Windows, Python | auto-update | rarely: CLI options, `grep`/`sed` behaviour in Git Bash | low |
+
+**Detect.** `check_tools.sh` shows a WARN when the installed extension differs from `IDE_EXT_VERSION`,
+and a BAD when a pinned tool is missing. `update_tools.sh <board>` lists every pin as `same`,
+`newer` (pinned installed, a newer one too), `changed` (pinned gone, another installed) or
+`missing`.
+
+**Follow only after a yes.** With anything `newer` or `changed`, `update_tools.sh` prints
+`UPDATE: AVAILABLE n` and stops with `ACTION: APPROVE` (exit 10). Staying is fine while the pinned
+versions are installed. When the developer agrees, `update_tools.sh <board> --apply --yes` re-pins
+the profile's `KEY=value` lines and appends a dated **"not re-qualified yet"** line to the board's
+verification log - it builds and flashes nothing.
+
+**Re-qualify.** The levels in the log stay with the old versions until the same gates pass again:
+regen + build (0 warnings), flash (asks first), the bring-up tests, and for an extension update the
+IDE path once in VS Code (open, build, debug, no "fix"/"configure" prompt). Then add the dated result
+line. The profile diff (old -> new pins) plus that line is the evidence for the upgrade.
+
+`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6); the `IDE_EXT_VERSION` check in
+`check_tools.sh` covers every skill whose profile sets it (STM32 and ModusToolbox).
+
 ## Common options
 
 - **`serial_test.py`**:
@@ -254,7 +329,8 @@ Writing specs:
   - Without `--yes` it is a dry run.
   - The default deletes build outputs only; `--apps` also deletes whole apps (your source code) and
     `.bench/`.
-- **Overrides**:
+- **Overrides** (per skill and per shell; for every skill on this PC use the
+  [apps workspace](#apps-workspace) setting):
 
   | Skill | Workspace | Boards folder | Board serial | Console port |
   | --- | --- | --- | --- | --- |
@@ -274,13 +350,14 @@ Writing specs:
 ```
 skills/<skill>/SKILL.md, scripts/, reference/, templates/   one skill per toolchain + MCU family
 lib/common.sh, lib/fwtest.py, lib/func/                      shared by all skills
+lib/fw_workspace.sh, lib/fwpaths.py                          this PC's apps workspace (shell / Python)
 boards/<id>/README.md                                        board hardware, tool-independent
 boards/<id>/<skill>/                                         that skill's board profile + log
 boards/index.json                                            board ids, aliases, MCU, evidence level per profile
 lib/host/, host_test.sh, check_layers.py                     M2 checks: layer rules, optional fake-board unit tests
 tools/validate_skills.py                                     repo validator (run before every commit)
-apps/<app>/                                                  generated projects
-apps/.bench/<id>.env                                         per-PC instance data (git-ignored)
+apps/<app>/                                                  generated projects (or this PC's workspace, see Apps workspace)
+apps/.bench/<id>.env                                         per-PC instance data (git-ignored; in the workspace)
 ```
 
 ## Adding a skill (a new toolchain or MCU family)

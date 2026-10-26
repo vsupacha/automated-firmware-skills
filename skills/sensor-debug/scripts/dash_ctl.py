@@ -26,7 +26,9 @@ def post(port, path, obj):
 
 
 def newest_log(app):
-    repo_apps = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "apps")
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "lib"))
+    import fwpaths  # apps workspace rules shared with the board skills
+    repo_apps = str(fwpaths.default_ws())
     pats = ([os.path.join(app, "logs", "liveview-*.log")] if app else
             ["apps/*/logs/liveview-*.log", os.path.join(repo_apps, "*", "logs", "liveview-*.log"), "liveview-*.log"])
     files = [f for p in pats for f in glob.glob(p)]

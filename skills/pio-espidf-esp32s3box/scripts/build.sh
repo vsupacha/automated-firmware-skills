@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 4: build an app with PlatformIO (ESP-IDF) and write the build manifest.
+# Stage 3: build an app with PlatformIO (ESP-IDF) and write the build manifest.
 # Usage: build.sh <app-dir> [--clean] [--allow-warnings]
 # Gate: "BUILD: PASS" = pio exit 0, firmware.bin/.elf + bootloader + partition table present,
 # 0 warnings in the app's own src/ (an incremental build only recompiles changed files; --clean

@@ -47,3 +47,11 @@ package and bundles, `MX_START`, `MX_CONFIG`, identity gate). Hardware: [../READ
   agent's own `stats.json` 9/9 (break, argc/argv, `g_cmd_count` watchpoints, CFSR/HFSR 0). Core on
   AP 0 (no `DEBUG_APID`). With the NUCLEO-C562RE also plugged in, discover picks this probe by its
   ST-LINK board name.
+- 2026-10-26 `hello-world` (app `hl4`, template code unchanged): check_tools `missing/bad=0`
+  (CubeMX 6.18.1, STM32Cube_FW_L4 V1.18.2, GNU Tools for STM32 14.3.1+st.2, STM32CubeProgrammer
+  2.23.0); discover `IDENTITY: PASS` (ST-LINK/V2-1 FW V2J46M32, board `STM32L4IO`, ID 0x415,
+  3.23 V); REGEN PASS; build PASS 0 warnings, ELF `f7c16d29...`; `FLASH: PASS` (programmed +
+  verified + reset); serial test **RESULT: PASS 9/9** (0 skipped). Not looked at by a person.
+  An earlier run on 2026-10-08 (same template code) also gave 9/9 but was not logged here.
+  Note: on a PC whose repo path is long, `new_app.sh` allows app names of only a few characters
+  in the default `apps/` (100-character path limit).

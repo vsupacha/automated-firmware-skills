@@ -28,6 +28,7 @@ case "$APP" in *[!A-Za-z0-9_-]*|"") die "app name '$APP': use letters, digits, -
 [ -z "$SRC_IOC2" ] || [ -f "$SRC_IOC2" ] || die "no file $SRC_IOC2"
 
 mkdir -p "$WS" || die "cannot create $WS"; WS="$(cd "$WS" && pwd)"; APPDIR="$WS/$APP"
+fw_ws_choose "$WS" "$APPDIR" 110   # ACTION: CHOOSE when no workspace was chosen for this PC and apps/ is synced or too long
 require_safe_path "$APPDIR" "app" 110
 [ -e "$APPDIR" ] && die "$APPDIR already exists - pick another name (or delete it after asking the user)"
 write_workspace_gitignore "$WS"

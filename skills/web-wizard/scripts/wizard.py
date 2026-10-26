@@ -34,6 +34,8 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
 REPO = SKILL.parent.parent
+sys.path.insert(0, str(REPO / "lib"))
+import fwpaths  # noqa: E402  (apps workspace rules shared with the board skills)
 APP_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -69,7 +71,9 @@ def catalog(board, skill, app, ws):
             boards[b["id"]] = {"name": b.get("name", b["id"]), "mcu": b.get("mcu", ""),
                                "family": b.get("mcu_family", ""), "profiles": profiles}
     return {"boards": boards, "skills": skills, "default_board": board if board in boards else next(iter(boards), ""),
-            "default_skill": skill or "", "default_app": app or "", "ws": str(ws), "levels": index.get("evidence_levels", {})}
+            "default_skill": skill or "", "default_app": app or "", "ws": str(ws),
+            # how the commands name the workspace: apps/ when it is the repo's, else its full path
+            "ws_cmd": "apps" if Path(ws).resolve() == (REPO / "apps").resolve() else Path(ws).as_posix(), "levels": index.get("evidence_levels", {})}
 
 
 def run_check(ws, b):
@@ -153,7 +157,7 @@ def main():
     ap.add_argument("--board")
     ap.add_argument("--skill")
     ap.add_argument("--app")
-    ap.add_argument("--ws", help="apps workspace (default: <repo>/apps)")
+    ap.add_argument("--ws", help="apps workspace (default: this PC's, see lib/fw_workspace.sh)")
     ap.add_argument("--http-port", type=int, default=8766)
     ap.add_argument("--timeout", type=float, default=900)
     ap.add_argument("--no-open", action="store_true")
@@ -168,7 +172,7 @@ def main():
             sys.exit("WIZARD: ERROR mode ask needs a questions.json")
         data = json.loads(Path(a.spec).read_text(encoding="utf-8"))
     else:
-        data = catalog(a.board, a.skill, a.app, Path(a.ws).resolve() if a.ws else REPO / "apps")
+        data = catalog(a.board, a.skill, a.app, Path(a.ws).resolve() if a.ws else fwpaths.default_ws().resolve())
     state = {"mode": a.mode, "data": data, "done": threading.Event(), "result": ("TIMEOUT", None)}
     Handler.state = state
     srv = ThreadingHTTPServer(("127.0.0.1", a.http_port), Handler)

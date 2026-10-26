@@ -1,6 +1,8 @@
 ---
 name: scons-rtthread-visionboard
 description: Firmware workflow for the RT-Thread Vision Board (Renesas RA8D1, Cortex-M85) with RT-Thread 5.0.2, its scons build and the board SDK from RT-Thread Studio - check tools and folder paths, create a standalone RT-Thread app from the SDK's blink project plus a layered template (board -> func -> hal_entry.c with msh commands), already synced as an RT-Thread Studio project (GCC 13.3), open it in RT-Thread Studio, build it with scons and a manifest, discover the board's ART-Link CMSIS-DAP probe with pyOCD (read-only CPUID check), flash code flash only (never the option-setting memory) with read-back, and run automated and interactive msh tests (RGB LED, KEY0). Use when asked to create, build, flash (แฟลช) or test Vision Board / RA8D1 RT-Thread firmware, open such an app in RT-Thread Studio, or how to use this skill (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for Renesas e2 studio / FSP-only projects, Keil MDK, or other RA boards without a profile.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs RT-Thread Studio with the VISION-BOARD SDK (scons, GCC 13.3, pyOCD); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # RT-Thread Vision Board firmware workflow (RT-Thread + scons + pyOCD)
@@ -36,7 +38,7 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 | M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(planned)* | Stage 3 rules, `check_layers.py` |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, APPROVE, CHOOSE ...):
@@ -123,6 +125,11 @@ Missing pieces are installed in Studio's SDK Manager by the user - never by you.
 ## Stage 2 - Create the project and open it in the IDE
 
 1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - copies the SDK project `vision_board_blink_led` (without pictures/Keil files), `rt-thread/`
      (without documentation/examples) and `libraries/HAL_Drivers`, then `templates/_common/src` +
      the template's `src/` and `tests/` (about 15 s, 38 MB).
@@ -204,7 +211,7 @@ until `READY`, checks `board=<id>`, runs the steps. Interactive steps (LED colou
 only with `--interactive`: tell the user what to look at first. **Gate:** `RESULT: PASS`. `led`
 reads the pins back; only a human confirms the colours.
 
-## Stage 7 - Clean
+## Stage 16 - Clean
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run

@@ -23,6 +23,7 @@ templates() {
 
 if [ $LANG_EN = 1 ]; then cat <<'EOF'
 skill pio-arduino-unor4wifi (Arduino UNO R4 WiFi, PlatformIO + Arduino) - ask Claude in your own words:
+  (<app> in the later stages = the app folder new_app.sh prints, e.g. apps/my-app or C:/fw-ws/my-app)
  Set up / check
   "check my tools"                            -> check_tools.sh <board>
  Create and build (no board needed)
@@ -41,6 +42,7 @@ skill pio-arduino-unor4wifi (Arduino UNO R4 WiFi, PlatformIO + Arduino) - ask Cl
 EOF
 else cat <<'EOF'
 skill pio-arduino-unor4wifi (Arduino UNO R4 WiFi, PlatformIO + Arduino) - สั่ง Claude ได้ด้วยภาษาของคุณเอง ตัวอย่าง:
+  (<app> ในขั้นหลัง new_app.sh = โฟลเดอร์แอปที่ new_app.sh พิมพ์ออกมา เช่น apps/my-app หรือ C:/fw-ws/my-app)
  เตรียม / ตรวจสอบ
   "ตรวจเครื่องมือให้หน่อย"                         -> check_tools.sh <board>
  สร้างและ build (ไม่ต้องมีบอร์ด)

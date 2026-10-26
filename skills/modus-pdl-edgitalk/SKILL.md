@@ -1,6 +1,8 @@
 ---
 name: modus-pdl-edgitalk
 description: End-to-end firmware workflow for Infineon PSOC Edge E84 (PSE84) boards - RT-Thread Edgi-Talk (other E84 boards through their own profiles) - with native ModusToolbox on Windows - check dev tools and folder paths, discover the KitProg3 board, create a Project Creator app with a board BSP overlay, write layered code (board -> func -> main), build, flash with identity/life-cycle gates via OpenOCD, run automated UART tests, list and start from Infineon ModusToolbox code examples, and clean build outputs. Use when asked to create, build, flash (แฟลช) or test PSOC Edge / PSE84 / E84 firmware (บอร์ด PSOC Edge), list or start from ModusToolbox examples for E84, port an app to another E84 board, add an E84 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for PSoC 6 or other MCU families.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs ModusToolbox 3.9 (+ Programming Tools/OpenOCD); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # PSOC Edge E84 firmware workflow
@@ -29,12 +31,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 4 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 2 step 1, Stage 5, Stage 6 |
-| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 3 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 4 (discover), Stage 5, Stage 6 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 2e (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, POWER_CYCLE, JUMPER,
@@ -132,7 +134,7 @@ git, python + pyserial, and lists Infineon COM ports. `--fix` only installs pyse
 Anything else missing: tell the user what to install (ModusToolbox Setup) - never run installers
 needing admin rights yourself. **Gate:** `missing/bad=0`; report every WARN (reference/tools.md).
 
-## Stage 2 - Discover the board, create the project
+## Stage 2 - Create the project (and stage 4: discover the board)
 
 1. **Discover (needs the board, read-only):** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <s>]`
    - lists KitProg3 probes + their USB-UART COM ports, picks the only one (or `--serial`),
@@ -142,6 +144,11 @@ needing admin rights yourself. **Gate:** `missing/bad=0`; report every WARN (ref
      busy in another tool, locked chip). Re-run after changing board or USB port.
    - No board yet? Skip to step 2 - creating and building need no hardware.
 2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - clones the pinned template app, Project Creator with the base BSP (auto-detects the BSP
      folder), optional pinned BSP replacement (`BSP_SOURCE=git:...`), checks BSP version and the
      **base `design.modus` sha256**, applies overlays (hash-checked), regenerates
@@ -171,7 +178,7 @@ needing admin rights yourself. **Gate:** `missing/bad=0`; report every WARN (ref
   **Gate:** `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or the
   extension is missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
-## Stage 3 - Code in layers
+## Stage 2e - Code in layers
 
 Read `reference/layering.md` before writing code. Rules:
 - `proj_cm33_ns/board/` - **only** place for `CYBSP_*` aliases, `Cy_*` pin/SCB calls and
@@ -197,7 +204,7 @@ Read `reference/layering.md` before writing code. Rules:
 `bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` unit-tested on the PC
 against a fake board, no hardware). Fix a violation in the layer the message names.
 
-## Stage 4 - Build
+## Stage 3 - Build
 
 ```bash
 bash "$SKILL/scripts/build.sh" <app-dir> [--clean] [--getlibs] [--allow-warnings]
@@ -244,7 +251,7 @@ Interactive steps (press a button, look at an LED) run only with `--interactive`
 `--only-interactive`: first tell the user exactly what to do (prompts use `BTN_LABELS`), then run.
 **Gate:** `RESULT: PASS`. A human-observed result is a separate level - ask and record it.
 
-## Stage 7 - Clean (reset the apps workspace)
+## Stage 16 - Clean (reset the apps workspace)
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run: lists what would go

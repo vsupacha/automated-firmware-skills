@@ -121,16 +121,16 @@ function fix() {   // keep the selection consistent after a change
 
 function commands() {
   if (!S.skill) return [];
-  const sc = `skills/${S.skill}/scripts`, app = S.app || "<app>";
+  const sc = `skills/${S.skill}/scripts`, app = S.app || "<app>", w = D.ws_cmd || "apps";
   const gen = `bash ${sc}/new_app.sh ${S.board} ${app} "" ${S.template}` +
               (S.action === "generate_ide" || S.openIde ? "" : " --no-open");
   const out = [gen];
-  if (S.action !== "generate_ide") out.push(`bash ${sc}/build.sh apps/${app}`);
+  if (S.action !== "generate_ide") out.push(`bash ${sc}/build.sh ${w}/${app}`);
   if (S.action === "build_flash_test") {
     const spec = (skill().templates[S.template]?.tests || [])[0] || "<spec>.json";
     out.push(`bash ${sc}/discover.sh ${S.board}        # only if this PC has no bench file yet`,
-             `bash ${sc}/flash.sh apps/${app} --yes`,
-             `python ${sc}/serial_test.py auto apps/${app}/tests/${spec} apps/${app}/logs/test.log --board ${S.board}`);
+             `bash ${sc}/flash.sh ${w}/${app} --yes`,
+             `python ${sc}/serial_test.py auto ${w}/${app}/tests/${spec} ${w}/${app}/logs/test.log --board ${S.board}`);
   }
   return out;
 }

@@ -12,7 +12,8 @@ REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 . "$REPO_ROOT/lib/common.sh" || { echo "ERROR: $REPO_ROOT/lib/common.sh missing - keep the repo layout" >&2; exit 1; }
 PATH_EXAMPLE="C:/stm32-ws"
 
-# Where apps go (CUBE_WS): <repo>/apps inside the repo checkout, else ./apps.
+# Where apps go (CUBE_WS): the per-PC workspace (FW_WS / ~/.fw-skills.env, lib/fw_workspace.sh), else
+# <repo>/apps inside the repo checkout, else ./apps.
 # Bench files: this PC's ST-LINK serial + VCP COM port.
 CUBE_WS="${CUBE_WS:-$(fw_default_ws)}"
 BENCH_DIR="${CUBE_BENCH_DIR:-$CUBE_WS/.bench}"

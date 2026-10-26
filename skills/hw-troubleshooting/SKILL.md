@@ -1,6 +1,8 @@
 ---
 name: hw-troubleshooting
 description: Hardware troubleshooting method for any board of this repo - find out whether a fault is firmware, configuration, bench setup or hardware, without guessing pins and without risky writes - least-invasive steps first (console of the running app, read-only identity/register reads, then a gated firmware change), one physical action at a time with marked phases and a positive control, separation by a reference (second board, vendor firmware, known-good image), and recording every finding in the board's verification log. Covers a stuck or clamped bus, devices that do not answer, buttons/LEDs that do nothing, values that change for no reason, "works on one board but not the other", and a second probe on the same PC. Use when the user says something does not work on the board, "check the HW", "why is X dead", "compare with the working board", "is it firmware or hardware", "which pin is this button".
+license: MIT
+compatibility: a method skill for any agent; uses the board skills' scripts and sensor-debug, Python 3 for phase_diff.py
 ---
 
 # hw-troubleshooting - is it firmware, setup or hardware?

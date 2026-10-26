@@ -1,6 +1,8 @@
 ---
 name: pio-arduino-unor4wifi
 description: Firmware workflow for the Arduino UNO R4 WiFi (Renesas RA4M1) with PlatformIO and the Arduino UNO R4 core (renesas-ra platform) - check tools and folder paths, create a PlatformIO Arduino app from a layered template (board -> func -> setup/loop) written with the Arduino API, with the platform pinned to an exact version, open it in VS Code with PlatformIO IDE, build it with a manifest, discover the board through its ESP32-S3 USB bridge (USB serial, loader identity), flash the sketch with bossac behind identity gates, and run automated serial tests (console + LED L; the board has no user button). Use when asked to create, build, flash (แฟลช) or test UNO R4 WiFi firmware with PlatformIO (บอร์ด Arduino UNO R4 WiFi), or how to use this skill (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for the Arduino IDE / arduino-cli, the UNO R4 Minima, the classic UNO R3, or the board's ESP32-S3 bridge firmware.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs PlatformIO (Arduino UNO R4 core); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # Arduino UNO R4 WiFi firmware workflow (PlatformIO + Arduino)
@@ -32,12 +34,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 4 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned: needs an SWD probe)* | Stage 2 step 1, Stage 5, Stage 6 |
-| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(not for Arduino C++)* | Stage 3 (Arduino-style rules, `check_layers.py`) |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 3 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned: needs an SWD probe)* | Stage 4 (discover), Stage 5, Stage 6 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(not for Arduino C++)* | Stage 2e (Arduino-style rules, `check_layers.py`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, APPROVE, CHOOSE ...):
@@ -123,7 +125,7 @@ use PlatformIO's python), lists Arduino USB devices, and checks VS Code + Platfo
 **Gate:** `missing/bad=0`; report every WARN. Missing PlatformIO: tell the user to install it -
 don't install it yourself. Changing git config is the user's call - ask.
 
-## Stage 2 - Discover the board, create the project
+## Stage 2 - Create the project (and stage 4: discover the board)
 
 1. **Discover:** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <usb-serial>]`
    - lists Arduino USB devices (VID 2341), then a 1200 baud touch starts the bridge's loader and
@@ -134,6 +136,11 @@ don't install it yourself. Changing git config is the user's call - ask.
    - **Gate:** `IDENTITY: PASS` (PID 1002, loader + device as the profile, security false, nothing
      locked) + `Saved ...` (bench file). Several boards: `--serial`.
 2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - copies `templates/_common/src` (board + func layers) and the template's `src/` + `tests/`,
      writes `platformio.ini` and `arduino-app.env`. No network needed.
    - **Gate:** `Created ...`.
@@ -146,7 +153,7 @@ don't install it yourself. Changing git config is the user's call - ask.
    `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
    missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
-## Stage 3 - Code in layers
+## Stage 2e - Code in layers
 
 Read `reference/layering.md` before writing code. Rules:
 Arduino style: every file includes `<Arduino.h>` and uses the Arduino API - `millis()`,
@@ -173,7 +180,7 @@ outside `board/`.
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS` (`<Arduino.h>` is allowed in every
 layer; pin I/O and `Serial` only in `board/`). `host_test.sh` does not cover this skill (Arduino C++).
 
-## Stage 4 - Build
+## Stage 3 - Build
 
 ```bash
 bash "$SKILL/scripts/build.sh" <app-dir> [--clean] [--allow-warnings]
@@ -218,7 +225,7 @@ Default `--sync` sends `info` until `READY`, checks `board=<id>`, runs the steps
 (look at LED L on, then off) only with `--interactive`: tell the user what to look at first.
 **Gate:** `RESULT: PASS`. `led?` reads the pin back; only a human confirms the LED lit.
 
-## Stage 7 - Clean
+## Stage 16 - Clean
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run

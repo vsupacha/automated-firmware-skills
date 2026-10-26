@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 2a: find the connected board and save this PC's bench file (USB serial = chip ID, COM port).
+# Stage 4: find the connected board and save this PC's bench file (USB serial = chip ID, COM port).
 # Usage: discover.sh <board-id> [--serial <usb-serial>]
 # Read-only: never reboots or writes the board. A board running a sketch is identified by its USB
 # IDs + serial; a board in BOOTSEL (blank or held at power-up) is also checked with picotool

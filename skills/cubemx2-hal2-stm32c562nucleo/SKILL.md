@@ -1,6 +1,8 @@
 ---
 name: cubemx2-hal2-stm32c562nucleo
 description: End-to-end firmware workflow for STM32C5 boards (NUCLEO-C562RE) with the STM32CubeMX2 CLI on Windows - check the pinned STM32Cube bundles and packs, discover the on-board ST-LINK, create the hardware configuration (.ioc2) from the board with the pinned board pack, generate the CMake project headlessly, write layered code (board -> func -> app_main) hooked into the generated main.c, build with the pinned GCC/CMake/Ninja, flash with STM32CubeProgrammer behind identity gates (ST-LINK board, device name and ID), run automated UART tests over the ST-LINK virtual COM port, regenerate after .ioc2 changes, and clean build outputs. Use when asked to create, build, flash (แฟลช) or test STM32C5 / NUCLEO-C562RE firmware with STM32CubeMX2 (บอร์ด Nucleo), start from an existing .ioc2, regenerate after a CubeMX change, add an STM32C5 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for classic STM32CubeMX (.ioc) projects or other STM32 families.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs STM32CubeMX2 + STM32Cube for VS Code bundles (GCC, CMake, Ninja, STM32CubeProgrammer); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # STM32C5 firmware workflow (STM32CubeMX2)
@@ -30,12 +32,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2 (+ `regen.sh`), Stage 4 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | Stage 2 step 1, Stage 5, Stage 6, Stage 6b |
-| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2 (+ `regen.sh`), Stage 3 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | Stage 4 (discover), Stage 5, Stage 6, Stage 7 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 2e (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, POWER_CYCLE, JUMPER,
@@ -121,13 +123,18 @@ pinned pack, python + pyserial, and lists ST-LINKs with their VCP. Read-only.
 **Gate:** `missing/bad=0`. A missing bundle/pack: tell the user to install it with STM32CubeMX2 /
 the STM32Cube bundle manager - don't install it yourself; never silently use another version.
 
-## Stage 2 - Discover the board, create the project
+## Stage 2 - Create the project (and stage 4: discover the board)
 
 1. **Discover (read-only):** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <sn>]`
    - lists ST-LINKs, hot-plug connects (no reset, no write) and checks the board name the ST-LINK
      reports, the device name and the device ID; saves the bench file.
    - **Gate:** `IDENTITY: PASS`. Several ST-LINKs: `--serial` (it never guesses).
 2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app> [<workspace>] [template] [--ioc2 <file>]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - starts a headless STM32CubeMX2 backend (own free port, stopped afterwards), creates
      `<app>.ioc2` from the board + `MX_CONFIG`, copies the template, then runs `regen.sh`.
    - **Gate:** `REGEN: PASS` and `Created ...`.
@@ -148,7 +155,7 @@ the STM32Cube bundle manager - don't install it yourself; never silently use ano
    `ACTION: SETUP` = VS Code or the extension is missing (new_app.sh only reports it). See
    docs/workflow.md "IDE handoff".
 
-## Stage 3 - Code in layers
+## Stage 2e - Code in layers
 
 Read `reference/layering.md` first. Rules:
 - `src/board/` - **only** place for GPIO ports/pins, HAL2/LL calls, `#if defined(BOARD_xxx)`.
@@ -169,7 +176,7 @@ Read `reference/layering.md` first. Rules:
 `bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` unit-tested on the PC
 against a fake board, no hardware). Fix a violation in the layer the message names.
 
-## Stage 4 - Build
+## Stage 3 - Build
 
 ```bash
 bash "$SKILL/scripts/build.sh" <app> [--clean] [--allow-warnings]
@@ -206,7 +213,7 @@ python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/t
 the steps. Interactive steps (press B1, look at LD1) only with `--interactive`, after telling the
 user exactly what to do. **Gate:** `RESULT: PASS`. `led?` reads the GPIO output register back.
 
-## Stage 6b - Debug through the ST-LINK (shared stage 7)
+## Stage 7 - Debug through the ST-LINK
 
 Read-only status - hot-plug connect, **no reset, no halt** (the firmware keeps running):
 ```bash
@@ -240,7 +247,7 @@ Halting changes timing: keep timing checks in Stage 6 tests, not in scenarios.
 With several ST-LINKs plugged in, `discover.sh` picks the one whose on-board ST-LINK reports
 this board (`EXPECTED_STLINK_BOARD`); otherwise it asks (`ACTION: CHOOSE`, `board=` column).
 
-## Stage 7 - Clean
+## Stage 16 - Clean
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run
@@ -272,6 +279,6 @@ dated line to `boards/<id>/cubemx2-hal2-stm32c562nucleo/README.md` when a board 
   never mass-erase or upgrade ST-LINK firmware without asking.
 - Ask before every flash and before `clean.sh --yes`. Say before `debug.sh run` that it halts the
   core while attached; never reset, reflash or detach-and-reset a board whose fault state is
-  being kept (Stage 6b exit 1) unless the developer agrees.
+  being kept (Stage 7 exit 1) unless the developer agrees.
 - The headless backend is started and killed by the scripts on their own port; never kill other
   STM32CubeMX2 / STM32CubeIDE processes.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 2a: find the connected board's ST-LINK, check the target read-only, save this PC's bench
+# Stage 4: find the connected board's ST-LINK, check the target read-only, save this PC's bench
 # file (probe serial + VCP COM port).
 # Usage: discover.sh <board-id> [--serial <stlink-serial>]
 # Read-only: hot-plug connect (no reset, no write). On PASS writes <CUBE_WS>/.bench/<board-id>.env.

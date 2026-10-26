@@ -12,7 +12,8 @@ REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 . "$REPO_ROOT/lib/common.sh" || { echo "ERROR: $REPO_ROOT/lib/common.sh missing - keep the repo layout" >&2; exit 1; }
 PATH_EXAMPLE="C:/pse84-ws"
 
-# Where apps go (PSE84_WS): <repo>/apps inside the repo checkout, else ./apps. Backups go next to
+# Where apps go (PSE84_WS): the per-PC workspace (FW_WS / ~/.fw-skills.env, lib/fw_workspace.sh), else
+# <repo>/apps inside the repo checkout, else ./apps. Backups go next to
 # the workspace unless PSE84_BACKUP_DIR is set. Bench files: this PC's probe serial + COM port.
 PSE84_WS="${PSE84_WS:-$(fw_default_ws)}"
 PSE84_BACKUP_DIR="${PSE84_BACKUP_DIR:-$(dirname "$PSE84_WS")/backup}"

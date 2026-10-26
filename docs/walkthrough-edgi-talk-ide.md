@@ -36,6 +36,9 @@ Claude runs `bash skills/modus-pdl-edgitalk/scripts/help.sh --en` and shows the 
  Active milestones: M1  (hardware commands = M3; enable in milestones.env)
 ```
 
+*(Captured before 2026-10-08, when the hardware commands belonged to milestone M3. Today they are
+part of M1, and the menu says so.)*
+
 ## 2. "Check my tools"
 
 > **You:** Check my PC for the Edgi-Talk tools.
@@ -151,8 +154,9 @@ Two ways, both your decision:
   Launch PSOCE84 CM33 (KitProg3_MiniProg4)** to program and stop in the debugger. These tasks
   program whatever KitProg3 is connected - there is no identity check; with several probes set
   `MTB_PROBE_SERIAL` in `bsp.mk` and re-run `open_ide.sh --refresh`.
-- **Script path** - Claude's `flash.sh` checks the probe, the board and the image hash first. In
-  this release only milestone M1 is active, so it stops before touching any hardware:
+- **Script path** - Claude's `flash.sh` checks the probe, the board and the image hash first. At the
+  time of this capture the hardware stages belonged to milestone M3, which was not active, so it
+  stopped before touching any hardware:
 
 ```
 $ bash skills/modus-pdl-edgitalk/scripts/flash.sh apps/my-edgi --yes

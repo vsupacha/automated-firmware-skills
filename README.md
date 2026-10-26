@@ -24,14 +24,63 @@ Other languages: [ภาษาไทย](README_TH.md) · [日本語](README_JA.
   every board: **hello-world** (UART console), **blink** (LED), **push-to-light** (button lights
   an LED). A board without a button gets the first two.
 - **Board type vs bench.** `boards/<id>/` describes a board type (pins, expected identity, pinned
-  tools); the probe serial and COM port of *your* board on *your* PC go into `apps/.bench/`, never
-  into git.
+  tools); the probe serial and COM port of *your* board on *your* PC go into `.bench/` of the apps
+  workspace, never into git.
+- **Apps workspace per PC.** Apps go to `apps/` unless this PC has its own workspace (e.g. `C:/fw-ws`,
+  outside Dropbox/OneDrive); a new app asks once when `apps/` is in a synced folder or too long -
+  see [Apps workspace](docs/workflow.md#apps-workspace).
 - **Honest results.** built ≠ flashed ≠ tested ≠ observed by a person - every board keeps a dated
   verification log.
 
+## Requirements
+
+| What | Needed for | Notes |
+| --- | --- | --- |
+| **Windows 10/11 + [Git for Windows](https://git-scm.com/download/win)** (Git Bash) | every script | the scripts are bash; Linux/macOS are not supported yet |
+| **Python 3** with `pyserial` (`pip install --user pyserial`) | tests, debug, tool skills | tested with Python 3.12 |
+| **[Claude Code](https://claude.com/claude-code)** | the agent path | optional: every stage also runs by hand |
+| **The vendor toolchain of your board** | setup onward | not bundled - each board's README lists the exact versions (ModusToolbox, STM32CubeMX / CubeMX2 + STM32Cube bundles, PlatformIO, RT-Thread Studio) |
+| **VS Code + the vendor's extension** | the IDE path | optional; RT-Thread Studio for the Vision Board |
+| **The board and its USB cable** | connect, flash, test, debug | build stages need no board |
+
+Keep apps on a short local path without spaces, outside Dropbox/OneDrive if you can (Windows tools
+fail beyond 260 characters; synced folders lock files during builds) - `new_app.sh` asks once per PC
+([Apps workspace](docs/workflow.md#apps-workspace)).
+
+## Quick start (about 5 minutes, no board needed)
+
+In Claude Code, from an empty project folder, install the plugin for your board's toolchain (it
+pulls in `firmware-tools`):
+
+```
+/plugin marketplace add vsupacha/automated-firmware-skills
+/plugin install firmware-stm32@automated-firmware-skills
+```
+
+| Plugin | Boards / skills | Install |
+| --- | --- | --- |
+| `firmware-stm32` | NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1 | `/plugin install firmware-stm32 --marketplace vsupacha/automated-firmware-skills` |
+| `firmware-platformio` | Pico 2 W, ESP32-S3-BOX (ESP-IDF, Arduino), UNO R4 WiFi | `/plugin install firmware-platformio --marketplace vsupacha/automated-firmware-skills` |
+| `firmware-modustoolbox` | Edgi-Talk (PSOC Edge E84) | `/plugin install firmware-modustoolbox --marketplace vsupacha/automated-firmware-skills` |
+| `firmware-rtthread` | Vision Board (RA8D1) | `/plugin install firmware-rtthread --marketplace vsupacha/automated-firmware-skills` |
+| `firmware-tools` | web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting (installed with each of the above) | `/plugin install firmware-tools --marketplace vsupacha/automated-firmware-skills` |
+| `automated-firmware-skills` | everything above in one plugin - install this **or** the vendor plugins, not both | `/plugin install automated-firmware-skills --marketplace vsupacha/automated-firmware-skills` |
+
+A vendor plugin adds up to about 1,000 tokens of skill descriptions to every session (plus about 800 for
+`firmware-tools`); the all-in-one plugin about 3,300. The one-line `--marketplace` form needs Claude
+Code 2.1.275 or later.
+
+Then ask "check my tools for the B-L475E-IOT01A" (or your board from
+[boards/README.md](boards/README.md)). You should see a table ending in `missing/bad=0`; every `BAD`
+row says what to install. Next ask "create a hello-world app and build it": expect `REGEN: PASS` /
+`Created ...` and then `BUILD: PASS`. With the board plugged in, "flash it and run the test" ends in
+`IDENTITY: PASS`, a flash question you answer, `FLASH: PASS` and `RESULT: PASS (9/9 ...)`.
+
 ## How to use
 
-1. **Install** the plugin in Claude Code (works from any project folder; apps go to `./apps` there):
+1. **Install** a plugin in Claude Code - a vendor plugin from the table in
+   [Quick start](#quick-start-about-5-minutes-no-board-needed), or all of them (works from any
+   project folder; apps go to `./apps` there unless this PC has its own workspace):
 
    ```
    /plugin marketplace add vsupacha/automated-firmware-skills
@@ -56,6 +105,9 @@ bash $S/discover.sh b-l475e-iot01a                    # 4 connect    -> IDENTITY
 bash $S/flash.sh apps/my-blink --yes                  # 5 flash      -> FLASH: PASS (only after you decided)
 python $S/serial_test.py auto apps/my-blink/tests/blink.json apps/my-blink/logs/test.log --board b-l475e-iot01a
 ```
+
+`apps/my-blink` stands for the app folder `new_app.sh` prints (`Created <folder>`); with a per-PC
+workspace it is e.g. `C:/fw-ws/my-blink`.
 
 Exit codes: 0 pass (WARN rows are advice), 1 fail, 2 warnings that block a gate (build, layer
 check), **10 = do what the `ACTION:` line says, then re-run**.
@@ -117,7 +169,7 @@ project and build folders as the scripts. Details: [docs/workflow.md](docs/workf
 
 ```
 automated-firmware-skills/
-├── .claude-plugin/          plugin + marketplace manifests (install with /plugin)
+├── .claude-plugin/          marketplace.json: the plugins (all-in-one, per vendor, firmware-tools)
 ├── milestones.env           release scope: active milestones (M1)
 ├── skills/<toolchain>-<framework>-<board>/   SKILL.md, scripts/, reference/, templates/
 ├── boards/<id>/             board README (tools, commands, hardware) + one profile per skill
@@ -125,20 +177,18 @@ automated-firmware-skills/
 ├── lib/                     shared: common.sh, fwtest.py (test engine), func/ (C logic layer), M2 checks
 ├── docs/                    milestones, workflow contract, board API, walkthrough
 ├── tools/validate_skills.py repo validator: run it before every commit
-└── apps/<app>/              projects generated by the skills: build outputs and per-PC files are
+├── lib/fw_workspace.sh      this PC's apps workspace: show / set / unset (~/.fw-skills.env)
+└── apps/<app>/              projects generated by the skills (or this PC's workspace): build outputs and per-PC files are
                              git-ignored, app sources are not - never commit test apps
 ```
 
 ## Contributing
 
-Follow [docs/workflow.md](docs/workflow.md) and [docs/board-api.md](docs/board-api.md); run
-`python tools/validate_skills.py` before every commit (`VALIDATE: PASS`). For a new or changed skill,
-template or board profile, also run the [cleanroom-test](skills/cleanroom-test/SKILL.md) skill and fix
-what its report finds. Never commit probe serials,
-COM ports, IP addresses, user paths, build outputs or flash dumps (`.gitignore` covers the usual
-places). Keep scripts and `.env` files LF. Report verification honestly: built ≠ flashed ≠ tested.
-New board: copy [boards/_template](boards/_template/README.md); your own board in your own project:
-put its profile in `<project>/boards/<id>/<skill>/` - the skills look there first.
+See [CONTRIBUTING.md](CONTRIBUTING.md): `python tools/validate_skills.py` must end with
+`VALIDATE: PASS`, a new or changed skill gets a [cleanroom-test](skills/cleanroom-test/SKILL.md) run,
+results are logged honestly (built ≠ flashed ≠ tested), and serials, COM ports, user paths and build
+outputs never reach git. Security issues: [SECURITY.md](SECURITY.md). Changes per release:
+[CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

@@ -1,6 +1,8 @@
 ---
 name: cubemx-hal-stm32l475iot
 description: Firmware workflow for the ST B-L475E-IOT01A IoT node (STM32L475VG) with classic STM32CubeMX 6.18 (headless), the STM32CubeL4 HAL and CMake on Windows - check the pinned tools (all-users or per-user installs), create the .ioc from the CubeMX board configuration plus the USART1 console on the ST-LINK virtual COM port, generate the CMake project, open it in STM32CubeIDE for VS Code, write layered code (board -> func -> app_main), build with a manifest, discover the ST-LINK/V2-1, flash behind identity gates, run automated and interactive UART tests (B1 USER, LED2), regenerate after .ioc changes, clean. Use when asked to create, build, flash (แฟลช) or test B-L475E-IOT01A / STM32L475 firmware with STM32CubeMX, open such an app in VS Code, or how to use this skill (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for STM32CubeMX2 boards, B-L4S5I/B-U585I kits or STM32CubeIDE projects.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs STM32CubeMX 6.18 + STM32CubeL4 + STM32Cube bundles (GCC, CMake, Ninja, STM32CubeProgrammer); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # B-L475E-IOT01A firmware workflow (STM32CubeMX + STM32CubeL4 HAL + CMake)
@@ -32,12 +34,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 steps 2-4 (+ `regen.sh`, `open_ide.sh`), Stage 4 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | Stage 2 step 1, Stage 5, Stage 6, Stage 6b |
-| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 steps 2-4 (+ `regen.sh`, `open_ide.sh`), Stage 3 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | Stage 4 (discover), Stage 5, Stage 6, Stage 7 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 2e (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, APPROVE, CHOOSE...): tell
@@ -127,7 +129,14 @@ GNU Tools for STM32 / CMake / Ninja / STM32CubeProgrammer bundles, python + pyse
 IDE (VS Code + STM32CubeIDE for VS Code, warning only). Every tool row says **GLOBAL** (installed
 for all users) or **LOCAL** (per user). Read-only. **Gate:** `missing/bad=0`.
 
-## Stage 2 - Discover the board, create the project
+**Tool updates (stage 1b):** `bash "$SKILL/scripts/update_tools.sh" <board-id>` compares every pin of the
+board profile (CubeMX, firmware package, STM32Cube bundles, `IDE_EXT_VERSION`) with this PC. Read-only.
+**Gate:** `UPDATE: NONE`, or `UPDATE: AVAILABLE n` + exit 10 `ACTION: APPROVE` - ask the developer;
+only after a yes run it again with `--apply --yes` (re-pins the profile, logs "not re-qualified"),
+then re-qualify: regen + build, flash (asks first) and the tests. Run it when check_tools shows
+an `IDE: extension` WARN or a tool update is announced.
+
+## Stage 2 - Create the project (and stage 4: discover the board)
 
 1. **Discover (stage 4 connect, read-only):** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <sn>]`
    - lists ST-LINKs, hot-plug connects (no reset, no write) and checks the board name the ST-LINK
@@ -135,6 +144,11 @@ for all users) or **LOCAL** (per user). Read-only. **Gate:** `missing/bad=0`.
    - **Gate:** `IDENTITY: PASS`. Several ST-LINKs: `--serial` (it never guesses). No board yet?
      Skip to step 2.
 2. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app> [<workspace>] [template] [--no-open]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - copies `lib/func` + `templates/_common/src` + the template, then one headless CubeMX run
      (`MX_START`, `MX_CONFIG`, save `<app>.ioc`, generate `mx/`), then `overlay.py`. 30 s - 2 min.
    - **Gate:** `REGEN: PASS` and `Created ...` (any `KO`, lost file or missing `exit` fails it).
@@ -151,7 +165,7 @@ for all users) or **LOCAL** (per user). Read-only. **Gate:** `missing/bad=0`.
    **Gate:** `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or the
    extension is missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
-## Stage 3 - Code in layers
+## Stage 2e - Code in layers
 
 Read `reference/layering.md` first. Rules:
 - `src/board/` - **only** place for GPIO ports/pins, HAL/CMSIS calls, `#if defined(BOARD_xxx)`.
@@ -171,7 +185,7 @@ Read `reference/layering.md` first. Rules:
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS`, and
 `bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` on the PC, fake board).
 
-## Stage 4 - Build
+## Stage 3 - Build
 
 ```bash
 bash "$SKILL/scripts/build.sh" <app> [--clean] [--allow-warnings]
@@ -211,7 +225,7 @@ B1 USER, look at LED2) only with `--interactive`, after telling the user exactly
 button press must come within 30 s. **Gate:** `RESULT: PASS`. `led?` reads the GPIO output
 register back.
 
-## Stage 6b - Debug through the ST-LINK (shared stage 7)
+## Stage 7 - Debug through the ST-LINK
 
 Read-only status - hot-plug connect, **no reset, no halt** (the firmware keeps running):
 ```bash
@@ -243,7 +257,7 @@ Halting changes timing: keep timing checks in Stage 6 tests, not in scenarios.
 With several ST-LINKs plugged in, `discover.sh` picks the one whose on-board ST-LINK reports
 this board (`EXPECTED_STLINK_BOARD`); otherwise it asks (`ACTION: CHOOSE`, `board=` column).
 
-## Stage 7 - Clean
+## Stage 16 - Clean
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run
@@ -277,6 +291,6 @@ newly verified.
   upgrade the ST-LINK firmware without asking.
 - Ask before every flash and before `clean.sh --yes`. Say before `debug.sh run` that it halts the
   core while attached; never reset, reflash or detach-and-reset a board whose fault state is
-  being kept (Stage 6b exit 1) unless the developer agrees.
+  being kept (Stage 7 exit 1) unless the developer agrees.
 - CubeMX runs headless through its own java on scripts the skill writes; the scripts end that java
   process tree themselves - never kill other STM32CubeMX / STM32CubeIDE processes.

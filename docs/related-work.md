@@ -77,10 +77,17 @@ Prompt scenarios that check how the agent follows the skill, not just the script
 
 ## Suggested order
 
-1. **With M2 (now):** `validate_skills.py`, `boards/index.json` with evidence status, `.bench` board
-   lock, `FLASH_POLICY`, `host_test.sh` for `lib/func`.
-2. **Later in M3:** `debug.sh` (ST-LINK first); bench capabilities with optional power and loopback
-   instruments.
-3. **M4:** a Zephyr skill that refers to zephyr-agent-skills; a FreeRTOS execution layer.
-4. **Community:** submit to embeddedskills.dev and propose an "Embedded" section to
-   awesome-agent-skills, once the validator passes and the repo is on GitHub.
+Status in the current milestone plan ([milestones.md](milestones.md)), updated 2026-10-27:
+
+1. **Done (M1 / M2 basics):** `validate_skills.py`, `boards/index.json` with evidence levels, the
+   `.bench` board lock and `FLASH_POLICY`; `host_test.sh` for `lib/func` exists (M2, optional, not
+   run yet).
+2. **M1 bring-up:** `debug.sh` - done for the ST-LINK skills (C5, L475), other probes next; bench
+   capabilities with optional power and loopback instruments later.
+3. **M3 execution model:** a FreeRTOS execution layer and a Zephyr skill that refers to
+   zephyr-agent-skills (moved here from the old M4).
+4. **Behaviour evals:** started - `evals/` cases for `claude plugin eval` (flash approval, clean dry
+   run, unknown board, workspace choice).
+5. **Community:** submit to embeddedskills.dev and propose an "Embedded" section to
+   awesome-agent-skills, once the release basics (README requirements, CONTRIBUTING, SECURITY,
+   CHANGELOG, per-vendor plugins) are on GitHub.

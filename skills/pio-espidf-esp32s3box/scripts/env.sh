@@ -12,7 +12,8 @@ REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 . "$REPO_ROOT/lib/common.sh" || { echo "ERROR: $REPO_ROOT/lib/common.sh missing - keep the repo layout" >&2; exit 1; }
 PATH_EXAMPLE="C:/esp-ws"                        # ESP-IDF (CMake + ninja + its python env) breaks on spaces
 
-# Where apps go (ESP_WS): <repo>/apps inside the repo checkout, else ./apps.
+# Where apps go (ESP_WS): the per-PC workspace (FW_WS / ~/.fw-skills.env, lib/fw_workspace.sh), else
+# <repo>/apps inside the repo checkout, else ./apps.
 # Bench files: this PC's USB serial (= MAC address) + COM port.
 ESP_WS="${ESP_WS:-$(fw_default_ws)}"
 BENCH_DIR="${ESP_BENCH_DIR:-$ESP_WS/.bench}"

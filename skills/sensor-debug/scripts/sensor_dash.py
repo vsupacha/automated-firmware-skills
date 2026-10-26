@@ -14,7 +14,7 @@ frees the COM port for sensor_debug.py / serial_test.py.
 Usage: sensor_dash.py [--app <app-dir>] [--board <id> | --port COMx] [--http-port 8765] [--config F] [--log F] [--no-open]
   --app: board from <app>/*-app.env (APP_BOARD, written by new_app.sh), page settings from <app>/tests/liveview.json if present
   raw tee: every board line, command and status goes to a timestamped log (default <app>/logs/liveview-*.log,
-           without --app <repo>/apps/liveview/logs/liveview-*.log - where dash_ctl.py log finds it)
+           without --app <apps workspace>/liveview/logs/liveview-*.log - where dash_ctl.py log finds it)
   BEFORE the page sees it - read that log for the data; the page is only a viewer.
 Binds 127.0.0.1 only. Never flashes or resets the board.
 """
@@ -170,7 +170,7 @@ def main():
     ap.add_argument("--http-port", type=int, default=8765)
     ap.add_argument("--config", help="page settings JSON (default: <app>/tests/liveview.json, else web/config.json)")
     ap.add_argument("--no-open", action="store_true", help="do not open the default browser")
-    ap.add_argument("--log", help="raw log file (default: <app>/logs/liveview-<time>.log, else <repo>/apps/liveview/logs/)")
+    ap.add_argument("--log", help="raw log file (default: <app>/logs/liveview-<time>.log, else <apps workspace>/liveview/logs/)")
     a = ap.parse_args()
     if a.app:
         envs = sorted(Path(a.app).glob("*-app.env"))
@@ -186,7 +186,7 @@ def main():
     json.loads(Path(a.config).read_text(encoding="utf-8"))      # fail early on a broken file
     Handler.config = a.config
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    log_dir = Path(a.app) / "logs" if a.app else sd.SKILL.parent.parent / "apps" / "liveview" / "logs"
+    log_dir = Path(a.app) / "logs" if a.app else sd.fwpaths.default_ws() / "liveview" / "logs"
     log_path = Path(a.log) if a.log else log_dir / f"liveview-{stamp}.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     rawlog = open(log_path, "a", encoding="utf-8", newline="\n")

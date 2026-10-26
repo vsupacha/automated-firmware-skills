@@ -26,7 +26,7 @@ WSABS="$(mkdir -p "$WS" 2>/dev/null; cd "$WS" 2>/dev/null && pwd || echo "$WS")"
 why="$(path_problem "$WSABS" 100)"
 if [ -n "$why" ]; then bad "path: workspace" "$WSABS -> $why"; else ok "path: workspace" "$WSABS"; fi
 svc="$(path_synced "$WSABS")"
-[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync if generation or a build fails on locked files"
+[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync if generation or a build fails on locked files - or keep apps outside it: bash lib/fw_workspace.sh set $(fw_ws_suggest)"
 
 # STM32CubeMX (classic, headless script mode through its bundled java)
 if [ -f "$CUBEMX_EXE" ] && [ -x "$CUBEMX_JAVA" ]; then

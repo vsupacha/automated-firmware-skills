@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 2a: find the connected board and save this PC's bench file (USB serial = MAC, COM port).
+# Stage 4: find the connected board and save this PC's bench file (USB serial = MAC, COM port).
 # Usage: discover.sh <board-id> [--serial <usb-serial>]
 # Read-only: esptool reads chip, features, MAC, flash size and the security state through the
 # USB Serial/JTAG - it RESETS the chip (the running firmware restarts) but writes nothing.

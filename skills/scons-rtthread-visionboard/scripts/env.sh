@@ -14,7 +14,8 @@ REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 . "$REPO_ROOT/lib/common.sh" || { echo "ERROR: $REPO_ROOT/lib/common.sh missing - keep the repo layout" >&2; exit 1; }
 PATH_EXAMPLE="C:/rtt-ws"
 
-# Where apps go (RTT_WS): <repo>/apps inside the repo checkout, else ./apps.
+# Where apps go (RTT_WS): the per-PC workspace (FW_WS / ~/.fw-skills.env, lib/fw_workspace.sh), else
+# <repo>/apps inside the repo checkout, else ./apps.
 # Bench files: this PC's probe serial (ART-Link unique id) + COM port of its VCP.
 RTT_WS="${RTT_WS:-$(fw_default_ws)}"
 BENCH_DIR="${RTT_BENCH_DIR:-$RTT_WS/.bench}"

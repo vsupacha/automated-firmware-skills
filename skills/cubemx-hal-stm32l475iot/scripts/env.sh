@@ -13,7 +13,8 @@ REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 . "$REPO_ROOT/lib/common.sh" || { echo "ERROR: $REPO_ROOT/lib/common.sh missing - keep the repo layout" >&2; exit 1; }
 PATH_EXAMPLE="C:/l4-ws"
 
-# Where apps go (L4_WS): <repo>/apps inside the repo checkout, else ./apps.
+# Where apps go (L4_WS): the per-PC workspace (FW_WS / ~/.fw-skills.env, lib/fw_workspace.sh), else
+# <repo>/apps inside the repo checkout, else ./apps.
 L4_WS="${L4_WS:-$(fw_default_ws)}"
 BENCH_DIR="${L4_BENCH_DIR:-$L4_WS/.bench}"
 fw_init_boards "$L4_WS" "$L4_BOARDS_DIR"

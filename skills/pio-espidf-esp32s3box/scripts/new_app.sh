@@ -27,6 +27,7 @@ SDK_BOARD="$BOARD_DIR/${SDKCONFIG_BOARD:-sdkconfig.board}"
 [ -f "$SDK_BOARD" ] || die "board '$BOARD_ID' has no $SDK_BOARD"
 
 mkdir -p "$WS" || die "cannot create $WS"; WS="$(cd "$WS" && pwd)"; APPDIR="$WS/$APP"
+fw_ws_choose "$WS" "$APPDIR" 100   # ACTION: CHOOSE when no workspace was chosen for this PC and apps/ is synced or too long
 require_safe_path "$APPDIR" "app" 100
 [ -e "$APPDIR" ] && die "$APPDIR already exists - pick another name (or delete it after asking the user)"
 write_workspace_gitignore "$WS"

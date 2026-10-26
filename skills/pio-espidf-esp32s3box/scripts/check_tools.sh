@@ -28,7 +28,7 @@ for item in "workspace|$WSABS|100" "PlatformIO home|$PIO_HOME|60"; do
   if [ -n "$why" ]; then bad "path: $name" "$p -> $why"; else ok "path: $name" "$p"; fi
 done
 svc="$(path_synced "$WSABS")"
-[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync if a build fails on locked files"
+[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync if a build fails on locked files - or keep apps outside it: bash lib/fw_workspace.sh set $(fw_ws_suggest)"
 
 # PlatformIO Core
 if [ -n "$PIO" ] && [ -x "$PIO" ]; then

@@ -26,6 +26,15 @@ nsc_veneer.o
 # --- flash dumps of your own boards (backup.sh) ---
 backup/
 
+# --- local renders (Quarto preview of the READMEs) ---
+/*.html
+*_files/
+.quarto/
+_site/
+
+# --- vendor manuals/datasheets: link them from the board README, never commit the PDF ---
+boards/**/*.pdf
+
 # --- Python / editors / OS ---
 __pycache__/
 *.pyc
@@ -38,3 +47,6 @@ Thumbs.db
 # --- local handoff notes between PCs (Claude Code loads it; never committed) ---
 CLAUDE.local.md
 .claude/settings.local.json
+
+# --- behaviour eval results (claude plugin eval) ---
+evals/results/

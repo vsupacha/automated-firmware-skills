@@ -1,6 +1,8 @@
 ---
 name: web-wizard
 description: Browser forms instead of one-by-one console questions - opens a local page, waits for the user's submit and returns all answers at once. "project" mode is a new-app wizard for the board skills of this repo (board, skill, bring-up template with its verified level, app name, then generate + IDE / build / build + flash + test), with the scripts' first gates and optionally the skill's check_tools.sh run before submit; "ask" mode renders any set of questions (AskUserQuestion-like JSON). Use when several choices are needed at once, when creating a new app and the user would rather pick on one page, or when the user asks for a web form ("open the wizard", "ask me in the browser", "เปิดหน้าเว็บให้เลือก").
+license: MIT
+compatibility: Claude Code or another agent that runs Python 3; opens a local page in the default browser (127.0.0.1 only)
 ---
 
 # web-wizard - answer many questions on one page

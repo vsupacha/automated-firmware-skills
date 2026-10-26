@@ -7,7 +7,7 @@ console protocol (the board skills' templates keep it, docs/workflow.md "Test sp
   "SENSORS a=OK b=ERR_NODEV"        init status     "SCAN bus=i2c0 n=4 0x18 0x44"
   "SELFTEST a=OK rslt=0x0 ..."      self-tests      "OK ..." / "ERR ..." command replies
 
-Usage (port: --port <port>, or --board <id> = apps/.bench/<id>.env written by the board skill's
+Usage (port: --port <port>, or --board <id> = <apps workspace>/.bench/<id>.env written by the board skill's
 discover.sh, else the only USB serial port):
   sensor_debug.py ports
   sensor_debug.py send <cmd> [<cmd> ...] [--wait S]       raw console session (S s per command)
@@ -40,6 +40,8 @@ except ImportError:                                   # pragma: no cover
     sys.exit("DEBUG: FAIL pyserial missing - pip install --user pyserial")
 
 SKILL = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(SKILL.parent.parent / "lib"))
+import fwpaths  # noqa: E402  (apps workspace + bench rules shared with the board skills)
 CODES = json.loads((SKILL / "reference" / "result_codes.json").read_text(encoding="utf-8"))
 DATA_RE = re.compile(r"^([A-Z][A-Z0-9_]*) (.*)$")
 KV_RE = re.compile(r"(\w+)=(-?\d+(?:\.\d+)?)([A-Za-z%]*)(?=\s|$)")
@@ -49,17 +51,19 @@ SKIP_TAGS = {"OK", "ERR", "INFO", "READY", "SENSORS", "SCAN", "SELFTEST", "EVT"}
 
 # ---------------------------------------------------------------- serial plumbing
 def find_bench(board):
-    for base in [Path.cwd(), *Path.cwd().parents, SKILL.parent.parent.parent]:
-        f = base / "apps" / ".bench" / f"{board}.env"
+    """this PC's apps workspace first (lib/fwpaths.py), then apps/.bench above the current folder"""
+    cands = [fwpaths.bench_dir() / f"{board}.env"]
+    cands += [base / "apps" / ".bench" / f"{board}.env" for base in [Path.cwd(), *Path.cwd().parents]]
+    for f in cands:
         if f.is_file():
             for line in f.read_text(encoding="utf-8").splitlines():
                 if line.startswith("CONSOLE_PORT="):
                     return line.split("=", 1)[1].strip().strip("'\"")
-    sys.exit(f"DEBUG: FAIL no apps/.bench/{board}.env - run the board skill's discover.sh {board} first")
+    sys.exit(f"DEBUG: FAIL no {cands[0].as_posix()} - run the board skill's discover.sh {board} first")
 
 
 def resolve_port(args):
-    """--port, else --board -> apps/.bench/<board>.env, else the only USB serial port"""
+    """--port, else --board -> <apps workspace>/.bench/<board>.env, else the only USB serial port"""
     port = args.port or (find_bench(args.board) if args.board else None)
     if not port:
         ports = [p.device for p in serial.tools.list_ports.comports() if p.vid is not None]

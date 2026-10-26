@@ -12,7 +12,8 @@ REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 . "$REPO_ROOT/lib/common.sh" || { echo "ERROR: $REPO_ROOT/lib/common.sh missing - keep the repo layout" >&2; exit 1; }
 PATH_EXAMPLE="C:/n6-ws"
 
-# Where apps go (N6_WS): <repo>/apps inside the repo checkout, else ./apps.
+# Where apps go (N6_WS): the per-PC workspace (FW_WS / ~/.fw-skills.env, lib/fw_workspace.sh), else
+# <repo>/apps inside the repo checkout, else ./apps.
 N6_WS="${N6_WS:-$(fw_default_ws)}"
 BENCH_DIR="${N6_BENCH_DIR:-$N6_WS/.bench}"
 fw_init_boards "$N6_WS" "$N6_BOARDS_DIR"

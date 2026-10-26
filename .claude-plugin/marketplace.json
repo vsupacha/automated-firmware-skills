@@ -3,12 +3,94 @@
   "owner": {
     "name": "Supachai Vorapojpisut"
   },
-  "description": "Community skills for automated MCU firmware workflows.",
+  "description": "Gated MCU firmware workflows (tools check, project, IDE, build, flash, test, debug) per toolchain, framework and board. Install one vendor plugin (it pulls in firmware-tools) or the all-in-one plugin - not both.",
   "plugins": [
     {
       "name": "automated-firmware-skills",
+      "displayName": "Automated firmware skills (all boards)",
       "source": "./",
-      "description": "Gated firmware workflows per toolchain, framework and board (skills/<toolchain>-<framework>-<board>), with shared board sheets (boards/) and sample apps (apps/)."
+      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), RT-Thread (Vision Board), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting.",
+      "version": "0.2.0",
+      "author": { "name": "Supachai Vorapojpisut" },
+      "homepage": "https://github.com/vsupacha/automated-firmware-skills",
+      "repository": "https://github.com/vsupacha/automated-firmware-skills",
+      "license": "MIT",
+      "category": "embedded",
+      "keywords": ["firmware", "embedded", "mcu", "build", "flash", "test", "stm32", "platformio", "modustoolbox", "rt-thread", "esp32", "arduino", "renesas-ra", "rp2350"]
+    },
+    {
+      "name": "firmware-tools",
+      "displayName": "Firmware tool skills",
+      "source": "./",
+      "description": "Board-independent tool skills used by every firmware plugin: web-wizard (browser forms), cleanroom-test (fresh-agent doc check), sensor-debug (PC-side checks and live view of a board's console), hw-troubleshooting (firmware vs setup vs hardware).",
+      "version": "0.2.0",
+      "author": { "name": "Supachai Vorapojpisut" },
+      "homepage": "https://github.com/vsupacha/automated-firmware-skills",
+      "repository": "https://github.com/vsupacha/automated-firmware-skills",
+      "license": "MIT",
+      "category": "embedded",
+      "keywords": ["firmware", "embedded", "serial", "debug", "testing"],
+      "skills": ["./skills/web-wizard", "./skills/cleanroom-test", "./skills/sensor-debug", "./skills/hw-troubleshooting"]
+    },
+    {
+      "name": "firmware-stm32",
+      "displayName": "Firmware skills: STM32 (STM32CubeMX / CubeMX2)",
+      "source": "./",
+      "description": "ST boards with STM32CubeMX 6.18 or CubeMX2, the STM32Cube HAL, CMake and STM32CubeProgrammer / ST-LINK: NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK and STM32F407G-DISC1 (build stages).",
+      "version": "0.2.0",
+      "author": { "name": "Supachai Vorapojpisut" },
+      "homepage": "https://github.com/vsupacha/automated-firmware-skills",
+      "repository": "https://github.com/vsupacha/automated-firmware-skills",
+      "license": "MIT",
+      "category": "embedded",
+      "keywords": ["firmware", "embedded", "stm32", "stm32cubemx", "stm32cubemx2", "st-link", "stm32l4", "stm32c5", "stm32n6", "stm32f4"],
+      "dependencies": ["firmware-tools"],
+      "skills": ["./skills/cubemx2-hal2-stm32c562nucleo", "./skills/cubemx-hal-stm32l475iot", "./skills/cubemx-hal-stm32n6570dk", "./skills/cubemx-hal-stm32f407disco"]
+    },
+    {
+      "name": "firmware-platformio",
+      "displayName": "Firmware skills: PlatformIO",
+      "source": "./",
+      "description": "PlatformIO boards: Raspberry Pi Pico 2 W (arduino-pico), ESP32-S3-BOX (ESP-IDF and Arduino) and Arduino UNO R4 WiFi.",
+      "version": "0.2.0",
+      "author": { "name": "Supachai Vorapojpisut" },
+      "homepage": "https://github.com/vsupacha/automated-firmware-skills",
+      "repository": "https://github.com/vsupacha/automated-firmware-skills",
+      "license": "MIT",
+      "category": "embedded",
+      "keywords": ["firmware", "embedded", "platformio", "arduino", "esp-idf", "esp32-s3", "rp2350", "pico", "uno-r4", "renesas-ra"],
+      "dependencies": ["firmware-tools"],
+      "skills": ["./skills/pio-arduino-rpipico2w", "./skills/pio-espidf-esp32s3box", "./skills/pio-arduino-esp32s3box", "./skills/pio-arduino-unor4wifi"]
+    },
+    {
+      "name": "firmware-modustoolbox",
+      "displayName": "Firmware skills: ModusToolbox (Infineon)",
+      "source": "./",
+      "description": "Infineon PSOC Edge E84 on the RT-Thread Edgi-Talk with ModusToolbox 3.9 (PDL, KitProg3 / OpenOCD).",
+      "version": "0.2.0",
+      "author": { "name": "Supachai Vorapojpisut" },
+      "homepage": "https://github.com/vsupacha/automated-firmware-skills",
+      "repository": "https://github.com/vsupacha/automated-firmware-skills",
+      "license": "MIT",
+      "category": "embedded",
+      "keywords": ["firmware", "embedded", "modustoolbox", "infineon", "psoc-edge", "pse84", "kitprog3"],
+      "dependencies": ["firmware-tools"],
+      "skills": ["./skills/modus-pdl-edgitalk"]
+    },
+    {
+      "name": "firmware-rtthread",
+      "displayName": "Firmware skills: RT-Thread",
+      "source": "./",
+      "description": "RT-Thread Vision Board (Renesas RA8D1) with RT-Thread 5.0.2, scons and the RT-Thread Studio SDK (pyOCD).",
+      "version": "0.2.0",
+      "author": { "name": "Supachai Vorapojpisut" },
+      "homepage": "https://github.com/vsupacha/automated-firmware-skills",
+      "repository": "https://github.com/vsupacha/automated-firmware-skills",
+      "license": "MIT",
+      "category": "embedded",
+      "keywords": ["firmware", "embedded", "rt-thread", "scons", "renesas-ra8", "pyocd"],
+      "dependencies": ["firmware-tools"],
+      "skills": ["./skills/scons-rtthread-visionboard"]
     }
   ]
 }

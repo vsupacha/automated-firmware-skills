@@ -11,7 +11,7 @@ many sensors. Tool-independent hardware sheet.
 
 | Demo | Uses | `cubemx-hal-stm32l475iot` |
 | --- | --- | --- |
-| hello-world | console: ST-LINK virtual COM port | unverified |
+| hello-world | console: ST-LINK virtual COM port | tested |
 | blink | LED1 = LED2 (green) | built |
 | push-to-light | BTN1 = B1 USER (blue) toggles LED1 | observed * |
 

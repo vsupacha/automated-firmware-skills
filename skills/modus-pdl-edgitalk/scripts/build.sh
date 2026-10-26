@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 4: build all three projects + signed/combined HEX, then write an artifact manifest.
+# Stage 3: build all three projects + signed/combined HEX, then write an artifact manifest.
 # Usage: build.sh <app-dir> [--clean] [--getlibs] [--allow-warnings]   (options in any order)
 # Gate: make exit 0, fresh app_combined.hex, secure image signed, 0 warnings.
 # Exit 0 = PASS, 1 = FAIL, 2 = built but with warnings (PASS only with --allow-warnings).

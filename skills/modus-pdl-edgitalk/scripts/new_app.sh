@@ -35,6 +35,7 @@ case "$APP" in *[!A-Za-z0-9_-]*|"") die "app name '$APP': use only letters, digi
 require_vars BSP_ID APP_TEMPLATE_REPO APP_TEMPLATE_COMMIT BOARD_DEFINE
 mkdir -p "$WS" || die "cannot create $WS"; WS="$(cd "$WS" && pwd)"; APPDIR="$WS/$APP"
 write_workspace_gitignore "$WS"
+fw_ws_choose "$WS" "$APPDIR" 120   # ACTION: CHOOSE when no workspace was chosen for this PC and apps/ is synced or too long
 require_safe_path "$APPDIR" "app" 120
 SYNCED="$(path_synced "$WS")"
 [ -n "$SYNCED" ] && echo "WARN: $WS is in a $SYNCED folder - pause sync if project-creator/getlibs/build fail on locked files"

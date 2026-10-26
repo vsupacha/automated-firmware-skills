@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 7 (before the first flash): read the whole flash of this PC's board into a file, so the
+# Stage 5 (before the first flash): read the whole flash of this PC's board into a file, so the
 # factory firmware can be restored. Read-only for the board (esptool read_flash; the chip resets).
 # Usage: backup.sh <board-id> [--out <dir>]
 #   --out  default $ESP_BACKUP_DIR = <workspace>/../backup (outside apps/, so clean.sh keeps it;

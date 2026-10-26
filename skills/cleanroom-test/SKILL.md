@@ -1,6 +1,8 @@
 ---
 name: cleanroom-test
 description: Clean-room check of a skill or workflow before commit and push - a fresh subagent with no conversation context acts as a new developer, follows only the repo docs (README.md -> boards/README.md -> the skill's SKILL.md) to do a realistic task end to end, and reports PASS/FAIL per stage plus every doc gap; the report is then triaged into doc fixes, script fixes and accepted limits and recorded. Use before committing a new or changed skill, template, board profile or workflow ("try a clean workflow without existing context", "can developers do the same?", "clean-room test", "ทดสอบแบบไม่มี context").
+license: MIT
+compatibility: Claude Code with subagents (a fresh agent follows only the repo docs); the board skill under test needs its own tools
 ---
 
 # cleanroom-test - can a new developer follow the docs?
@@ -30,8 +32,10 @@ has four fixed parts. Keep the task realistic and **different from the author's 
      `ACTION: CHOOSE`.
    - **Hardware limits:** "do NOT flash and do NOT run serial tests" unless this session assigns a
      board. Flashing stays with this session, which knows the bench, and still needs the user's yes.
-   - **Write limits:** only `apps/<test-app>` and its scratch files - never `skills/`, `boards/`,
-     `lib/`, `docs/`, `tools/`, `milestones.env` or the READMEs. No edits to git or tool settings.
+   - **Write limits:** only `<apps workspace>/<test-app>` (`apps/` or this PC's workspace, see
+     `lib/fw_workspace.sh show`) and its scratch files - never `skills/`, `boards/`, `lib/`, `docs/`,
+     `tools/`, `milestones.env` or the READMEs. No edits to git or tool settings; it does not answer
+     `ACTION: CHOOSE` (workspace) itself - this session does, before the run.
    - **No installs, no commits.** On `ACTION: SETUP` it stops that stage and reports it.
    - **Workarounds:** on a failure it works around the problem if it can and records it.
 4. **Report format:**

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 4: build an app's generated CMake project with the pinned GCC/CMake/Ninja.
+# Stage 3: build an app's generated CMake project with the pinned GCC/CMake/Ninja.
 # Usage: build.sh <app-dir> [--clean] [--allow-warnings]
 # Gate: "BUILD: PASS" = cmake configure + build exit 0, ELF present, 0 warnings in src/.
 # Exit 0 PASS, 1 FAIL, 2 warnings in src/. Writes .hex next to the ELF and

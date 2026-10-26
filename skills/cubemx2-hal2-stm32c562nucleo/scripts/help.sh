@@ -23,6 +23,7 @@ templates() {
 
 if [ $LANG_EN = 1 ]; then cat <<'EOF'
 skill cubemx2-hal2-stm32c562nucleo (STM32C5 / NUCLEO-C562RE, STM32CubeMX2 + CMake) - ask Claude in your own words:
+  (<app> in the later stages = the app folder new_app.sh prints, e.g. apps/my-app or C:/fw-ws/my-app)
  Set up / check
   "check my tools"                          -> check_tools.sh <board>
   "find my board"                           -> discover.sh <board>   (read-only, saves ST-LINK serial + COM port)
@@ -43,6 +44,7 @@ skill cubemx2-hal2-stm32c562nucleo (STM32C5 / NUCLEO-C562RE, STM32CubeMX2 + CMak
 EOF
 else cat <<'EOF'
 skill cubemx2-hal2-stm32c562nucleo (STM32C5 / NUCLEO-C562RE, STM32CubeMX2 + CMake) - สั่ง Claude ได้ด้วยภาษาของคุณเอง ตัวอย่าง:
+  (<app> ในขั้นหลัง new_app.sh = โฟลเดอร์แอปที่ new_app.sh พิมพ์ออกมา เช่น apps/my-app หรือ C:/fw-ws/my-app)
  เตรียม / ตรวจสอบ
   "ตรวจเครื่องมือให้หน่อย"                       -> check_tools.sh <board>
   "หาบอร์ดที่ต่ออยู่"                             -> discover.sh <board>   (อ่านอย่างเดียว บันทึก ST-LINK serial + COM port)

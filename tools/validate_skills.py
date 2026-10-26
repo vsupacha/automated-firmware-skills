@@ -6,7 +6,7 @@ Usage:
 
 Checks
   skills    board skills (with templates/): SKILL.md frontmatter (name = folder, description <= 1024
-            chars, no tags) and required
+            chars, no tags, license MIT, compatibility <= 500 chars, no unquoted ": ") and required
             sections; the standard stage scripts exist (incl. open_ide.sh + IDE_EXT/IDE_APP, stage 2d), have a shebang and LF endings; board-stage
             scripts are gated by M1; scripts/ and reference/ files named in SKILL.md exist; hello-world, blink and
             push-to-light templates with description.txt and valid tests/*.json; test specs of the
@@ -17,7 +17,8 @@ Checks
             evidence levels are consistent and dated in the profile log, aliases are unambiguous
   docs      relative Markdown links resolve; scripts named in docs/workflow.md exist unless the
             line says "planned"; README.md and the plugin manifest mention every skill
-  manifests .claude-plugin/plugin.json + marketplace.json parse and agree
+  manifests .claude-plugin/marketplace.json: all-in-one + firmware-tools + vendor plugins, each skill in one
+  status    demo-level tables in boards/README.md and boards/<id>/README.md = boards/index.json
   leaks     no user paths, COM ports, probe/USB serials, private IPs or e-mail addresses in files
             git would commit (a line containing "leak-ok" is exempt)
 
@@ -45,8 +46,11 @@ IDE_APP_RE = re.compile(r"^IDE_APP=([a-z0-9-]+)", re.M)
 BOARD_STAGE_SCRIPTS = ["discover.sh", "flash.sh", "serial_test.py"]
 BOARD_GATED_SCRIPTS = ["discover.sh", "flash.sh", "backup.sh", "identity_check.sh"]
 REQUIRED_SECTIONS = ["Milestones, stage numbers and developer actions", "Help menu", "Stage 1",
-                     "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Stage 7",
+                     "Stage 2", "Code in layers", "Stage 3", "Stage 5", "Stage 6", "Stage 16",
                      "Reporting", "Safety rules"]
+# "## Stage <n>" headings in a board SKILL.md use the shared stage numbers of docs/workflow.md, in order
+SHARED_STAGES = ["0", "1", "1b", "2", "2d", "2e", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                 "13", "14", "15", "16"]
 REQUIRED_TEMPLATES = ["hello-world", "blink", "push-to-light"]   # bring-up demos: UART, LED, button
 LEVELS = ["unverified", "built", "flashed", "tested", "interactive", "observed"]
 
@@ -134,6 +138,12 @@ def check_skills():
             ok(desc, f"skills/{name}/SKILL.md: empty description")
             ok(len(desc) <= 1024, f"skills/{name}/SKILL.md: description is {len(desc)} characters (limit 1024)")
             ok(not re.search(r"<[A-Za-z/]", desc), f"skills/{name}/SKILL.md: description contains a tag")
+            ok(fm.get("license") == "MIT", f"skills/{name}/SKILL.md: frontmatter license is not MIT (repo LICENSE)")
+            for k, v in fm.items():   # unquoted YAML: ": " or " #" inside a value breaks strict parsers
+                ok(v[:1] in "\"'" or not re.search(r": | #", v),
+                   f"skills/{name}/SKILL.md: frontmatter '{k}' contains ': ' or ' #' - reword or quote it")
+            comp = fm.get("compatibility", "")
+            ok(0 < len(comp) <= 500, f"skills/{name}/SKILL.md: compatibility missing or over 500 characters")
         if tool:                                    # files it names + script hygiene only
             # paths of this skill only (not "<other-skill>/scripts/x.py")
             for ref in sorted(set(re.findall(r"(?<![\w/.-])((?:scripts|web|examples|reference|prompts|reports|limits)/[\w.-]+\.(?:sh|py|md|html|json))\b", text))):
@@ -147,6 +157,11 @@ def check_skills():
         heads = re.findall(r"^#{2,3} +(.+)$", text, re.M)
         for sec in REQUIRED_SECTIONS:
             ok(any(sec in h for h in heads), f"skills/{name}/SKILL.md: missing section '{sec} ...'")
+        nums = [m.group(1) for h in heads for m in [re.match(r"Stage (\w+)\b", h)] if m]
+        for n in nums:
+            ok(n in SHARED_STAGES, f"skills/{name}/SKILL.md: heading 'Stage {n}' is not a shared stage number (docs/workflow.md)")
+        idx = [SHARED_STAGES.index(n) for n in nums if n in SHARED_STAGES]
+        ok(idx == sorted(idx), f"skills/{name}/SKILL.md: Stage headings out of order ({' '.join(nums)})")
         for ref in sorted(set(re.findall(r"\b((?:scripts|reference)/[\w.-]+\.(?:sh|py|md))\b", text))):
             if Path(ref).stem == "x":                   # "$SKILL/scripts/x.sh" placeholder
                 continue
@@ -163,6 +178,8 @@ def check_skills():
         if (sc / "new_app.sh").is_file():
             ok("fw_new_app_ide" in read(sc / "new_app.sh"),
                f"skills/{name}/scripts/new_app.sh does not end with stage 2d (fw_new_app_ide)")
+            ok("fw_ws_choose" in read(sc / "new_app.sh"),
+               f"skills/{name}/scripts/new_app.sh does not ask for the apps workspace (fw_ws_choose)")
         board_row = next((l for l in text.splitlines() if l.startswith("| M1 bring-up (board)")), None)
         ok(board_row is not None, f"skills/{name}/SKILL.md: milestone table has no '| M1 bring-up (board) |' row")
         board_planned = "**planned**" in (board_row or "")
@@ -330,23 +347,46 @@ def check_docs(files, skill_names, tool_names=()):
 
 
 # ---------------------------------------------------------------------------------- manifests
-def check_manifests(skill_names):
+def check_manifests(skill_names, tool_names):
+    # No plugin.json: every marketplace entry is its own manifest (namespace = entry name). The
+    # all-in-one entry scans skills/; the others list their skills and share the repo root, so each
+    # installed copy has lib/ and boards/. Every skill is in exactly one listed plugin.
     d = ROOT / ".claude-plugin"
+    m = "marketplace.json"
+    ok(not (d / "plugin.json").exists(),
+       ".claude-plugin/plugin.json exists - the marketplace entries are the manifests (one namespace each)")
     try:
-        plugin = json.loads(read(d / "plugin.json"))
-        market = json.loads(read(d / "marketplace.json"))
+        market = json.loads(read(d / m))
     except (OSError, ValueError) as e:
-        err(f".claude-plugin: cannot read manifests ({e})")
+        err(f".claude-plugin: cannot read {m} ({e})")
         return
-    ok(plugin.get("name"), ".claude-plugin/plugin.json: no name")
-    entries = market.get("plugins", [])
-    ok(any(p.get("name") == plugin.get("name") for p in entries),
-       f".claude-plugin/marketplace.json: no plugin named '{plugin.get('name')}'")
-    for p in entries:
-        ok((d.parent / p.get("source", "")).resolve().is_dir(),
-           f".claude-plugin/marketplace.json: source '{p.get('source')}' is not a folder")
+    entries = {p.get("name"): p for p in market.get("plugins", [])}
+    ok("automated-firmware-skills" in entries and not entries["automated-firmware-skills"].get("skills"),
+       f"{m}: the all-in-one entry 'automated-firmware-skills' (no skills list) is missing")
+    ok(set(entries.get("firmware-tools", {}).get("skills", [])) == {f"./skills/{t}" for t in tool_names},
+       f"{m}: 'firmware-tools' must list exactly the tool skills {sorted(tool_names)}")
+    listed = {}
+    for name, p in entries.items():
+        ok(p.get("source") == "./", f"{m}: '{name}' source must be './' (the skills need lib/ and boards/)")
+        for field in ("description", "version", "license"):
+            ok(p.get(field), f"{m}: '{name}' has no {field}")
+        for s in p.get("skills", []):
+            ok((ROOT / s).is_dir(), f"{m}: '{name}' lists {s}, which is not a folder")
+            listed.setdefault(s.rsplit("/", 1)[-1], []).append(name)
+        if p.get("skills") and name != "firmware-tools":
+            ok("firmware-tools" in p.get("dependencies", []), f"{m}: '{name}' does not depend on firmware-tools")
     for s in skill_names:
-        ok(s in plugin.get("description", ""), f".claude-plugin/plugin.json: description does not mention {s}", warn)
+        ok(len(listed.get(s, [])) == 1, f"{m}: board skill {s} is in {listed.get(s, [])} - must be in exactly one vendor plugin")
+    ok(len({p.get("version") for p in entries.values()}) == 1, f"{m}: the plugins have different versions")
+
+
+# ------------------------------------------------------------------------------- board status
+def check_board_status():
+    """README demo-level tables = boards/index.json (tools/board_status.py writes them)"""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import board_status
+    msgs = board_status.problems()
+    ok(not msgs, "; ".join(msgs) or "board status")
 
 
 # -------------------------------------------------------------------------------------- leaks
@@ -377,7 +417,8 @@ def main(argv):
     skill_names, tool_names = check_skills()
     check_boards(skill_names)
     check_docs(files, skill_names, tool_names)
-    check_manifests(skill_names + tool_names)
+    check_manifests(skill_names, tool_names)
+    check_board_status()
     check_leaks(files)
     for e in errors:
         print(f"ERROR {e}")

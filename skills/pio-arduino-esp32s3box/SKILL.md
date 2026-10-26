@@ -1,6 +1,8 @@
 ---
 name: pio-arduino-esp32s3box
 description: Firmware workflow for the Espressif ESP32-S3-BOX (ESP32-S3) with PlatformIO and the Arduino framework (arduino-esp32) - check tools and folder paths, create a PlatformIO Arduino app from a layered template (board -> func -> setup/loop) written with the Arduino API (Arduino.h), with the platform pinned to an exact version, build it with a manifest of every image and its flash map, discover the board over its USB Serial/JTAG (chip, MAC = USB serial, flash size, security state), flash with esptool behind identity gates and hash verification, and run automated serial tests. Use when asked to create, build, flash (แฟลช) or test ESP32-S3-BOX firmware with PlatformIO and Arduino (บอร์ด ESP32-S3-BOX, Arduino), add an ESP32-S3 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). For ESP-IDF use pio-espidf-esp32s3box. Not for the Arduino IDE / arduino-cli, MicroPython, the BOX-Lite or BOX-3.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs PlatformIO (arduino-esp32); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # ESP32-S3-BOX firmware workflow (PlatformIO + Arduino)
@@ -32,12 +34,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 4 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 2 step 1, Stage 5 (+ backup), Stage 6 |
-| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(not for Arduino C++)* | Stage 3 (Arduino-style rules, `check_layers.py`) |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 3 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 4 (discover), Stage 5 (+ backup), Stage 6 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(not for Arduino C++)* | Stage 2e (Arduino-style rules, `check_layers.py`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, APPROVE, CHOOSE ...):
@@ -122,7 +124,7 @@ lists Espressif USB devices. Read-only. **Gate:** `missing/bad=0`; report every 
 PlatformIO: tell the user to install it - don't install it yourself. Changing git config is the
 user's call - ask.
 
-## Stage 2 - Discover the board, create the project
+## Stage 2 - Create the project (and stage 4: discover the board)
 
 1. **Discover:** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <usb-serial>]`
    - lists Espressif USB devices (USB serial = the chip's MAC), then esptool reads chip, features,
@@ -131,6 +133,11 @@ user's call - ask.
    - **Gate:** `IDENTITY: PASS` (chip ESP32-S3, MAC = USB serial, flash = profile, secure boot and
      flash encryption disabled) + `Saved ...` (bench file). Several boards: `--serial`.
 2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - copies `templates/_common/src` (board + func layers) and the template's `src/` + `tests/`,
      writes `platformio.ini` and `arduino-app.env`. No network needed.
    - **Gate:** `Created ...`.
@@ -143,7 +150,7 @@ user's call - ask.
    `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
    missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
-## Stage 3 - Code in layers
+## Stage 2e - Code in layers
 
 Read `reference/layering.md` before writing code. Rules:
 Arduino style: every file includes `<Arduino.h>` and uses the Arduino API - `millis()`,
@@ -169,7 +176,7 @@ No ESP-IDF calls, no C stdio (`printf`, `stdout`) - output goes through `console
 layer; pin I/O and `Serial` only in `board/`). `host_test.sh` does not cover this skill: it tests
 the C `lib/func`, and this func/ is Arduino C++.
 
-## Stage 4 - Build
+## Stage 3 - Build
 
 ```bash
 bash "$SKILL/scripts/build.sh" <app-dir> [--clean] [--allow-warnings]
@@ -213,7 +220,7 @@ backlight) only with `--interactive`: tell the user exactly what to do first, an
 cable still (a jolt drops the port). **Gate:** `RESULT: PASS`. `led?` reads the GPIO level back;
 only a human confirms the backlight lit.
 
-## Stage 7 - Clean
+## Stage 16 - Clean
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run

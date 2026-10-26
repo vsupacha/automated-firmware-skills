@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 4: build an app's generated CMake project (mx/) with the pinned STM32Cube bundles.
+# Stage 3: build an app's generated CMake project (mx/) with the pinned STM32Cube bundles.
 # Usage: build.sh <app-dir> [--clean] [--allow-warnings]
 # Gate: "BUILD: PASS" = cmake exit 0, ELF present, 0 warnings in the app's own src/ (exit 2 = fix
 # them, or --allow-warnings). Writes <elf>.hex and mx/build/Debug/manifest.txt (tools, firmware

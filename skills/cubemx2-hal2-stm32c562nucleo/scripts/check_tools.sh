@@ -27,7 +27,7 @@ for item in "workspace|$WSABS|100" "STM32Cube root|$STM32CUBE_ROOT|"; do
   if [ -n "$why" ]; then bad "path: $name" "$p -> $why"; else ok "path: $name" "$(fw_where "$p")"; fi
 done
 svc="$(path_synced "$WSABS")"
-[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync if generation/build fails on locked files"
+[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync if generation/build fails on locked files - or keep apps outside it: bash lib/fw_workspace.sh set $(fw_ws_suggest)"
 [ -d "$STM32CUBE_ROOT/bundles" ] || bad "STM32Cube bundles" "none under $STM32CUBE_ROOT - install STM32CubeMX2 (or the STM32Cube VS Code extension: LOCAL %LOCALAPPDATA%/stm32cube), or set STM32CUBE_ROOT to a shared GLOBAL copy"
 
 # pinned bundles: exact version folder must exist; list what is there otherwise

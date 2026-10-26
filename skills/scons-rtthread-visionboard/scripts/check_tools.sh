@@ -26,7 +26,7 @@ WSABS="$(mkdir -p "$WS" 2>/dev/null; cd "$WS" 2>/dev/null && pwd || echo "$WS")"
 why="$(path_problem "$WSABS" 100)"
 if [ -n "$why" ]; then bad "path: workspace" "$WSABS -> $why"; else ok "path: workspace" "$WSABS"; fi
 svc="$(path_synced "$WSABS")"
-[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: apps are ~38 MB each (RT-Thread + FSP copied); pause sync if a build fails on locked files"
+[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: apps are ~38 MB each (RT-Thread + FSP copied); pause sync if a build fails on locked files - or keep apps outside it: bash lib/fw_workspace.sh set $(fw_ws_suggest)"
 
 # RT-Thread Studio and what the profile pins from it
 if [ -x "$STUDIO_EXE" ]; then

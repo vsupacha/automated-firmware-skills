@@ -13,7 +13,8 @@ REPO_ROOT="$(cd "$SKILL_DIR/../.." && pwd)"
 PATH_ALLOW_SPACES=1                             # PlatformIO copes with spaces (check_tools warns)
 PATH_EXAMPLE="C:/pico-ws"
 
-# Where apps go (PICO_WS): <repo>/apps inside the repo checkout, else ./apps.
+# Where apps go (PICO_WS): the per-PC workspace (FW_WS / ~/.fw-skills.env, lib/fw_workspace.sh), else
+# <repo>/apps inside the repo checkout, else ./apps.
 # Bench files: this PC's USB serial (= chip ID) + COM port.
 PICO_WS="${PICO_WS:-$(fw_default_ws)}"
 BENCH_DIR="${PICO_BENCH_DIR:-$PICO_WS/.bench}"

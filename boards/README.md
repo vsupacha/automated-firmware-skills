@@ -29,18 +29,20 @@ The same three templates in every skill, checked with the same test specs (`test
 | `blink` | GPIO output: LED1 toggles every 0.5 s, reported as `BLINK led1=0\|1` | one LED |
 | `push-to-light` | GPIO input + console commands: a button press toggles LED1 (`EVT` lines), console commands `led <n> on|off|toggle` + `led?`/`btn?` (RT-Thread msh: `led`/`btn`) | one button + one LED |
 
+<!-- board-status:begin -->
 | Board | Skill | hello-world | blink | push-to-light |
 | --- | --- | --- | --- | --- |
 | [RT-Thread Edgi-Talk](edgi-talk/README.md) | `modus-pdl-edgitalk` | tested | built | interactive * |
 | [ST NUCLEO-C562RE](nucleo-c562re/README.md) | `cubemx2-hal2-stm32c562nucleo` | tested | built | observed * |
-| [ST B-L475E-IOT01A (IoT node)](b-l475e-iot01a/README.md) | `cubemx-hal-stm32l475iot` | unverified | built | observed * |
-| [ST STM32N6570-DK](stm32n6570-dk/README.md) | `cubemx-hal-stm32n6570dk` | built | not built yet | built |
-| [ST STM32F407G-DISC1](stm32f407g-disc1/README.md) | `cubemx-hal-stm32f407disco` | built | built | built |
 | [Raspberry Pi Pico 2 W](rpi-pico-2w/README.md) | `pio-arduino-rpipico2w` | tested | built | observed * |
-| [Espressif ESP32-S3-BOX (2021)](esp32-s3-box/README.md) | `pio-espidf-esp32s3box` | tested | built | observed * |
-| [Espressif ESP32-S3-BOX (2021)](esp32-s3-box/README.md) | `pio-arduino-esp32s3box` | tested | built | observed * |
+| [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-espidf-esp32s3box` | tested | built | observed * |
+| [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-arduino-esp32s3box` | tested | built | observed * |
+| [ST STM32N6570-DK](stm32n6570-dk/README.md) | `cubemx-hal-stm32n6570dk` | built | not built yet | built |
+| [ST STM32F407G-DISC1 (STM32F4DISCOVERY)](stm32f407g-disc1/README.md) | `cubemx-hal-stm32f407disco` | built | built | built |
+| [ST B-L475E-IOT01A (Discovery kit IoT node)](b-l475e-iot01a/README.md) | `cubemx-hal-stm32l475iot` | tested | built | observed * |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | `pio-arduino-unor4wifi` | tested | built | observed * |
-| [RT-Thread Vision Board](vision-board/README.md) | `scons-rtthread-visionboard` | tested | built | built |
+| [RT-Thread Vision Board (RA8D1)](vision-board/README.md) | `scons-rtthread-visionboard` | tested | built | built |
+<!-- board-status:end -->
 
 Levels: unverified < built < flashed < tested (automatic test PASS) < interactive (a person pressed
 a button) < observed (a person saw the LED). \* = verified under the earlier template name

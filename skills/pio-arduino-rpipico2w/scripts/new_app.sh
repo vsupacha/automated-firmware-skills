@@ -20,6 +20,7 @@ case "$APP" in *[!A-Za-z0-9_-]*|"") die "app name '$APP': use letters, digits, -
   || die "no template '$TPL' (have: $(ls "$SKILL_DIR/templates" | grep -v '^_' | tr '\n' ' '))"
 
 mkdir -p "$WS" || die "cannot create $WS"; WS="$(cd "$WS" && pwd)"; APPDIR="$WS/$APP"
+fw_ws_choose "$WS" "$APPDIR" 120   # ACTION: CHOOSE when no workspace was chosen for this PC and apps/ is synced or too long
 require_safe_path "$APPDIR" "app" 120
 [ -e "$APPDIR" ] && die "$APPDIR already exists - pick another name (or delete it after asking the user)"
 write_workspace_gitignore "$WS"

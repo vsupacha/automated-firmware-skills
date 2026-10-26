@@ -36,7 +36,7 @@ for item in "workspace|$WSABS" "home folder|$HOME" "ModusToolbox tools|$MTB_TOOL
   fi
 done
 svc="$(path_synced "$WSABS")"
-[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync during getlibs/build or move mtb_shared/build outside (file locks, slow builds)"
+[ -n "$svc" ] && wrn "path: workspace sync" "$svc folder: pause sync during getlibs/build or move mtb_shared/build outside (file locks, slow builds) - or keep apps outside it: bash lib/fw_workspace.sh set $(fw_ws_suggest)"
 
 # ModusToolbox tools package
 if [ -d "$MTB_TOOLS_DIR" ]; then

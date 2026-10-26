@@ -35,22 +35,67 @@ require_milestone() {
   need_user SETUP "$2 belongs to milestone $1, which is not active in this release (active: ${active:-none}). Enabling it is the developer's decision: add $1 to ACTIVE_MILESTONES in $REPO_ROOT/milestones.env, or export FW_ACTIVE_MILESTONES=\"${active:+$active }$1\" for one session"
 }
 
-# fw_default_ws: apps workspace = <repo>/apps inside the repo checkout, else ./apps
-fw_default_ws() {
+# ---- apps workspace (docs/workflow.md "Apps workspace") -----------------------------------------
+# Where new_app.sh creates apps and where .bench/ (this PC's probes and ports) lives. Order:
+#   new_app.sh's workspace argument > <PREFIX>_WS (env.sh) > FW_WS (environment, else the per-PC
+#   file ~/.fw-skills.env, FW_SETTINGS names another file) > <project>/apps.
+# The per-PC file is never in git and never synced; lib/fw_workspace.sh shows and writes it.
+# lib/fwpaths.py implements the same rules for the Python tools.
+FW_SETTINGS="${FW_SETTINGS:-$HOME/.fw-skills.env}"
+
+# fw_saved_ws: the workspace chosen for this PC (FW_WS, else the settings file), or nothing
+fw_saved_ws() {
+  local w="$FW_WS"
+  [ -n "$w" ] || w="$(sed -n 's/^FW_WS=//p' "$FW_SETTINGS" 2>/dev/null | tr -d '\r' | tail -1 | sed "s/^[\"']//; s/[\"']\$//")"
+  [ -n "$w" ] || return 0
+  if command -v cygpath >/dev/null 2>&1; then cygpath -u "$w"; else echo "$w"; fi
+}
+# fw_project_root: <repo> inside the repo checkout, else the current folder (a project using the plugin)
+fw_project_root() {
   case "$(pwd)/" in
-    "$REPO_ROOT"/*) echo "$REPO_ROOT/apps";;
-    *)              echo "$PWD/apps";;
+    "$REPO_ROOT"/*) echo "$REPO_ROOT";;
+    *)              echo "$PWD";;
   esac
+}
+# fw_fallback_ws: <project>/apps - used when no workspace was chosen for this PC
+fw_fallback_ws() { echo "$(fw_project_root)/apps"; }
+# fw_default_ws: the workspace chosen for this PC, else <project>/apps
+fw_default_ws() {
+  local w; w="$(fw_saved_ws)"
+  if [ -n "$w" ]; then echo "$w"; else fw_fallback_ws; fi
+}
+# fw_ws_suggest: a short folder outside any synced folder, offered by ACTION: CHOOSE
+fw_ws_suggest() { if [ -d /c ]; then echo "C:/fw-ws"; else echo "$HOME/fw-ws"; fi; }
+
+# fw_ws_choose <workspace> <app-dir> <max-len>: new_app.sh, before it creates anything. When no
+# workspace was chosen (no FW_WS, no workspace argument, no <PREFIX>_WS) and <project>/apps is in a
+# synced folder or makes the app path longer than this toolchain allows, stop with ACTION: CHOOSE.
+fw_ws_choose() {
+  local ws="$1" appdir="$2" max="$3" why="" svc n
+  [ -n "$(fw_saved_ws)" ] && return 0
+  [ "$ws" = "$(fw_fallback_ws)" ] || return 0
+  svc="$(path_synced "$ws")"
+  [ -n "$svc" ] && why="is in a $svc folder (file locks while generating and building, build outputs synced to every PC)"
+  n="$(winpath "$appdir" | tr -d '\r\n' | wc -c)"; n=$((n))
+  [ "$n" -gt "$max" ] && why="${why:+$why; }makes the app path $n characters long (limit $max for this toolchain)"
+  [ -z "$why" ] && return 0
+  need_user CHOOSE "apps workspace for this PC: $(winpath "$ws") $why.
+  Ask the developer which workspace to use, save it once for this PC, then re-run this command:
+    outside the synced folder (recommended):  bash $REPO_ROOT/lib/fw_workspace.sh set $(fw_ws_suggest)
+    keep $(winpath "$ws"):  bash $REPO_ROOT/lib/fw_workspace.sh set $(winpath "$ws")
+    this app only:  pass a folder as new_app.sh's workspace argument"
 }
 
 # fw_init_boards <workspace> [<repo boards dir>]: board profile search path
-#   1. <project>/boards  - the user's own boards, next to the apps workspace (survives updates)
+#   1. <project>/boards  - the user's own boards, in the project folder (survives updates)
 #   2. <repo>/boards     - boards shipped with the skills (or the override)
+# The workspace argument is kept for the callers; the project boards no longer follow it, so a
+# workspace outside the project (a per-PC FW_WS) still finds them.
 fw_init_boards() {
   BOARDS_DIR="${2:-$REPO_ROOT/boards}"
   [ -d "$BOARDS_DIR" ] || { echo "ERROR: no boards folder at $BOARDS_DIR - keep skills/ and boards/ together (repo layout)" >&2; exit 1; }
   BOARDS_DIR="$(cd "$BOARDS_DIR" && pwd)"
-  PROJECT_BOARDS_DIR="$(dirname "$1")/boards"
+  PROJECT_BOARDS_DIR="$(fw_project_root)/boards"
   BOARDS_DIRS=()
   if [ -d "$PROJECT_BOARDS_DIR" ]; then
     PROJECT_BOARDS_DIR="$(cd "$PROJECT_BOARDS_DIR" && pwd)"
@@ -285,8 +330,77 @@ fw_check_ide() {
   fi
   v="$("$code" --version 2>/dev/null | head -1 | tr -d '\r')"
   ok "IDE: VS Code" "${v:-?}  ($(fw_where "$(dirname "$(dirname "$code")")"))"
-  if v="$(fw_ide_ext_version "$code")"; then ok "IDE: extension" "$IDE_NAME $v"
+  if v="$(fw_ide_ext_version "$code")"; then
+    if [ -n "$IDE_EXT_VERSION" ] && [ "$v" != "$IDE_EXT_VERSION" ]; then
+      wrn "IDE: extension" "$IDE_NAME $v, the IDE path was proven with $IDE_EXT_VERSION (IDE_EXT_VERSION in the board profile) - VS Code updated it: re-qualify the IDE path before relying on it (docs/workflow.md \"Tool updates\")"
+    else ok "IDE: extension" "$IDE_NAME $v${IDE_EXT_VERSION:+ (as proven)}"; fi
   else wrn "IDE: extension" "$IDE_NAME missing - code --install-extension $IDE_EXT (IDE path only)"; fi
+}
+
+# ---- tool updates (docs/workflow.md "Tool updates") ----------------------------------------------
+# The board profile pins every tool version the bring-up was proven with. Vendors update tools on
+# their own (VS Code updates extensions silently, bundle managers add versions side by side), so
+# update_tools.sh compares the pins with what is installed and follows an update only after the
+# developer agreed: it re-pins the profile and logs that the board must be re-qualified.
+#
+# fw_pin_check <KEY> <label> <pinned> <installed versions...>: one row; collects PIN_UPDATES
+#   same     the pinned version is installed and is the newest
+#   newer    the pinned version is installed, a newer one too (follow it or stay)
+#   changed  the pinned version is gone, another is installed (the stages that need it fail)
+#   missing  nothing installed (check_tools.sh says what to install)
+PIN_UPDATES=(); PIN_MISSING=0
+fw_pin_check() {
+  local key="$1" label="$2" pinned="$3" v have=0 newest st; shift 3
+  for v in "$@"; do [ "$v" = "$pinned" ] && have=1; done
+  newest="$(printf '%s\n' "$@" | grep . | sort -V | tail -1)"
+  if [ -z "$newest" ]; then st=missing
+  elif [ "$have" = 1 ] && [ "$newest" = "$pinned" ]; then st=same
+  elif [ "$have" = 1 ]; then st=newer
+  else st=changed; fi
+  printf '%-8s %-30s pinned %-18s installed %s\n' "$st" "$label" "${pinned:-(none)}" "$(printf '%s ' "$@")"
+  case "$st" in newer|changed) PIN_UPDATES+=("$key|$label|$pinned|$newest");; missing) PIN_MISSING=$((PIN_MISSING + 1));; esac
+  return 0
+}
+# fw_bundle_versions <bundle>: STM32Cube bundle versions installed side by side
+fw_bundle_versions() {
+  local d
+  for d in "$STM32CUBE_ROOT/bundles/$1"/*/; do [ -d "$d" ] && basename "$d"; done
+}
+# fw_pin_gate <board> <apply 0|1>: after the fw_pin_check rows. Nothing to follow: "UPDATE: NONE".
+# Otherwise without --apply: "UPDATE: AVAILABLE n" + exit 10 ACTION: APPROVE (the developer decides;
+# staying on the pinned versions is fine while they are installed). With --apply --yes: rewrite the
+# KEY=value lines of the board profile, append a dated line to its verification log, print what
+# must be re-run, gate "UPDATE: APPLIED n".
+fw_pin_gate() {
+  local board="$1" apply="$2" u key label old new prof="$BOARD_DIR/board.env" log="$BOARD_DIR/README.md" list=""
+  if [ ${#PIN_UPDATES[@]} -eq 0 ]; then
+    if [ "$PIN_MISSING" -gt 0 ]; then echo "UPDATE: NONE ($PIN_MISSING pinned tool(s) not installed - check_tools.sh says what to install)"
+    else echo "UPDATE: NONE (every pinned tool is installed and the newest)"; fi
+    return 0
+  fi
+  for u in "${PIN_UPDATES[@]}"; do IFS='|' read -r key label old new <<<"$u"; list="${list:+$list, }$label ${old:-none} -> $new"; done
+  if [ "$apply" != 1 ]; then
+    echo "UPDATE: AVAILABLE ${#PIN_UPDATES[@]}"
+    need_user APPROVE "follow these tool updates for board $board? $list.
+  Following re-pins $(winpath "$prof") and marks the board for re-qualification (regen + build +
+  tests again; levels in the verification log stay with the old tools until then). Staying is fine
+  while the pinned versions are installed. If the developer agrees: re-run with --apply --yes"
+  fi
+  [ -f "$prof" ] || die "no board profile $prof"
+  for u in "${PIN_UPDATES[@]}"; do
+    IFS='|' read -r key label old new <<<"$u"
+    if grep -q "^$key=" "$prof"; then sed -i "s|^\($key=\)[^ #]*|\1$new|" "$prof"
+    else printf '%s=%s\n' "$key" "$new" >>"$prof"; fi
+    grep -q "^$key=$new" "$prof" || die "could not re-pin $key in $prof"
+    echo "re-pinned  $key=$new  (was ${old:-none})"
+  done
+  if [ -f "$log" ]; then
+    printf -- '- %s tools re-pinned by update_tools.sh: %s. **Not re-qualified yet** - regen, build and\n  the bring-up tests must pass again with these versions before the levels above count for them.\n' \
+      "$(date +%Y-%m-%d)" "$list" >>"$log"
+    echo "logged     $(winpath "$log")"
+  fi
+  echo "UPDATE: APPLIED ${#PIN_UPDATES[@]}"
+  echo "NEXT: re-qualify on this board - check_tools.sh, new_app.sh (or regen.sh) + build.sh, then flash (asks first) and the tests; IDE path: open_ide.sh and build/debug once in VS Code"
 }
 
 # fw_open_ide <workspace-file> [0]: gate "IDE: READY <file>", then check VS Code and IDE_EXT

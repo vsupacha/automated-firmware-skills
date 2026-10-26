@@ -1,6 +1,8 @@
 ---
 name: cubemx-hal-stm32f407disco
 description: Firmware workflow for the ST STM32F407G-DISC1 / STM32F4DISCOVERY (STM32F407VG, Cortex-M4) with classic STM32CubeMX 6.18 in headless script mode, the STM32CubeF4 HAL and CMake - check the pinned CubeMX, firmware package and STM32Cube build bundles, create the hardware configuration (.ioc) from the CubeMX board configuration plus SWO, generate the CMake project headlessly, write layered code (board -> func -> app_main) hooked into the generated main.c, and build with the pinned GCC/CMake/Ninja and a build manifest. Console is SWO output only (the board's ST-LINK/V2 has no virtual COM port). Milestone M1 (setup, create, build); flash and test are planned. Use when asked to create, generate, regenerate or build STM32F4 Discovery firmware with STM32CubeMX (บอร์ด STM32F4 Discovery), or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for STM32CubeMX2 boards (cubemx2-hal2-stm32c562nucleo), other F4 Discovery kits (F411, F429...) or STM32CubeIDE projects.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs STM32CubeMX 6.18 + STM32CubeF4 + STM32Cube bundles (GCC, CMake, Ninja); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # STM32F4 Discovery firmware workflow (STM32CubeMX + STM32CubeF4 HAL + CMake)
@@ -33,12 +35,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 (+ `regen.sh`), Stage 4 |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 (+ `regen.sh`), Stage 3 |
 | M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | **planned** for this skill |
-| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 2e (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>`: tell the user exactly that, wait for their
@@ -120,9 +122,21 @@ Checks the workspace path (no spaces/non-ASCII, ≤100 characters), STM32CubeMX 
 bundled java), the CubeMX repository and the pinned `STM32Cube_FW_F4` package (+ the board's BSP),
 GNU Tools for STM32 / CMake / Ninja bundles. Read-only. **Gate:** `missing/bad=0`.
 
+**Tool updates (stage 1b):** `bash "$SKILL/scripts/update_tools.sh" <board-id>` compares every pin of the
+board profile (CubeMX, firmware package, STM32Cube bundles, `IDE_EXT_VERSION`) with this PC. Read-only.
+**Gate:** `UPDATE: NONE`, or `UPDATE: AVAILABLE n` + exit 10 `ACTION: APPROVE` - ask the developer;
+only after a yes run it again with `--apply --yes` (re-pins the profile, logs "not re-qualified"),
+then re-qualify: regen + build, flash (asks first) and the tests. Run it when check_tools shows
+an `IDE: extension` WARN or a tool update is announced.
+
 ## Stage 2 - Create the project
 
 1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app> [<workspace>] [template]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - copies `lib/func` + `templates/_common/src` + the template, then one headless CubeMX run
      (`MX_START`, `MX_CONFIG`, save `<app>.ioc`, generate `mx/`), then `overlay.py`. ~2 minutes.
    - **Gate:** `REGEN: PASS` and `Created ...` (any `KO`, lost file or missing `exit` fails it).
@@ -139,7 +153,7 @@ GNU Tools for STM32 / CMake / Ninja bundles. Read-only. **Gate:** `missing/bad=0
    **Gate:** `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or the
    extension is missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
-## Stage 3 - Code in layers
+## Stage 2e - Code in layers
 
 Read `reference/layering.md` first. Rules:
 - `src/board/` - **only** place for GPIO ports/pins, HAL/CMSIS calls, `#if defined(BOARD_xxx)`. LEDs
@@ -159,7 +173,7 @@ Read `reference/layering.md` first. Rules:
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS`, and
 `bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` on the PC, fake board).
 
-## Stage 4 - Build
+## Stage 3 - Build
 
 ```bash
 bash "$SKILL/scripts/build.sh" <app> [--clean] [--allow-warnings]
@@ -175,7 +189,7 @@ Not implemented in this skill yet. Do not improvise with STM32CubeProgrammer or 
 debugger as part of the skill - say the hardware stages are planned and stop after `BUILD: PASS`.
 Plan: discover/flash through the ST-LINK/V2 (device ID 0x413), tests reading the SWO console.
 
-## Stage 7 - Clean
+## Stage 16 - Clean
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run

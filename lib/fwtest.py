@@ -49,6 +49,7 @@ import sys
 import time
 from pathlib import Path
 
+import fwpaths
 import serial
 from serial.tools import list_ports
 
@@ -144,7 +145,16 @@ def run(cfg):
               f"ACTIVE_MILESTONES in {REPO_ROOT / 'milestones.env'}, or export FW_ACTIVE_MILESTONES for one session")
         sys.exit(10)
     interactive = args.interactive or args.only_interactive
-    spec = json.load(open(args.spec, encoding="utf-8"))
+    try:
+        spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
+    except OSError:
+        have = sorted(p.name for p in Path(args.spec).parent.glob("*.json")) if Path(args.spec).parent.is_dir() else []
+        print(f"ERROR: no test spec {args.spec}" + (f" (have: {' '.join(have)})" if have else "")
+              + " - specs are named after the template with '_' (tests/hello_world.json, tests/push_to_light.json)")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"ERROR: test spec {args.spec} is not valid JSON ({e})")
+        sys.exit(1)
     boot = spec.get("boot", {})
 
 
@@ -160,14 +170,11 @@ def run(cfg):
 
     board = {}
     if args.board:
-        # same rules as env.sh: workspace = <repo>/apps inside the repo checkout, else ./apps;
+        # same rules as env.sh (lib/fwpaths.py): the bench file is in this PC's apps workspace;
         # board profiles from <project>/boards first, then the repo's boards
-        cwd = Path.cwd().resolve()
-        root = REPO_ROOT if cwd == REPO_ROOT or REPO_ROOT in cwd.parents else cwd
-        ws = Path(os.environ.get(f"{P}_WS") or root / "apps")
 
         def profile(board_id):
-            for d in (ws.parent / "boards", BOARDS_DIR):
+            for d in (fwpaths.project_root() / "boards", BOARDS_DIR):
                 f = d / board_id / SKILL_DIR.name / "board.env"
                 if f.is_file():
                     return f
@@ -177,7 +184,7 @@ def run(cfg):
         if own.get("BOARD_EXTENDS"):   # parent profile first, this board overrides it
             board = read_env(profile(own["BOARD_EXTENDS"]))
         board.update(own)
-        bench = Path(os.environ.get(f"{P}_BENCH_DIR") or ws / ".bench") / f"{args.board}.env"
+        bench = fwpaths.bench_dir(P) / f"{args.board}.env"
         board.update(read_env(bench))
         bench_lock(bench.parent, args.board, "serial_test.py")
         if os.environ.get(f"{P}_{cfg['serial_env']}"):

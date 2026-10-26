@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "about": "Machine-readable board index. Resolve a board name with 'aliases' (case, spaces, '-' and '_' ignored) to exactly one id, or ask the user when nothing or several match. Evidence levels come from dated lines in each profile's README (log); tools/validate_skills.py checks this file against the folders.",
+  "about": "Machine-readable board index. Resolve a board name with 'aliases' (case, spaces, '-' and '_' ignored) to exactly one id, or ask the user when nothing or several match. Evidence levels come from dated lines in each profile's README (log); tools/validate_skills.py checks this file against the folders. A profile's 'renamed' map names templates verified under an earlier template name (shown with ' *'); tools/board_status.py writes the README level tables from this file.",
   "evidence_levels": {
     "unverified": "profile exists, nothing run on hardware",
     "built": "build gate passed",
@@ -30,6 +30,9 @@
             "blink": "built",
             "push-to-light": "interactive"
           },
+          "renamed": {
+            "push-to-light": "uart-btn-led"
+          },
           "log": "boards/edgi-talk/modus-pdl-edgitalk/README.md"
         }
       }
@@ -53,6 +56,9 @@
             "hello-world": "tested",
             "blink": "built",
             "push-to-light": "observed"
+          },
+          "renamed": {
+            "push-to-light": "uart-btn-led"
           },
           "log": "boards/nucleo-c562re/cubemx2-hal2-stm32c562nucleo/README.md"
         }
@@ -78,6 +84,9 @@
             "blink": "built",
             "push-to-light": "observed"
           },
+          "renamed": {
+            "push-to-light": "uart-btn-led"
+          },
           "log": "boards/rpi-pico-2w/pio-arduino-rpipico2w/README.md"
         }
       }
@@ -102,6 +111,9 @@
             "blink": "built",
             "push-to-light": "observed"
           },
+          "renamed": {
+            "push-to-light": "uart-btn-led"
+          },
           "note": "2021 model only (not BOX-Lite / BOX-3)",
           "log": "boards/esp32-s3-box/pio-espidf-esp32s3box/README.md"
         },
@@ -112,6 +124,9 @@
             "hello-world": "tested",
             "blink": "built",
             "push-to-light": "observed"
+          },
+          "renamed": {
+            "push-to-light": "uart-btn-led"
           },
           "note": "Arduino-style code; 2021 model only (not BOX-Lite / BOX-3)",
           "log": "boards/esp32-s3-box/pio-arduino-esp32s3box/README.md"
@@ -189,11 +204,14 @@
           "level": "observed",
           "date": "2026-10-08",
           "templates": {
-            "hello-world": "unverified",
+            "hello-world": "tested",
             "blink": "built",
             "push-to-light": "observed"
           },
-          "note": "M1 incl. board stages; push-to-light flashed, tests 13/13, interactive 5/5, LED2 seen by the owner; console RX by interrupt (no USART RX FIFO); hello-world not run yet",
+          "renamed": {
+            "push-to-light": "uart-btn-led"
+          },
+          "note": "M1 incl. board stages; push-to-light flashed, tests 13/13, interactive 5/5, LED2 seen by the owner; console RX by interrupt (no USART RX FIFO); hello-world flashed, tests 9/9 (2026-10-26)",
           "log": "boards/b-l475e-iot01a/cubemx-hal-stm32l475iot/README.md"
         }
       }
@@ -218,6 +236,9 @@
             "hello-world": "tested",
             "blink": "built",
             "push-to-light": "observed"
+          },
+          "renamed": {
+            "push-to-light": "uart-btn-led"
           },
           "log": "boards/uno-r4-wifi/pio-arduino-unor4wifi/README.md"
         }

@@ -1,6 +1,8 @@
 ---
 name: pio-arduino-rpipico2w
 description: End-to-end firmware workflow for the Raspberry Pi Pico 2 W (RP2350) with PlatformIO and the arduino-pico core - check tools and folder paths, discover the board by its USB serial / chip ID (also in BOOTSEL), create a PlatformIO app from a layered template (board -> func -> main) with the platform pinned to a commit, build with a manifest, flash with picotool behind identity gates (chip type, flash size, chip ID), run automated serial tests, and clean build outputs. Use when asked to create, build, flash (แฟลช) or test Pico 2 W / RP2350 firmware with PlatformIO or Arduino (บอร์ด Pico 2 W), add an RP2350 board profile, or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for RP2040 Picos, Pico SDK (CMake) projects or MicroPython.
+license: MIT
+compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs PlatformIO (arduino-pico core); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
 
 # Raspberry Pi Pico 2 W firmware workflow (PlatformIO)
@@ -31,12 +33,12 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
-| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 4 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 2 step 1, Stage 5, Stage 6 |
-| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 3 (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
+| M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 step 2, Stage 3 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(planned)* | Stage 4 (discover), Stage 5, Stage 6 |
+| M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 2e (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
-| - | 16 clean | Stage 7 |
+| - | 16 clean | Stage 16 |
 
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, CONNECT, POWER_CYCLE, JUMPER,
@@ -109,7 +111,7 @@ PATH), the pinned platform (installed by the first build if missing), picotool, 
 (`python -m pip install -U platformio` or the VS Code extension) - don't install it yourself.
 Changing git config (`core.longpaths`) is the user's call - ask.
 
-## Stage 2 - Discover the board, create the project
+## Stage 2 - Create the project (and stage 4: discover the board)
 
 1. **Discover (read-only):** `bash "$SKILL/scripts/discover.sh" <board-id> [--serial <usb-serial>]`
    - lists RP2 devices: sketch mode (CDC port) or BOOTSEL (no port; blank boards start here).
@@ -118,6 +120,11 @@ Changing git config (`core.longpaths`) is the user's call - ask.
    - **Gate:** `IDENTITY: PASS` + `Saved ...`. More than one board: `--serial` (it never guesses).
    - No board yet? Skip to step 2.
 2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
+   - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
+     and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
+     e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
+     re-run `new_app.sh`; then use the app path it prints (`<workspace>/<app>`) in the later stages
+     (docs/workflow.md "Apps workspace").
    - writes `platformio.ini` (pinned platform commit, board, core, `-D<BOARD_DEFINE>`,
      `-Wall -Wextra` for `src/` only), copies `templates/_common/src` + the template's `src/` and
      `tests/`, records `pico-app.env`. No network needed.
@@ -131,7 +138,7 @@ Changing git config (`core.longpaths`) is the user's call - ask.
    `IDE: READY <workspace>` + `IDE: OPENED` (`IDE: not opened` with `--no-open`); exit 10 `ACTION: SETUP` = VS Code or PlatformIO IDE is
    missing (new_app.sh only reports it). See docs/workflow.md "IDE handoff".
 
-## Stage 3 - Code in layers
+## Stage 2e - Code in layers
 
 Read `reference/layering.md` before writing code. Rules:
 - `src/board/` - **only** place for pin numbers, `LED_BUILTIN`, `BOOTSEL`, `#if defined(BOARD_xxx)`.
@@ -151,7 +158,7 @@ Read `reference/layering.md` before writing code. Rules:
 `host_test.sh` does not cover this skill yet: its `func/` is a C++ copy, to be merged into
 `lib/func` (docs/board-api.md).
 
-## Stage 4 - Build
+## Stage 3 - Build
 
 ```bash
 bash "$SKILL/scripts/build.sh" <app-dir> [--clean] [--allow-warnings]
@@ -195,7 +202,7 @@ until `READY`, checks the image reports `board=<id>`, then runs the steps. Inter
 to do, then run. **Gate:** `RESULT: PASS`. The LED state reported by `led?` is the commanded
 state (no read-back on this board) - only a human can confirm the LED really lit.
 
-## Stage 7 - Clean
+## Stage 16 - Clean
 
 ```bash
 bash "$SKILL/scripts/clean.sh" [--apps] [<workspace>]          # dry run

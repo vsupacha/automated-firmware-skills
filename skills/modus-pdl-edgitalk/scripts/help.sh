@@ -25,6 +25,7 @@ templates() {
 
 if [ $LANG_EN = 1 ]; then cat <<'EOF'
 PSOC Edge E84 firmware skill - what you can ask (say it in your own words)
+  (<app> in the later stages = the app folder new_app.sh prints, e.g. apps/my-app or C:/fw-ws/my-app)
 
  Setup
   "check my tools"                         -> check_tools.sh <board>
@@ -50,6 +51,7 @@ PSOC Edge E84 firmware skill - what you can ask (say it in your own words)
 EOF
 else cat <<'EOF'
 skill modus-pdl-edgitalk (PSOC Edge E84) - สั่ง Claude ได้ด้วยภาษาของคุณเอง ตัวอย่าง:
+  (<app> ในขั้นหลัง new_app.sh = โฟลเดอร์แอปที่ new_app.sh พิมพ์ออกมา เช่น apps/my-app หรือ C:/fw-ws/my-app)
 
  เตรียมเครื่อง
   "ตรวจเครื่องมือให้หน่อย"                  -> check_tools.sh <board>

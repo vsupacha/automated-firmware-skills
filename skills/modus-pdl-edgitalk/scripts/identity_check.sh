@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 2a / 5 gate: READ-ONLY identity check of probe + chip. No erase, program, reset or halt.
+# Stage 4 / 5 gate: READ-ONLY identity check of probe + chip. No erase, program, reset or halt.
 # Usage: identity_check.sh <board-id> [logfile]
 # Probe serial comes from the bench file (discover.sh) or PSE84_PROBE_SERIAL.
 # Exit 0 = PASS (probe serial and detected device match; life cycle too if reported).

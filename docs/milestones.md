@@ -104,7 +104,7 @@ gates already passed. `(cr)` = found by a clean-room run.
 | `debug.sh` | - (script) | attach **without** reset or programming by default; halt at `main` on request; refuses to reset or reflash while a fault's state is being kept, unless the user agrees. Done for STM32 (C5, L475: `status` + scenarios); next: other probes (pyOCD, OpenOCD, esptool/JTAG), halt at `main`, scenario checks "no change" and values compared across steps, offline scenario check `(cr)` |
 | Board stages for N6 / F4 | adapts discover/flash to the board's boot mode and console (dev boot mode, SWO) | `IDENTITY:` / `FLASH:` / `BOOT:` / `RESULT:` on the board |
 | Bring-up certificate | - (generated) | per board: demo levels up to observed, pinned-tools manifest, IDE and script path, clean-room report |
-| SKILL.md stage numbers = shared stages `(cr)` | - (docs) | validator: headings match the stage table |
+| SKILL.md stage numbers = shared stages `(cr)` | - (docs) | **done 2026-10-27**: every `## Stage <n>` heading uses the shared numbers (coding = 2e); the validator checks number and order |
 
 ### M2 board support - drivers behind `board.h`, proven per peripheral
 
@@ -136,7 +136,7 @@ gates already passed. `(cr)` = found by a clean-room run.
 
 | Item | AI customizes / integrates | Gate |
 | --- | --- | --- |
-| Application logic in `func/` | writes the logic against proven APIs only; stub/driver inputs through the console | tests PASS on the board |
+| Application logic as portable modules | moves the logic that needs testing or profiling out of `app_main.c` / `main.c` into modules of the logic layer (`func/` rules: `board.h` and the C library only), written against proven APIs only; `app_main.c` keeps the wiring; stub/driver inputs through the console | tests PASS on the board + `LAYERS: PASS` |
 | Profiling gates | adds measurement points (cycle counter, GPIO markers) | `PROFILE: PASS` against budgets; supply, flags, workload and method recorded; a gain smaller than the run-to-run variation counts as no gain |
 | Instruments | logic analyser / power meter captures with stated channels, rate, trigger and tolerance | saved raw capture + bounded script; feeds the profiling gate |
 
@@ -170,7 +170,7 @@ so an agent never calls APIs that were not built and tested first.
 | **M2 board support** | BSP drivers behind the `board.h` API, from vendor board configs > netlist > schematic > the developer | board-driver skills + the layer checks | per-peripheral tests (loopback, `WHO_AM_I`, LED seen) + `LAYERS: PASS` | `boards/<id>/parts.json`: every part and pin with its source (board config, netlist, schematic, measured) and verification level; `board.h` proven to be the only board-specific code |
 | **M3 execution model** | bare-metal superloop, RTOS (FreeRTOS), RTOS + stack (Zephyr, RT-Thread) | execution skills + the trace tool | the same logic tests pass under each model; trace rules (order, latency, period, stack) PASS | trace rules kept as test specs; the **same app logic** passing under at least two execution models - the execution layer is swappable |
 | **M4 components** | middleware on M2 + M3: LVGL, USB device classes, file system, network stack ... | one skill per component (adapter to `board.h` + the execution model) | component demo test | each component's demo test passing on **at least two boards**, versions pinned in the manifest |
-| **M5 application + profiling** | application logic in `func/`, tested on the board with stub/driver inputs; time and memory per function (e.g. a digital filter) | profiling scripts | tests + budgets PASS (cycles, stack, RAM/flash) | budgets as gates (`PROFILE: PASS`), *measured* vs *estimated* labelled, tracked across commits; instruments (logic analyser, power meter) only feed these gates |
+| **M5 application + profiling** | application logic as portable logic-layer modules (`func/` rules, wired from `app_main.c`), tested on the board with stub/driver inputs; time and memory per function (e.g. a digital filter) | profiling scripts | tests + budgets PASS (cycles, stack, RAM/flash) | budgets as gates (`PROFILE: PASS`), *measured* vs *estimated* labelled, tracked across commits; instruments (logic analyser, power meter) only feed these gates |
 | **Export / port** (stages 14-15) | a standalone project; the same app on another board | `export_app.sh`, `port.sh --to <skill>:<board>` | the exported project builds and tests on its own; the target passes the **same** tests | an exported project carries its skills, scripts and tests - no dependency on this repo or on any service |
 
 Order: M3 (execution model) comes before M4 (components) because middleware depends on it - LVGL

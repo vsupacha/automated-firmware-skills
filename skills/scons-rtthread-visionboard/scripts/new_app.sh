@@ -27,6 +27,7 @@ SRC="$BSP_DIR/projects/$BSP_PROJECT"
   || need_user SETUP "SDK $BSP_NAME $BSP_VERSION not found ($SRC) - install it in RT-Thread Studio (SDK Manager > Board_Support_Packages > $BSP_VENDOR > $BSP_NAME $BSP_VERSION), then re-run"
 
 mkdir -p "$WS" || die "cannot create $WS"; WS="$(cd "$WS" && pwd)"; APPDIR="$WS/$APP"
+fw_ws_choose "$WS" "$APPDIR" 100   # ACTION: CHOOSE when no workspace was chosen for this PC and apps/ is synced or too long
 require_safe_path "$APPDIR" "app" 100
 [ -e "$APPDIR" ] && die "$APPDIR already exists - pick another name (or delete it after asking the user)"
 write_workspace_gitignore "$WS"

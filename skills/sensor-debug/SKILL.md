@@ -1,6 +1,8 @@
 ---
 name: sensor-debug
 description: PC-side debugging of the values a running app prints - a Python tool (scripts/sensor_debug.py) drives the app's console over the board's console port (no flashing) to check init status, bus scans, self-tests, value plausibility and noise against limits, decode raw driver error codes, sweep rates/settings, and run before/after physical stimulus tests (rotate, flip, breathe, lift); on request it opens a browser live view (scripts/sensor_dash.py + web/index.html) that charts every reading and sends console commands, with a raw log for the agent. Use when readings are missing, wrong, noisy or failing (ERR_BUS, ERR_NODEV, NODATA, stuck values, odd magnitudes), when verifying a new driver on hardware, or when asked to watch or chart what a board prints - for any app of this repo's board skills that keeps the console protocol.
+license: MIT
+compatibility: Python 3 + pyserial; a board that prints over a serial console; optional browser live view (127.0.0.1 only)
 ---
 
 # sensor-debug - drive and judge the numbers from the PC
@@ -12,7 +14,7 @@ through the board skill (build, then **ask before every flash**).
 
 ```bash
 DBG=skills/sensor-debug/scripts/sensor_debug.py
-python "$DBG" --board <board-id> diag          # port from apps/.bench/<board-id>.env (the skill's discover.sh)
+python "$DBG" --board <board-id> diag          # port from <apps workspace>/.bench/<board-id>.env (the skill's discover.sh)
 python "$DBG" --port <port> watch --seconds 10 --limits skills/sensor-debug/limits/example-at-rest.json
 python "$DBG" ports                            # list serial ports
 ```
@@ -39,7 +41,8 @@ YOUR app prints (the example file lists typical sensor tags only).
 `--expect` syntax: `TAG.field>+N` rose >= N, `TAG.field<-N` fell >= N, `TAG.field~N` changed <= N,
 `TAG.field!N` changed >= N either way. Units are the ones the firmware prints.
 `--log F` (global) appends every received line to a file - keep it next to the app logs.
-Port lookup: `--port`, else `--board` (needs the bench file `apps/.bench/<board>.env` with
+Port lookup: `--port`, else `--board` (needs the bench file `.bench/<board>.env` in this PC's apps workspace - `apps/` or the one
+`lib/fw_workspace.sh show` names - with
 `CONSOLE_PORT`, written by the board skill's `discover.sh` - without it `--board` stops), else the
 only USB serial port. On a PC without a bench file, leave `--board` out (one board plugged in) or
 pass `--port` (`ports` lists them). Every command prints the port it opened (`PORT: ...`).
