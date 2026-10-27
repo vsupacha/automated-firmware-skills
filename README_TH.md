@@ -18,11 +18,34 @@
 
 ## เริ่มใช้งาน
 
-1. ติดตั้ง plugin ใน Claude Code:
+1. เตรียมเครื่อง: Windows 10/11 + Git for Windows (Git Bash), Python 3 + `pyserial` และเครื่องมือของผู้ผลิตบอร์ด
+   (README ของแต่ละบอร์ดบอกเวอร์ชันที่ต้องใช้ - `check_tools.sh` จะบอกว่าขาดอะไร)
+2. ติดตั้ง plugin ใน Claude Code ตามค่ายของบอร์ด (จะได้ `firmware-tools` มาด้วย):
    `/plugin marketplace add vsupacha/automated-firmware-skills` แล้ว
-   `/plugin install automated-firmware-skills@automated-firmware-skills`
-2. เลือกบอร์ดใน [boards/README.md](boards/README.md) — README ของแต่ละบอร์ดบอกเครื่องมือที่ต้องติดตั้งและคำสั่ง
-3. พิมพ์ถามเป็นภาษาไทยได้เลย เช่น "ขอวิธีใช้หน่อย", "มีคำสั่งอะไรบ้าง", "สร้างแอป blink แล้ว build ให้หน่อย"
+   `/plugin install firmware-stm32@automated-firmware-skills` (หรือ `firmware-platformio`,
+   `firmware-modustoolbox`, `firmware-rtthread`) - ถ้าต้องการทุกบอร์ดใช้
+   `automated-firmware-skills@automated-firmware-skills` แทน เลือกอย่างใดอย่างหนึ่ง
+3. พิมพ์ถามเป็นภาษาไทยได้เลย เช่น "ขอวิธีใช้หน่อย", "ตรวจเครื่องมือให้หน่อย", "สร้างแอป blink แล้ว build ให้หน่อย",
+   "แฟลชเลย" (Claude ถามก่อน flash ทุกครั้ง), "ทดสอบ"
+4. แอปแรกบนเครื่อง: ถ้าโฟลเดอร์ `apps/` อยู่ใน Dropbox/OneDrive หรือ path ยาวเกิน ระบบจะถามว่าจะเก็บแอปที่ไหน
+   (แนะนำโฟลเดอร์ path สั้นนอก Dropbox เช่น `C:/fw-ws`) ถามครั้งเดียวต่อเครื่อง
+
+## คู่มือภาษาไทยของแต่ละบอร์ด
+
+ตั้งแต่เตรียมเครื่องจนถึงทดสอบบนบอร์ด พร้อมประโยคที่ใช้สั่ง Claude และคำสั่ง Git Bash:
+
+| บอร์ด | คู่มือ |
+| --- | --- |
+| ST NUCLEO-C562RE | [skills/cubemx2-hal2-stm32c562nucleo/README_TH.md](skills/cubemx2-hal2-stm32c562nucleo/README_TH.md) |
+| ST B-L475E-IOT01A | [skills/cubemx-hal-stm32l475iot/README_TH.md](skills/cubemx-hal-stm32l475iot/README_TH.md) |
+| ST STM32N6570-DK (build เท่านั้น) | [skills/cubemx-hal-stm32n6570dk/README_TH.md](skills/cubemx-hal-stm32n6570dk/README_TH.md) |
+| ST STM32F407G-DISC1 (build เท่านั้น) | [skills/cubemx-hal-stm32f407disco/README_TH.md](skills/cubemx-hal-stm32f407disco/README_TH.md) |
+| RT-Thread Edgi-Talk | [skills/modus-pdl-edgitalk/README_TH.md](skills/modus-pdl-edgitalk/README_TH.md) |
+| Raspberry Pi Pico 2 W | [skills/pio-arduino-rpipico2w/README_TH.md](skills/pio-arduino-rpipico2w/README_TH.md) |
+| ESP32-S3-BOX (ESP-IDF) | [skills/pio-espidf-esp32s3box/README_TH.md](skills/pio-espidf-esp32s3box/README_TH.md) |
+| ESP32-S3-BOX (Arduino) | [skills/pio-arduino-esp32s3box/README_TH.md](skills/pio-arduino-esp32s3box/README_TH.md) |
+| Arduino UNO R4 WiFi | [skills/pio-arduino-unor4wifi/README_TH.md](skills/pio-arduino-unor4wifi/README_TH.md) |
+| RT-Thread Vision Board | [skills/scons-rtthread-visionboard/README_TH.md](skills/scons-rtthread-visionboard/README_TH.md) |
 
 ## เอกสาร (ภาษาอังกฤษ)
 

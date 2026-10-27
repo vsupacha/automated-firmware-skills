@@ -5,7 +5,7 @@ the USB bridge, the RA4M1 programmer and the WiFi/BLE radio. Tool-independent ha
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [pio-arduino-unor4wifi/](pio-arduino-unor4wifi/README.md) | `skills/pio-arduino-unor4wifi` (PlatformIO + Arduino UNO R4 core) | verified on hardware (LED L seen) |
+| [pio-arduino-unor4wifi/](pio-arduino-unor4wifi/README.md) | [`skills/pio-arduino-unor4wifi`](../../skills/pio-arduino-unor4wifi/README.md) ([ไทย](../../skills/pio-arduino-unor4wifi/README_TH.md)) (PlatformIO + Arduino UNO R4 core) | verified on hardware (LED L seen) |
 
 ## Bring-up demos
 

@@ -1,85 +1,95 @@
-# modus-pdl-edgitalk — คู่มือภาษาไทย
+# RT-Thread Edgi-Talk - วิธีใช้ `modus-pdl-edgitalk`
 
-Skill สำหรับ Claude Code ใช้สร้าง firmware บอร์ดตระกูล **Infineon PSOC Edge E84** ด้วย
-ModusToolbox แบบอัตโนมัติ ตั้งแต่ตรวจเครื่องมือจนถึงทดสอบบนบอร์ดจริง
-(คำสั่งหลักสำหรับ Claude อยู่ใน `SKILL.md` เป็นภาษาอังกฤษ)
+firmware สำหรับ RT-Thread Edgi-Talk - PSE846GPS2DBZC4A, Infineon PSOC Edge E84 - ด้วย ModusToolbox 3.9 + PDL ตั้งแต่ "ติดตั้งเครื่องมือครบหรือยัง" จนถึง
+"ทดสอบบนบอร์ดผ่านแล้ว" โดยมีด่านตรวจ (gate) ทุกขั้น สั่ง Claude ด้วยภาษาของคุณเอง หรือรัน script ชุดเดียวกันเองใน
+Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) คำสั่งที่ agent ทำตาม: [SKILL.md](SKILL.md)
 
-## ⚠️ ก่อนเริ่ม: ชื่อโฟลเดอร์
+ขั้นที่ใช้บอร์ด (connect, flash, test) ผ่านการตรวจบนบอร์ดจริงแล้ว ระดับหลักฐานของแต่ละ template และเวอร์ชันเครื่องมือที่แน่นอน:
+[boards/edgi-talk/README.md](../../boards/edgi-talk/README.md)
 
-ModusToolbox (make, configurator, OpenOCD) **ทำงานผิดพลาดถ้า path มีช่องว่าง หรือมีตัวอักษรที่ไม่ใช่ภาษาอังกฤษ (เช่น ภาษาไทย)**
-ทั้งโฟลเดอร์ workspace/แอป, โฟลเดอร์ผู้ใช้ Windows (`C:\Users\<ชื่อ>`) และโฟลเดอร์ติดตั้ง ModusToolbox
+| บนบอร์ด | |
+| --- | --- |
+| Console | KitProg3 USB-UART |
+| LED1 | LED1 (red) |
+| BTN1 | SW2 |
+| Probe / USB | on-board KitProg3 |
 
-- ใช้เฉพาะ A-Z, a-z, 0-9, `-`, `_` เช่น `C:\Users\<you>\works\automated-firmware-skills`
-- ถ้าชื่อผู้ใช้ Windows เป็นภาษาไทย ให้วาง workspace นอกโฟลเดอร์ผู้ใช้ เช่น `C:\pse84-ws`
-- โฟลเดอร์ที่ sync (Dropbox/OneDrive) ใช้ได้ แต่ถ้า build ล้มเพราะไฟล์ถูกล็อก ให้หยุด sync ชั่วคราว
-- ขั้นที่ 1 (`check_tools.sh`) ตรวจให้อัตโนมัติ ถ้าขึ้น `BAD` ต้องแก้ก่อน และ `new_app` / `build` / `flash` จะไม่ยอมทำงานบน path ที่ไม่ปลอดภัย
+## 1. เตรียมเครื่อง (ทำครั้งเดียว)
 
-## โครงสร้างโฟลเดอร์ใน repo automated-firmware-skills
+- Windows 10/11 พร้อม Git for Windows (Git Bash) และ Python 3 กับ `pyserial`
+- ModusToolbox 3.9 tools, ModusToolbox Programming Tools, Arm GCC, Edge Protect Security Suite
+- path สั้น ไม่มีช่องว่างหรืออักษรที่ไม่ใช่ภาษาอังกฤษ ทั้ง workspace, โฟลเดอร์ผู้ใช้ Windows และที่ติดตั้ง ModusToolbox
+- ไม่บังคับ: VS Code และ Infineon ModusToolbox for VS Code สำหรับทาง IDE; Claude Code สำหรับทาง agent
 
-```
-automated-firmware-skills/              ← เปิด Claude Code ที่นี่
-├── skills/modus-pdl-edgitalk/              ← skill นี้
-├── boards/<id>/README.md               ← ข้อมูล hardware ของบอร์ด (ใช้ร่วมกันทุก skill)
-├── boards/<id>/modus-pdl-edgitalk/         ← profile ของบอร์ดสำหรับ skill นี้: board.env, overlay, log การทดสอบ
-└── apps/                               ← แอปที่สร้างขึ้น + mtb_shared (ลบได้ด้วยขั้น clean)
-```
+`check_tools.sh` (ข้อ 3) จะบอกสิ่งที่ขาดพร้อมเวอร์ชันที่ board profile pin ไว้
 
-แอปตัวอย่างที่ commit ไว้ใน repo มี `APP_PUBLISHED=1` ใน `pse84-app.env` — ขั้น clean จะลบเฉพาะผล build ของแอปเหล่านี้
+## 2. ติดตั้ง plugin
 
-## ลำดับงาน 6 ขั้น + clean (แต่ละขั้นมี "gate" ต้องผ่านก่อนไปขั้นถัดไป)
-
-| ขั้น | ทำอะไร | สคริปต์ | ผ่านเมื่อ |
-| --- | --- | --- | --- |
-| 1 | ตรวจชื่อโฟลเดอร์ + dev tools (MTB, ProgTools, GCC, Edge Protect, python/pyserial) | `scripts/check_tools.sh <board>` | `missing/bad=0` |
-| 2a | ค้นหาบอร์ดที่ต่อกับเครื่องนี้ (อ่านอย่างเดียว) แล้วบันทึก probe serial + COM port ของเครื่อง | `discover.sh <board>` | `IDENTITY: PASS`, `Saved ...` |
-| 2b | สร้าง project ด้วย Project Creator + overlay BSP (ไม่ต้องมีบอร์ด) | `new_app.sh <board> <app>` | `Created ...` |
-| 3 | เขียนโค้ดแยก layer: `board/` → `func/` → `main.c` และเขียน test spec จากโจทย์ | `templates/push-to-light/` | โค้ดไม่ข้าม layer |
-| 4 | build ทั้ง 3 core + sign + combined hex | `build.sh <app>` | `BUILD: PASS`, 0 warning |
-| 5 | flash (ต้องขออนุญาตผู้ใช้ก่อนทุกครั้ง) ตรวจ manifest, ตัวตนบอร์ด และ life cycle ก่อนเขียน | `flash.sh <app> --yes` | `FLASH: PASS` (exit 10 + `ACTION: POWER_CYCLE` = ให้ถอดเสียบ USB) |
-| 6 | ทดสอบผ่าน UART ตาม spec JSON (รันหลัง flash) | `serial_test.py auto <spec> <log> --board <board>` | `RESULT: PASS` |
-| 7 | clean: ลบผล build และ library (source ของแอปยังอยู่) | `clean.sh` (dry run) แล้ว `clean.sh --yes` | `CLEAN: done` |
-
-ขั้น clean มี 2 แบบ:
-- **ค่าปกติ:** ลบเฉพาะผล build และ library (`build/`, `libs/`, `mtb_shared`, cache) — source/test/log และ `.bench` ยังอยู่ (ดึงใหม่ได้ด้วย `build.sh <app> --getlibs`)
-- **`--apps`:** ลบทั้งแอปที่สร้างด้วย `new_app.sh` (โฟลเดอร์ที่มี `pse84-app.env`) **รวม source code** + `apps/.bench` — ใช้เมื่อผู้ใช้สั่งลบแอปเท่านั้น (แอปที่มี `APP_PUBLISHED=1` ลบเฉพาะผล build)
-
-บอร์ดของตัวเอง (ติดตั้ง skill เป็น plugin): วาง profile ไว้ในโปรเจกต์ที่ `boards/<id>/modus-pdl-edgitalk/board.env` (ข้าง `apps/`) — skill จะหาที่นี่ก่อน และไม่หายเมื่ออัปเดต plugin
-`new_app.sh` สร้าง `apps/.gitignore` ให้ถ้ายังไม่มี และ `backup.sh` ทำให้โฟลเดอร์ `backup/` ไม่ถูก commit
-
-ถ้าไม่ใส่ `--yes` จะแสดงรายการที่จะลบเท่านั้น ควรสำรอง log หรือโค้ดที่ต้องการเก็บก่อนลบจริง
-ถ้าขึ้น `CLEAN: INCOMPLETE` แปลว่า Dropbox/OneDrive ล็อกไฟล์อยู่ ให้หยุด sync ชั่วคราวแล้วรันซ้ำ
-
-## ข้อมูลบอร์ด 2 ระดับ
-
-- **ชนิดบอร์ด** (`boards/<id>/modus-pdl-edgitalk/board.env` ใน repo) — เหมือนกันทุกบอร์ดรุ่นเดียวกัน: BSP, overlay, ชิปที่คาดหวัง, ชื่อปุ่ม
-- **บอร์ดที่ต่อกับเครื่องนี้** (`apps/.bench/<id>.env`) — probe serial และ COM port ซึ่งต่างกันทุกเครื่อง
-  นักศึกษาแต่ละคนรัน `discover.sh <board>` ครั้งแรกครั้งเดียว ห้ามแก้ค่าเหล่านี้ใน `boards/`
-
-## โครงสร้างโฟลเดอร์ skill
+ใน Claude Code จากโฟลเดอร์โปรเจกต์ของคุณ:
 
 ```
-SKILL.md                 คำสั่งสำหรับ Claude (อังกฤษ)
-(ข้อมูลบอร์ดย้ายไปอยู่ที่ <repo>/boards/<id>/ แล้ว)
-reference/               รายละเอียดแต่ละขั้น, ปัญหาที่เคยเจอและวิธีแก้
-scripts/                 สคริปต์ทุกขั้น (รันด้วย Git Bash)
-templates/<ชื่อ>/        template แอปแบบแบ่ง layer พร้อม test spec: push-to-light, button-led,
-                         hello-world, dual-core-ipc (CM33 console + CM55 ทำงานผ่าน mailbox)
+/plugin marketplace add vsupacha/automated-firmware-skills
+/plugin install firmware-modustoolbox@automated-firmware-skills
 ```
 
-## เมนูวิธีใช้ และ example ของ ModusToolbox
+จะได้ `firmware-tools` มาด้วย ถ้าใช้ `automated-firmware-skills@automated-firmware-skills` จะได้ทุกบอร์ด
+เลือกอย่างใดอย่างหนึ่ง
 
-- พิมพ์ **"ขอวิธีใช้หน่อย"** หรือ "มีคำสั่งอะไรบ้าง" — Claude จะแสดงรายการคำสั่งพร้อมตัวอย่าง (มาจาก `scripts/help.sh`)
-- **"ขอรายการ example ของ edgi-talk"** / **"มี example bluetooth ไหม"** — ดึงรายการ code example ของ Infineon ที่รองรับบอร์ดนั้น (`examples.sh`)
-- **"เริ่มจาก example btstack-findme"** — สร้างแอปจาก example โดยล็อกเวอร์ชันทั้ง example และ BSP (`new_app.sh ... --example <id>`)
-  example ที่ปรับ BSP เอง (เช่น Bluetooth) ใช้กับ Edgi-Talk ที่มี overlay ไม่ได้โดยตรง ต้องรวมการตั้งค่าเอง
+## 3. สั่ง Claude
 
-## ใช้หลายบอร์ดในเครื่องเดียว
+| คุณพิมพ์ | Claude รัน | สิ่งที่เห็น |
+| --- | --- | --- |
+| "ขอวิธีใช้หน่อย" | `help.sh` | เมนูคำสั่ง บอร์ด และ template |
+| "ตรวจเครื่องมือสำหรับ RT-Thread Edgi-Talk ให้หน่อย" | `check_tools.sh edgi-talk` | `missing/bad=0`; แถว BAD บอกว่าต้องติดตั้งอะไร |
+| "สร้างแอป push-to-light ชื่อ btn-edgi" | `new_app.sh edgi-talk btn-edgi "" push-to-light` | `Created <โฟลเดอร์แอป>` (ครั้งแรกบนเครื่อง: ถามที่เก็บแอป) |
+| "เปิดใน IDE" | `open_ide.sh <app>` (new_app เปิดให้เอง) | `IDE: OPENED` - Infineon ModusToolbox for VS Code |
+| "build ให้หน่อย" | `build.sh <app>` | `BUILD: PASS` ไม่มี warning + manifest (เวอร์ชันเครื่องมือ, hash ของ image) |
+| "สำรองบอร์ดก่อน" | `backup.sh edgi-talk` | เก็บ image จากโรงงานไว้ก่อน flash ครั้งแรก |
+| "หาบอร์ดที่ต่ออยู่" | `discover.sh edgi-talk` | `IDENTITY: PASS` - อ่านอย่างเดียว บันทึก probe และ console port ของเครื่องนี้ |
+| "แฟลชเลย" | `flash.sh <app> --yes` **หลังคุณตอบ yes** | `FLASH: PASS` |
+| "ทดสอบ" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
+| "ทดสอบแบบกดปุ่ม" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (แอป push-to-light) | กด SW2 เมื่อถูกบอก แล้วดู LED1 (red) |
+| "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
 
-เสียบหลายบอร์ดได้ แต่ต้องรัน `discover.sh <board> --serial <probe>` แยกให้แต่ละบอร์ด (สคริปต์จะไม่เดาให้)
-เพราะทุกบอร์ดใช้ชิปรุ่นเดียวกัน สิ่งเดียวที่แยกบอร์ดได้คือ serial ของ probe — serial หนึ่งผูกได้กับบอร์ดเดียว
+- **แอปแรกบนเครื่อง:** ถ้า `apps/` อยู่ใน Dropbox/OneDrive หรือ path ยาวเกิน `new_app.sh` จะหยุดด้วย
+  `ACTION: CHOOSE` แล้ว Claude จะถามว่าจะเก็บแอปที่ไหน (แนะนำโฟลเดอร์ path สั้นนอกโฟลเดอร์ที่ sync เช่น
+  `C:/fw-ws`) แล้วบันทึกด้วย `lib/fw_workspace.sh set <dir>` เครื่องนั้นจะไม่ถามอีก
+- **สองทาง:** หลังสร้างแอปแล้ว คุณเขียนโค้ด, build, flash และ debug เองใน Infineon ModusToolbox for VS Code ได้
+  (ทาง IDE) หรือให้ Claude รันขั้นที่มี gate ให้ (ทาง script) ใช้โฟลเดอร์แอปเดียวกัน สลับได้ทุกเมื่อ
+- **โค้ดของคุณ** อยู่ใน `src/` แบ่งเป็น layer: `board/` (ขาและ peripheral), `func/` (logic ที่ย้ายบอร์ดได้),
+  `app_main` (ตัวเชื่อม) - ดู [docs/board-api.md](../../docs/board-api.md)
+- **ไม่มีการ flash จนกว่าคุณจะตอบ yes** Claude จะแสดงบอร์ด แอป และ hash ของ image แล้วรอ
+  `flash.sh` ตรวจตัวตนบอร์ดอีกครั้งก่อนเขียน
 
-## ก่อน commit / ส่งต่อ
+## 4. ใช้แบบไม่มี Claude (Git Bash จาก root ของ repo)
 
-1. ข้อมูลเฉพาะเครื่อง (`apps/.bench`, `apps/mtb_shared`, `build/`, `logs/`) และ `backup/` ถูก `.gitignore` ไว้แล้ว — ห้ามบังคับ add
-2. skill ต้องอยู่คู่กับ `boards/` เสมอ (ส่งทั้ง repo ไม่ใช่เฉพาะโฟลเดอร์ skill)
-3. ผู้รับเปิด Claude Code ใน repo แล้วเริ่มจากขั้นที่ 1 (`check_tools.sh`) และ `discover.sh`
+```bash
+S=skills/modus-pdl-edgitalk/scripts
+bash $S/check_tools.sh edgi-talk
+bash $S/new_app.sh edgi-talk btn-edgi "" push-to-light   # พิมพ์: Created <โฟลเดอร์แอป>
+bash $S/build.sh <โฟลเดอร์แอป>
+bash $S/discover.sh edgi-talk
+bash $S/flash.sh <โฟลเดอร์แอป> --yes          # เมื่อตัดสินใจ flash แล้วเท่านั้น
+python $S/serial_test.py auto <โฟลเดอร์แอป>/tests/push_to_light.json <โฟลเดอร์แอป>/logs/test.log --board edgi-talk --interactive
+```
+
+`<โฟลเดอร์แอป>` คือที่ `new_app.sh` พิมพ์ออกมา - `apps/btn-edgi` หรือเช่น `C:/fw-ws/btn-edgi` ถ้าเครื่องตั้ง
+workspace ไว้ exit code: 0 ผ่าน, 1 ล้มเหลว, 2 มี warning ที่กั้น gate, **10 = ทำตามบรรทัด `ACTION:` แล้วรันซ้ำ**
+(SETUP, CONNECT, APPROVE, CHOOSE)
+
+## 5. หมายเหตุของบอร์ดนี้
+
+- **การ flash:** OpenOCD (ModusToolbox Programming Tools) ผ่าน KitProg3 (ตรวจตัวตน: serial ของ probe, ชิป, ตรวจ life cycle ก่อนเขียน; verify)
+- การสร้างแอปจะรัน ModusToolbox Project Creator (ใช้เวลาไม่กี่นาที และโหลด `mtb_shared` ครั้งแรก) ถ้า Dropbox หรือ OneDrive lock ไฟล์ จะล้มโดยไม่บอกสาเหตุชัดเจน ให้เก็บ apps workspace ไว้นอกโฟลเดอร์ที่ sync (`new_app.sh` ถามครั้งเดียวต่อเครื่อง)
+- มี template เพิ่ม: `button-led`, `dual-core-ipc` (CM33 + CM55) การส่งต่อให้ IDE จะรัน `make vscode` ของ ModusToolbox แล้วทำ "Fix Tasks / Fix Settings" ของ extension ให้ล่วงหน้า (`vscode_fix.py`)
+- "สำรองบอร์ด" (`backup.sh edgi-talk`) ก่อน flash ครั้งแรก เพื่อเก็บ firmware จากโรงงานไว้
+- ถ้าชื่อผู้ใช้ Windows เป็นภาษาไทยหรือมีอักษรที่ไม่ใช่ภาษาอังกฤษ ให้เก็บ apps workspace ไว้นอกโฟลเดอร์ผู้ใช้ (เช่น `C:/fw-ws`)
+- `flash.sh` อาจหยุดด้วย `ACTION: POWER_CYCLE`: ถอดแล้วเสียบ USB ใหม่ แล้วรันซ้ำ ส่วน `clean.sh` จะขึ้น `CLEAN: INCOMPLETE` ถ้าโปรแกรม sync lock ไฟล์อยู่ ให้หยุด sync ชั่วคราวแล้วรันซ้ำ
+- code example ของ Infineon: "ขอรายการ example ของ edgi-talk" (`examples.sh`), "เริ่มจาก example <id>" (`new_app.sh ... --example <id>` ล็อกเวอร์ชันทั้ง example และ BSP) example ที่ปรับ BSP เอง (เช่น Bluetooth) ต้องรวมการตั้งค่าเข้ากับ overlay ของ Edgi-Talk เอง
+- หลายบอร์ดในเครื่องเดียว: รัน `discover.sh edgi-talk --serial <probe>` แยกทีละบอร์ด เพราะทุกบอร์ดใช้ชิปรุ่นเดียวกัน แยกกันได้ด้วย serial ของ probe เท่านั้น
+
+## อ่านต่อ (ภาษาอังกฤษ)
+
+- [README.md](../../README.md) - แนวคิด บอร์ดทั้งหมด plugin
+- [docs/workflow.md](../../docs/workflow.md) - ขั้นตอน gate exit code apps workspace การอัปเดตเครื่องมือ
+- [boards/edgi-talk/README.md](../../boards/edgi-talk/README.md) - hardware เวอร์ชันเครื่องมือ verification log

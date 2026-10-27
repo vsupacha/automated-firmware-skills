@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Stage 5: program an app (the flash map of its build manifest: bootloader, partition table,
 # boot_app0 OTA data, sketch) into the board of this PC's bench file with esptool, verify, run.
-# Usage: flash.sh <app-dir> --yes
+# Usage: flash.sh <app-dir> --yes [--env <pio-env>]
+#   --env   program the build of another environment of the app (unit_test.sh: <env>_unit); its
+#           manifest.txt must exist and match, like the app's
 #   --yes   required: the agent must have asked the user first (board, app, firmware.bin sha256
 #           prefix), unless the developer put FLASH_POLICY=auto into this board's bench file
 # Gates: app made for this board -> every image of the manifest's flash map matches its sha256 ->
@@ -12,17 +14,17 @@
 
 . "$(dirname "$0")/env.sh"
 require_milestone M1 "flash.sh (stage 5 flash)"
-APPDIR=""; YES=0
+APPDIR=""; YES=0; FENV=""
 while [ $# -gt 0 ]; do
-  case "$1" in --yes) YES=1;; --*) die "unknown option $1";; *) APPDIR="$1";; esac; shift
+  case "$1" in --yes) YES=1;; --env) FENV="$2"; shift;; --*) die "unknown option $1";; *) APPDIR="$1";; esac; shift
 done
-[ -n "$APPDIR" ] && [ -f "$APPDIR/arduino-app.env" ] || die "usage: flash.sh <app-dir> --yes"
+[ -n "$APPDIR" ] && [ -f "$APPDIR/arduino-app.env" ] || die "usage: flash.sh <app-dir> --yes [--env <pio-env>]"
 APPDIR="$(cd "$APPDIR" && pwd)"
 # shellcheck disable=SC1091
 . "$APPDIR/arduino-app.env"
 load_board "$APP_BOARD"
 require_vars USB_SERIAL EXPECTED_CHIP
-OUT="$APPDIR/.pio/build/$APP_PIO_ENV"; M="$OUT/manifest.txt"
+OUT="$APPDIR/.pio/build/${FENV:-$APP_PIO_ENV}"; M="$OUT/manifest.txt"
 mkdir -p "$APPDIR/logs"; LOG="$APPDIR/logs/flash-$(ts).log"
 
 # 1. image + manifest gate: the flash map and every image's sha256 come from the PASS manifest
@@ -38,7 +40,7 @@ for m in "${MAP[@]}"; do
   ARGS+=("$off" "$(winpath "$OUT/$f")")
 done
 SHA="$(sha256sum "$OUT/firmware.bin" | cut -d' ' -f1)"
-require_flash_approval $YES "program board '$APP_BOARD' with app $(basename "$APPDIR") (firmware.bin sha256 ${SHA:0:16}...)"
+require_flash_approval $YES "program board '$APP_BOARD' with app $(basename "$APPDIR")${FENV:+ (build $FENV)} (firmware.bin sha256 ${SHA:0:16}...)"
 bench_lock "$BOARD_ID" flash.sh
 info "App $(basename "$APPDIR") for board $APP_BOARD, firmware.bin sha256 ${SHA:0:16}..."
 

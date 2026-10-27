@@ -8,6 +8,10 @@ verification log, not here.
 ## [Unreleased]
 
 ### Added
+- Step-by-step guides per board skill: `skills/<skill>/README.md` (English) and `README_TH.md`
+  (Thai) - install, what to ask Claude, the Git Bash commands, board notes; linked from the README
+  skills table, each board README and README_TH.md (which also shows the per-vendor plugins). The
+  earlier Thai guides of the C5, Edgi-Talk and Pico skills are folded into the new ones.
 - Per-PC apps workspace: `lib/fw_workspace.sh` (`show` / `set <dir>` / `unset`, saved in
   `~/.fw-skills.env`) and `lib/fwpaths.py` for the Python tools. `new_app.sh` (all board skills)
   stops with `ACTION: CHOOSE` when no workspace was chosen and `<project>/apps` is in a synced
@@ -28,6 +32,16 @@ verification log, not here.
   (profile field `renamed` for the ` *` footnote); the validator runs the check.
 - Behaviour evals in `evals/` for `claude plugin eval` (flash asks first, clean dry-runs first,
   unknown board stops, `ACTION: CHOOSE` is relayed); first run 4/4.
+
+- pio-arduino-rpipico2w: `unit_test.sh` (prototype) - Unity tests of `func/` (led, button,
+  console; 12 cases) against a fake board, built with `pio test`, flashed through `flash.sh` after
+  the user's approval, results read on the board: 12/12 on a Pico 2 W. New apps get `test/` and
+  `[env:<env>_unit]`.
+- pio-arduino-esp32s3box: the same unit-test prototype (12 cases, 12/12 on an ESP32-S3-BOX);
+  `flash.sh --env <pio-env>` programs another build of the app behind the same manifest and identity
+  gates; results are read by `scripts/unity_read.py` (start byte) because the USB Serial/JTAG drops
+  output and cannot be reset by `pio test`; `unit_test.sh --read-only`; build.sh's flash map is
+  the shared `pio_flash_map` in env.sh.
 
 ### Changed
 - `serial_test.py` (lib/fwtest.py), sensor-debug and web-wizard read the bench file and apps from

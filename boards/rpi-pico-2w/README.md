@@ -4,7 +4,7 @@ RP2350 board with a CYW43439 Wi-Fi/Bluetooth module. Tool-independent hardware s
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [pio-arduino-rpipico2w/](pio-arduino-rpipico2w/README.md) | `skills/pio-arduino-rpipico2w` (PlatformIO + arduino-pico) | verified on hardware |
+| [pio-arduino-rpipico2w/](pio-arduino-rpipico2w/README.md) | [`skills/pio-arduino-rpipico2w`](../../skills/pio-arduino-rpipico2w/README.md) ([ไทย](../../skills/pio-arduino-rpipico2w/README_TH.md)) (PlatformIO + arduino-pico) | verified on hardware |
 
 ## Bring-up demos
 

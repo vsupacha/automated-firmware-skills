@@ -6,7 +6,7 @@ Tool-independent hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [cubemx-hal-stm32n6570dk/](cubemx-hal-stm32n6570dk/README.md) | `skills/cubemx-hal-stm32n6570dk` (STM32CubeMX 6.18 + STM32CubeN6 HAL + CMake) | M1: generated + built, not run on hardware |
+| [cubemx-hal-stm32n6570dk/](cubemx-hal-stm32n6570dk/README.md) | [`skills/cubemx-hal-stm32n6570dk`](../../skills/cubemx-hal-stm32n6570dk/README.md) ([ไทย](../../skills/cubemx-hal-stm32n6570dk/README_TH.md)) (STM32CubeMX 6.18 + STM32CubeN6 HAL + CMake) | M1: generated + built, not run on hardware |
 
 ## Bring-up demos
 

@@ -119,18 +119,18 @@ Milestone **M1 bring-up** is active: 10 skills, board stages verified on 8 board
 (layer checks) is implemented but gated; M3-M5 are planned. Plan and per-skill state:
 [docs/milestones.md](docs/milestones.md).
 
-| Skill | Dev tool | MCU | Board |
-| --- | --- | --- | --- |
-| [modus-pdl-edgitalk](skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox 3.9 | Infineon PSOC Edge E84 | [Edgi-Talk](boards/edgi-talk/README.md) |
-| [cubemx2-hal2-stm32c562nucleo](skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 1.1.1 + CMake | ST STM32C5 | [NUCLEO-C562RE](boards/nucleo-c562re/README.md) |
-| [cubemx-hal-stm32l475iot](skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 + STM32CubeL4 + CMake | ST STM32L4 | [B-L475E-IOT01A](boards/b-l475e-iot01a/README.md) |
-| [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 + STM32CubeN6 + CMake | ST STM32N6 | [STM32N6570-DK](boards/stm32n6570-dk/README.md) |
-| [cubemx-hal-stm32f407disco](skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 + STM32CubeF4 + CMake | ST STM32F4 | [STM32F407G-DISC1](boards/stm32f407g-disc1/README.md) |
-| [pio-arduino-rpipico2w](skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO + arduino-pico | Raspberry Pi RP2350 | [Pico 2 W](boards/rpi-pico-2w/README.md) |
-| [pio-espidf-esp32s3box](skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF 5.5 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) |
-| [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + arduino-esp32 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) |
-| [pio-arduino-unor4wifi](skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino UNO R4 core | Renesas RA4M1 | [UNO R4 WiFi](boards/uno-r4-wifi/README.md) |
-| [scons-rtthread-visionboard](skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons (RT-Thread Studio SDK) | Renesas RA8D1 | [Vision Board](boards/vision-board/README.md) |
+| Skill | Dev tool | MCU | Board | How to use |
+| --- | --- | --- | --- | --- |
+| [modus-pdl-edgitalk](skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox 3.9 | Infineon PSOC Edge E84 | [Edgi-Talk](boards/edgi-talk/README.md) | [guide](skills/modus-pdl-edgitalk/README.md) · [ไทย](skills/modus-pdl-edgitalk/README_TH.md) |
+| [cubemx2-hal2-stm32c562nucleo](skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 1.1.1 + CMake | ST STM32C5 | [NUCLEO-C562RE](boards/nucleo-c562re/README.md) | [guide](skills/cubemx2-hal2-stm32c562nucleo/README.md) · [ไทย](skills/cubemx2-hal2-stm32c562nucleo/README_TH.md) |
+| [cubemx-hal-stm32l475iot](skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 + STM32CubeL4 + CMake | ST STM32L4 | [B-L475E-IOT01A](boards/b-l475e-iot01a/README.md) | [guide](skills/cubemx-hal-stm32l475iot/README.md) · [ไทย](skills/cubemx-hal-stm32l475iot/README_TH.md) |
+| [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 + STM32CubeN6 + CMake | ST STM32N6 | [STM32N6570-DK](boards/stm32n6570-dk/README.md) | [guide](skills/cubemx-hal-stm32n6570dk/README.md) · [ไทย](skills/cubemx-hal-stm32n6570dk/README_TH.md) |
+| [cubemx-hal-stm32f407disco](skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 + STM32CubeF4 + CMake | ST STM32F4 | [STM32F407G-DISC1](boards/stm32f407g-disc1/README.md) | [guide](skills/cubemx-hal-stm32f407disco/README.md) · [ไทย](skills/cubemx-hal-stm32f407disco/README_TH.md) |
+| [pio-arduino-rpipico2w](skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO + arduino-pico | Raspberry Pi RP2350 | [Pico 2 W](boards/rpi-pico-2w/README.md) | [guide](skills/pio-arduino-rpipico2w/README.md) · [ไทย](skills/pio-arduino-rpipico2w/README_TH.md) |
+| [pio-espidf-esp32s3box](skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF 5.5 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-espidf-esp32s3box/README.md) · [ไทย](skills/pio-espidf-esp32s3box/README_TH.md) |
+| [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + arduino-esp32 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-arduino-esp32s3box/README.md) · [ไทย](skills/pio-arduino-esp32s3box/README_TH.md) |
+| [pio-arduino-unor4wifi](skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino UNO R4 core | Renesas RA4M1 | [UNO R4 WiFi](boards/uno-r4-wifi/README.md) | [guide](skills/pio-arduino-unor4wifi/README.md) · [ไทย](skills/pio-arduino-unor4wifi/README_TH.md) |
+| [scons-rtthread-visionboard](skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons (RT-Thread Studio SDK) | Renesas RA8D1 | [Vision Board](boards/vision-board/README.md) | [guide](skills/scons-rtthread-visionboard/README.md) · [ไทย](skills/scons-rtthread-visionboard/README_TH.md) |
 
 **Tool skills** (shared by all board skills, no board of their own):
 

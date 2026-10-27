@@ -5,7 +5,7 @@ parts. Toolchain profiles live in subfolders:
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [modus-pdl-edgitalk/](modus-pdl-edgitalk/README.md) | `skills/modus-pdl-edgitalk` (ModusToolbox) | verified on hardware |
+| [modus-pdl-edgitalk/](modus-pdl-edgitalk/README.md) | [`skills/modus-pdl-edgitalk`](../../skills/modus-pdl-edgitalk/README.md) ([ไทย](../../skills/modus-pdl-edgitalk/README_TH.md)) (ModusToolbox) | verified on hardware |
 
 ## Bring-up demos
 

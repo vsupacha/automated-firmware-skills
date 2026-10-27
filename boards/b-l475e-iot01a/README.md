@@ -5,7 +5,7 @@ many sensors. Tool-independent hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [cubemx-hal-stm32l475iot/](cubemx-hal-stm32l475iot/README.md) | `skills/cubemx-hal-stm32l475iot` (STM32CubeMX 6.18 + STM32CubeL4 HAL + CMake) | M1 verified on hardware (uart-btn-led: tests 13/13, interactive 5/5, LED2 seen) |
+| [cubemx-hal-stm32l475iot/](cubemx-hal-stm32l475iot/README.md) | [`skills/cubemx-hal-stm32l475iot`](../../skills/cubemx-hal-stm32l475iot/README.md) ([ไทย](../../skills/cubemx-hal-stm32l475iot/README_TH.md)) (STM32CubeMX 6.18 + STM32CubeL4 HAL + CMake) | M1 verified on hardware (uart-btn-led: tests 13/13, interactive 5/5, LED2 seen) |
 
 ## Bring-up demos
 

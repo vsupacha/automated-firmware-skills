@@ -50,7 +50,7 @@ Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own 
 | | 3 | build | `build.sh <app>` | `BUILD: PASS` + manifest | no |
 | | 4 | connect | `discover.sh <board>` | `IDENTITY: PASS` | yes |
 | | 5 | flash | `flash.sh <app> --yes` (**ask the developer first**) | `FLASH: PASS` | yes |
-| | 6 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]` | `RESULT: PASS` | yes |
+| | 6 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]`; unit tests of `func/` on the board: `unit_test.sh <app>` (Unity via `pio test`; prototypes in pio-arduino-rpipico2w and pio-arduino-esp32s3box, `UNIT: PASS`) | `RESULT: PASS` | yes |
 | | 7 | debug | `debug.sh status <board>` (read-only core + fault registers) and `debug.sh run <app> <scenario.json>` (attach, scripted break / watch / step / print / read) - STM32 skills C5 + L475 so far; engine `lib/fwdebug.py` | `DEBUG: STATUS ...` / `DEBUG: PASS` | yes + probe |
 | **M2 board support** | 8 | board drivers | *(planned)*: pin/peripheral map from the board sources, `board.h` drivers, per-peripheral `tests/*.json` (run with stage 6) | `RESULT: PASS` per peripheral | yes |
 | | 9 | layer check | `python lib/check_layers.py <app>` | `LAYERS: PASS` | no |

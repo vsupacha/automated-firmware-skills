@@ -5,7 +5,7 @@ ART-Link (CMSIS-DAP) debugger. Tool-independent hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [scons-rtthread-visionboard/](scons-rtthread-visionboard/README.md) | `skills/scons-rtthread-visionboard` (RT-Thread 5.0.2 + scons + pyOCD, RT-Thread Studio) | hello-world tested on hardware |
+| [scons-rtthread-visionboard/](scons-rtthread-visionboard/README.md) | [`skills/scons-rtthread-visionboard`](../../skills/scons-rtthread-visionboard/README.md) ([ไทย](../../skills/scons-rtthread-visionboard/README_TH.md)) (RT-Thread 5.0.2 + scons + pyOCD, RT-Thread Studio) | hello-world tested on hardware |
 
 ## Bring-up demos
 

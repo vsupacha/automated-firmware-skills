@@ -34,7 +34,7 @@ info "Creating $APPDIR (board $BOARD_ID, template $TPL)"
 mkdir -p "$APPDIR"
 # templates/_common (board + func layers) first, then the app template on top
 for T in "$SKILL_DIR/templates/_common" "$SKILL_DIR/templates/$TPL"; do
-  for part in src tests; do
+  for part in src tests test; do
     [ -d "$T/$part" ] && { mkdir -p "$APPDIR/$part"; cp -r "$T/$part/." "$APPDIR/$part/"; }
   done
 done
@@ -52,6 +52,8 @@ build_flags = -D$BOARD_DEFINE
 ; warnings for our own code only (src/), not for the framework
 build_src_flags = -Wall -Wextra
 monitor_speed = ${CONSOLE_BAUD:-115200}
+
+$(fw_pio_unit_env "$PIO_ENV" "${CONSOLE_BAUD:-115200}")
 EOF
 
 cat >"$APPDIR/arduino-app.env" <<EOF

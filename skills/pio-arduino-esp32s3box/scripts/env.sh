@@ -110,6 +110,29 @@ pio_pkg_version() {
 }
 
 # write_workspace_gitignore <workspace>: this skill's per-PC / regenerable files
+# pio_flash_map <env> <build-dir>: "<offset> <file>" lines of the images PlatformIO would upload for
+# that environment (framework files such as boot_app0.bin are copied next to the build)
+pio_flash_map() {
+  "$PIO" project metadata -d "$APPDIR" -e "$1" --json-output 2>/dev/null | "$PYTHON" -c "
+import json, sys, os, shutil
+e = json.load(sys.stdin)[sys.argv[1]]['extra']; out = sys.argv[2]
+for im in e['flash_images']:
+    name = os.path.basename(im['path'])
+    if os.path.normcase(os.path.dirname(os.path.abspath(im['path']))) != os.path.normcase(os.path.abspath(out)):
+        shutil.copyfile(im['path'], os.path.join(out, name))     # e.g. boot_app0.bin from the framework
+    print(im['offset'], name)
+print(e['application_offset'], 'firmware.bin')" "$1" "$(winpath "$2")" | tr -d '\r'
+}
+
+# fw_pio_unit_env <env> <baud>: the unit-test environment of an app's platformio.ini (unit_test.sh).
+# pio test builds test/test_*/ with src/func/ only (test/test_func/board_fake.cpp replaces
+# src/board/), so the app's main.cpp and board.cpp stay out of the test image.
+fw_pio_unit_env() {
+  printf '%s\n' "; unit tests of src/func on the board: scripts/unit_test.sh <app> (asks before flashing)" \
+    "[env:$1_unit]" "extends = env:$1" "test_framework = unity" "test_build_src = yes" \
+    "build_src_filter = +<func/>" "test_speed = $2"
+}
+
 write_workspace_gitignore() {
   # */.vscode/, */*.code-workspace: IDE files with per-PC paths, re-made by open_ide.sh / PlatformIO IDE
   fw_gitignore "$1" "$SKILL_NAME" ".bench/" "*/.pio/" "*/logs/" "*/.vscode/" "*/*.code-workspace"

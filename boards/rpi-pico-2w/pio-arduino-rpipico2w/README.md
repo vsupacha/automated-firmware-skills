@@ -44,3 +44,7 @@ quirks and the verification log of the `pio-arduino-rpipico2w` skill. Machine-re
 - 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
   name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
   warnings. Both built only, not flashed (the earlier results above were with the old name).
+- 2026-10-27 unit tests on the board (prototype `unit_test.sh`, app `ut-pico` from push-to-light):
+  `pio test` env `rpi_pico_2w_unit` builds only `src/func` + `test/test_func` + Unity 2.6.1 (0
+  warnings); `flash.sh --uf2` identity gate RP2350 / 4096K, `FLASH: PASS`; results read on the CDC
+  port: **UNIT: PASS (12/12)** (led 4, button debounce 3, console 5; fake board, no human step).

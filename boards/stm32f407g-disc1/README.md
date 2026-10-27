@@ -5,7 +5,7 @@ hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [cubemx-hal-stm32f407disco/](cubemx-hal-stm32f407disco/README.md) | `skills/cubemx-hal-stm32f407disco` (STM32CubeMX 6.18 + STM32CubeF4 HAL + CMake) | M1: generated + built, not run on hardware |
+| [cubemx-hal-stm32f407disco/](cubemx-hal-stm32f407disco/README.md) | [`skills/cubemx-hal-stm32f407disco`](../../skills/cubemx-hal-stm32f407disco/README.md) ([ไทย](../../skills/cubemx-hal-stm32f407disco/README_TH.md)) (STM32CubeMX 6.18 + STM32CubeF4 HAL + CMake) | M1: generated + built, not run on hardware |
 
 ## Bring-up demos
 
@@ -44,9 +44,9 @@ S=skills/cubemx-hal-stm32f407disco/scripts
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
-Board: `stm32f407g-disc1`. Templates: `hello-world`, `blink`, `push-to-light`. Each app's `<app>.ioc` starts
-from ST's FSBL-only template in STM32CubeN6 plus the console UART; `mx/` is generated headlessly
-by STM32CubeMX and never edited by hand. Flash and test are planned (M1 board stages).
+Board: `stm32f407g-disc1`. Templates: `hello-world`, `blink`, `push-to-light`. `mx/` is generated
+headlessly by STM32CubeMX from each app's `<app>.ioc` and never edited by hand. Flash and test are
+planned (M1 board stages).
 
 Same commands and gates as cubemx-hal-stm32n6570dk with `S=skills/cubemx-hal-stm32f407disco/scripts`
 and board `stm32f407g-disc1`. The `.ioc` starts from the CubeMX board configuration

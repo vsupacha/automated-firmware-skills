@@ -36,3 +36,13 @@ define, labels, expected identity). Hardware: [../README.md](../README.md). Same
 - 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
   name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
   warnings. Both built only, not flashed (the earlier results above were with the old name).
+- 2026-10-27 unit tests on the board (prototype `unit_test.sh`, app `ut-esa` from push-to-light):
+  `pio test` env `esp32_s3_box_unit` builds only `src/func` + `test/test_func` + Unity 2.6.1;
+  `flash.sh --env esp32_s3_box_unit` (manifest + identity gates: ESP32-S3 QFN56 rev v0.1, 16MB,
+  secure boot / flash encryption off), `FLASH: PASS` 4/4 regions. First image: no result - the USB
+  Serial/JTAG drops output while no host reads and `pio test`'s reset does not restart the chip, so
+  the test image now waits for a start byte and `unity_read.py` reads it. Second image: the chip
+  stayed in its ROM bootloader after flashing and after the RESET button (a download flag set over
+  USB during a manual DTR/RTS reset experiment); after unplugging USB for 5 s: **UNIT: PASS (12/12)**,
+  twice (`--read-only` again). `FLASH: PASS` does not prove the image booted (BOOT: gate on the roadmap).
+  Before the session the board ran a TinyUSB firmware (PID 4001, not ours, not backed up - owner's call).

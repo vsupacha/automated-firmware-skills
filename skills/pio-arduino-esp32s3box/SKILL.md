@@ -220,6 +220,19 @@ backlight) only with `--interactive`: tell the user exactly what to do first, an
 cable still (a jolt drops the port). **Gate:** `RESULT: PASS`. `led?` reads the GPIO level back;
 only a human confirms the backlight lit.
 
+**Unit tests on the board (prototype):** `bash "$SKILL/scripts/unit_test.sh" <app> [--build-only | --read-only]` -
+Unity tests of `src/func/` (led read-back, button debounce with real `millis()`, console parsing) in
+`test/test_func/`, linked against a fake board (`board_fake.cpp`), built by `pio test` in
+`[env:<env>_unit]` (only `src/func` + `test/`) with a manifest of that build. Without `--yes` it
+builds and stops with `ACTION: APPROVE` (the test image replaces the app): ask the user, then
+re-run with `--yes` - `flash.sh --env <env>_unit` (manifest + identity gates). The results are read by
+`scripts/unity_read.py`, not by `pio test`: the USB Serial/JTAG drops output while no host reads and
+PlatformIO's reset does not restart this chip, so the test image waits for a start byte. **Gates:**
+`UNIT-BUILD: PASS`, `UNIT: PASS (n/n)`. If nothing at all arrives (`ACTION: POWER_CYCLE`), the chip is
+still in its ROM bootloader - `FLASH: PASS` does not prove the image booted, and a download flag set
+over USB survives the RESET button: ask the user to unplug USB for 5 s, then `--read-only`.
+Afterwards the board runs the test image: offer `flash.sh <app> --yes` (asks first) to put the app back.
+
 ## Stage 16 - Clean
 
 ```bash

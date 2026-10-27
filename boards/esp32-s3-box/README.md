@@ -6,8 +6,8 @@ not the ESP32-S3-BOX-3 (2023, other pins). Tool-independent hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [pio-espidf-esp32s3box/](pio-espidf-esp32s3box/README.md) | `skills/pio-espidf-esp32s3box` (PlatformIO + ESP-IDF) | verified on hardware (backlight seen) |
-| [pio-arduino-esp32s3box/](pio-arduino-esp32s3box/README.md) | `skills/pio-arduino-esp32s3box` (PlatformIO + Arduino) | verified on hardware (backlight seen) |
+| [pio-espidf-esp32s3box/](pio-espidf-esp32s3box/README.md) | [`skills/pio-espidf-esp32s3box`](../../skills/pio-espidf-esp32s3box/README.md) ([ไทย](../../skills/pio-espidf-esp32s3box/README_TH.md)) (PlatformIO + ESP-IDF) | verified on hardware (backlight seen) |
+| [pio-arduino-esp32s3box/](pio-arduino-esp32s3box/README.md) | [`skills/pio-arduino-esp32s3box`](../../skills/pio-arduino-esp32s3box/README.md) ([ไทย](../../skills/pio-arduino-esp32s3box/README_TH.md)) (PlatformIO + Arduino) | verified on hardware (backlight seen) |
 
 ## Bring-up demos
 

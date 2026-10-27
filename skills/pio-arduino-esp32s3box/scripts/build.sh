@@ -54,15 +54,7 @@ if [ "$nsrc" -gt 0 ] && [ $ALLOW = 0 ]; then
 fi
 
 # flash map: the images and offsets PlatformIO itself would upload ("<offset> <file>" lines)
-MAP="$("$PIO" project metadata -d "$APPDIR" -e "$ENV" --json-output 2>/dev/null | "$PYTHON" -c "
-import json, sys, os, shutil
-e = json.load(sys.stdin)[sys.argv[1]]['extra']; out = sys.argv[2]
-for im in e['flash_images']:
-    name = os.path.basename(im['path'])
-    if os.path.normcase(os.path.dirname(os.path.abspath(im['path']))) != os.path.normcase(os.path.abspath(out)):
-        shutil.copyfile(im['path'], os.path.join(out, name))     # e.g. boot_app0.bin from the framework
-    print(im['offset'], name)
-print(e['application_offset'], 'firmware.bin')" "$ENV" "$(winpath "$OUT")" | tr -d '\r')"
+MAP="$(pio_flash_map "$ENV" "$OUT")"
 [ -n "$MAP" ] && echo "$MAP" | grep -q ' firmware.bin$' || { echo "BUILD: FAIL (no flash map from pio project metadata)"; exit 1; }
 IMAGES="firmware.elf $(echo "$MAP" | awk '{print $2}' | tr '\n' ' ')"
 

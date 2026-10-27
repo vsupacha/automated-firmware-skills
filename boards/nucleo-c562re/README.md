@@ -4,7 +4,7 @@ Nucleo-64 board (MB2213) with an STM32C562RET6. Tool-independent hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [cubemx2-hal2-stm32c562nucleo/](cubemx2-hal2-stm32c562nucleo/README.md) | `skills/cubemx2-hal2-stm32c562nucleo` (STM32CubeMX2 + CMake + STM32CubeProgrammer) | verified on hardware |
+| [cubemx2-hal2-stm32c562nucleo/](cubemx2-hal2-stm32c562nucleo/README.md) | [`skills/cubemx2-hal2-stm32c562nucleo`](../../skills/cubemx2-hal2-stm32c562nucleo/README.md) ([ไทย](../../skills/cubemx2-hal2-stm32c562nucleo/README_TH.md)) (STM32CubeMX2 + CMake + STM32CubeProgrammer) | verified on hardware |
 
 ## Bring-up demos
 
