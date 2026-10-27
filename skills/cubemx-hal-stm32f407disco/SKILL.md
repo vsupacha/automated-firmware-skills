@@ -1,6 +1,6 @@
 ---
 name: cubemx-hal-stm32f407disco
-description: Firmware workflow for the ST STM32F407G-DISC1 / STM32F4DISCOVERY (STM32F407VG, Cortex-M4) with classic STM32CubeMX 6.18 in headless script mode, the STM32CubeF4 HAL and CMake - check the pinned CubeMX, firmware package and STM32Cube build bundles, create the hardware configuration (.ioc) from the CubeMX board configuration plus SWO, generate the CMake project headlessly, write layered code (board -> func -> app_main) hooked into the generated main.c, and build with the pinned GCC/CMake/Ninja and a build manifest. Console is SWO output only (the board's ST-LINK/V2 has no virtual COM port). Milestone M1 (setup, create, build); flash and test are planned. Use when asked to create, generate, regenerate or build STM32F4 Discovery firmware with STM32CubeMX (บอร์ด STM32F4 Discovery), or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for STM32CubeMX2 boards (cubemx2-hal2-stm32c562nucleo), other F4 Discovery kits (F411, F429...) or STM32CubeIDE projects.
+description: Firmware workflow for the ST STM32F407G-DISC1 / STM32F4DISCOVERY (STM32F407VG, Cortex-M4) with classic STM32CubeMX 6.18 in headless script mode, the STM32CubeF4 HAL and CMake - check the pinned CubeMX, firmware package and STM32Cube build bundles, create the hardware configuration (.ioc) from the CubeMX board configuration plus SWO, generate the CMake project headlessly, write layered code (board -> func -> app_main) hooked into the generated main.c, and build with the pinned GCC/CMake/Ninja and a build manifest. Console is SWO output only (no virtual COM port). Milestone M1 covers setup, create, build, connect and flash (asks first); SWO tests planned. Use when asked to create, generate, regenerate, build or flash STM32F4 Discovery firmware with STM32CubeMX (บอร์ด STM32F4 Discovery), or when the user asks how to use this skill / what commands exist (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for CubeMX2 boards (cubemx2-hal2-stm32c562nucleo), other F4 Discovery kits (F411, F429...) or STM32CubeIDE projects.
 license: MIT
 compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3 + pyserial; needs STM32CubeMX 6.18 + STM32CubeF4 + STM32Cube bundles (GCC, CMake, Ninja); uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
@@ -10,12 +10,12 @@ compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git 
 Gated stages, the same contract as every skill in this repo (`docs/workflow.md`). Do them in
 order; do not start a stage until the previous gate passed. **Windows + Git Bash only**
 (STM32CubeMX for Windows, STM32Cube bundles, `cygpath`, `taskkill`). This release covers
-**milestone M1**; the hardware stages (discover, flash, test) come after the key boards. The
+**milestone M1**: build, connect and flash; the test stage (reading the SWO console) is planned. The
 machinery (headless CubeMX, overlay, build gate) is the same as `cubemx-hal-stm32n6570dk`.
 
 ```
-1 tools ─► 2 project + VS Code ─► 3 code ─► 4 build ─► (5 flash, 6 test: planned) ─► 7 clean
-check_tools  new_app    src/board  build.sh                                     clean.sh
+1 tools ─► 2 project + VS Code ─► 2e code ─► 3 build ─► 4 connect ─► 5 flash ─► (6 test: planned) ─► 16 clean
+check_tools  new_app    src/board  build.sh  discover.sh  flash.sh                 clean.sh
              regen      src/func
              open_ide
                         app_main.c
@@ -36,7 +36,7 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
 | M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2 (+ `regen.sh`), Stage 3 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug | **planned** for this skill |
+| M1 bring-up (board) | 4 connect, 5 flash; 6 test (SWO) and 7 debug **planned** | Stage 4, Stage 5 |
 | M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 2e (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
@@ -48,7 +48,7 @@ OK, then re-run the same command. Never work around an ACTION yourself - install
 firmware packages or bundles is the developer's.
 
 **Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**).
-This skill has the M1 build stages only; its board stages (connect, flash, test) are planned.
+This skill has the M1 build stages plus connect and flash; the test stage (SWO) and debug are planned.
 Never edit `milestones.env` or set `FW_ACTIVE_MILESTONES` yourself.
 
 ## Help menu (answer this first when asked how to use the skill)
@@ -101,7 +101,8 @@ root (`reference/cubemx-cli.md`).
 - **Board type** (`boards/<id>/`): `README.md` = hardware; `cubemx-hal-stm32f407disco/board.env` =
   pinned CubeMX and firmware package versions, `MX_START`, `MX_CONFIG`, `BOARD_DEFINE`, labels,
   `SYSCLK_HZ`, pinned bundle versions, expected device ID.
-- **Bench instance** (`<workspace>/.bench/<id>.env`): board stages, not used yet.
+- **Bench instance** (`<workspace>/.bench/<id>.env`): written by `discover.sh` on each PC - the
+  probe serial of this board (no COM port: the ST-LINK/V2 has no VCP). Never commit it.
 
 | id | board | status |
 | --- | --- | --- |
@@ -183,11 +184,39 @@ bash "$SKILL/scripts/build.sh" <app> [--clean] [--allow-warnings]
 2 = fix them). Writes `mx.hex` and `mx/build/Debug/manifest.txt` (CubeMX + firmware package + tool
 versions, SYSCLK, `.ioc` sha256, ELF/HEX sha256, size) **only on PASS**.
 
-## Stage 5 - Flash, Stage 6 - Test (planned)
+## Stage 4 - Connect (discover the board)
 
-Not implemented in this skill yet. Do not improvise with STM32CubeProgrammer or the VS Code
-debugger as part of the skill - say the hardware stages are planned and stop after `BUILD: PASS`.
-Plan: discover/flash through the ST-LINK/V2 (device ID 0x413), tests reading the SWO console.
+```bash
+bash "$SKILL/scripts/discover.sh" <board-id> [--serial <sn>]
+```
+Read-only: lists ST-LINKs, hot-plug connects (no reset, no write), checks the device name
+(`STM32F405xx/F407xx...`) and device ID (0x413) and saves the bench file. The on-board ST-LINK/V2
+reports **no board name**, like an external ST-LINK, so with several ST-LINKs plugged in it stops
+with `ACTION: CHOOSE` - ask the user to unplug the others or pass `--serial` (it never guesses).
+**Gate:** `IDENTITY: PASS`.
+
+## Stage 5 - Flash
+
+**Ask the user before every flash** (board, app, ELF sha256 prefix): it overwrites the board's
+firmware. Then:
+```bash
+bash "$SKILL/scripts/flash.sh" <app> --yes [--elf <known-good.elf>]
+```
+`FLASH_POLICY=auto` in this board's bench file replaces `--yes` for a dedicated lab board - only
+the developer writes it, never you. discover and flash hold a per-board lock: `board '<id>' is in
+use` means another run has the board - wait; delete the lock only after the user confirms that run
+is gone.
+Gates: ELF matches the PASS manifest → bench ST-LINK connected → hot-plug identity (device name
+`STM32F405xx/F407xx...`, device ID 0x413; stops on signs of read-out protection) →
+`-c port=SWD sn=<sn> mode=UR reset=HWrst -d <elf> -v -rst`. **Gate:** `FLASH: PASS`
+(`Download verified successfully`). `FLASH: PASS` proves the image is in flash, not that it runs.
+
+## Stage 6 - Test (planned)
+
+Not implemented yet: the console is SWO output only, and no script reads it. After `FLASH: PASS`
+ask the user to look at the board (blink: LD3 orange toggles every 0.5 s; push-to-light: B1 lights
+LD3) and report that as **observed by a human**, never as tested. Do not improvise an SWO reader
+with the VS Code debugger as part of the skill.
 
 ## Stage 16 - Clean
 
@@ -210,12 +239,16 @@ Default: `mx/build` and `.mx` only. `--apps`: whole apps (`f4-app.env`) incl. th
 ## Reporting (always)
 
 Report levels separately: **source matches → generated → built → flashed → booted → tested →
-observed by a human**. With the build stages only, the highest level is **built**. Quote ELF sha256, CubeMX/package/tool
+observed by a human**. Without the test stage the highest script level is **flashed**; a
+look at the LEDs by the user is **observed**. Quote ELF sha256, CubeMX/package/tool
 versions, log paths. Add a dated line to `boards/<id>/cubemx-hal-stm32f407disco/README.md`.
 
 ## Safety rules
 
-- Never change option bytes / read-out protection or upgrade the ST-LINK firmware - stop and ask.
-- Ask before `clean.sh --yes`.
+- Identity gates before every write; never flash an ELF without a PASS manifest (except `--elf`
+  chosen by the user) or a board whose device name / ID don't match.
+- Never change option bytes / read-out protection, mass-erase or upgrade the ST-LINK firmware -
+  stop and ask.
+- Ask before every flash and before `clean.sh --yes`.
 - CubeMX runs headless through its own java on scripts the skill writes; the scripts end that java
   process tree themselves - never kill other STM32CubeMX / STM32CubeIDE processes.

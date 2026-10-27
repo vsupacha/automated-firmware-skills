@@ -33,8 +33,10 @@ skill cubemx-hal-stm32f407disco (STM32F407G-DISC1, STM32CubeMX + STM32CubeF4 HAL
   "open it in VS Code"                      -> open_ide.sh <app>  (VS Code + STM32CubeIDE extension; new_app does it)
      then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                -> build.sh <app>
- Run on hardware (milestone M1 board stages - planned for this skill)
-  "find my board" / "flash it" / "test it"  -> discover.sh / flash.sh / serial_test.py (planned)
+ Run on hardware (milestone M1 board stages; Claude asks before every flash)
+  "find my board"                           -> discover.sh <board>  (read-only: ST-LINK/V2 + device ID 0x413)
+  "flash it"                                -> flash.sh <app> --yes  (after you said yes)
+  "test it"                                 -> planned (SWO console; look at the LEDs instead)
  Housekeeping
   "clean the build outputs"                 -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
 EOF
@@ -50,8 +52,10 @@ skill cubemx-hal-stm32f407disco (STM32F407G-DISC1, STM32CubeMX + STM32CubeF4 HAL
   "เปิดใน VS Code"                             -> open_ide.sh <app>  (VS Code + STM32CubeIDE extension; new_app เปิดให้เอง)
      จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                              -> build.sh <app>
- ใช้กับบอร์ดจริง (milestone M1 ขั้นบอร์ดจริง - skill นี้ยังไม่มี)
-  "หาบอร์ด" / "แฟลช" / "ทดสอบ"                  -> discover.sh / flash.sh / serial_test.py (วางแผนไว้)
+ ใช้กับบอร์ดจริง (milestone M1 ขั้นบอร์ดจริง; Claude ถามก่อนแฟลชทุกครั้ง)
+  "หาบอร์ด"                                   -> discover.sh <board>  (อ่านอย่างเดียว: ST-LINK/V2 + device ID 0x413)
+  "แฟลช"                                      -> flash.sh <app> --yes  (หลังจากคุณตอบตกลง)
+  "ทดสอบ"                                     -> วางแผนไว้ (console เป็น SWO; ดูไฟ LED แทน)
  งานอื่น
   "clean ให้หน่อย"                              -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
 EOF

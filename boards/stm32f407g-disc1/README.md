@@ -12,7 +12,7 @@ hardware sheet.
 | Demo | Uses | `cubemx-hal-stm32f407disco` |
 | --- | --- | --- |
 | hello-world | console: SWO (no virtual COM port) | built |
-| blink | LED1 = LD3 (orange) | built |
+| blink | LED1 = LD3 (orange) | observed |
 | push-to-light | BTN1 = B1 (blue) toggles LED1 | built |
 
 Levels: built < flashed < tested (automatic test PASS) < interactive (a person pressed a
@@ -42,11 +42,13 @@ S=skills/cubemx-hal-stm32f407disco/scripts
 | 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 4 connect (read-only) | `bash $S/discover.sh <board> [--serial <sn>]` | `IDENTITY: PASS` |
+| 5 flash (ask first) | `bash $S/flash.sh apps/<app> --yes [--elf <file>]` | `FLASH: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `stm32f407g-disc1`. Templates: `hello-world`, `blink`, `push-to-light`. `mx/` is generated
-headlessly by STM32CubeMX from each app's `<app>.ioc` and never edited by hand. Flash and test are
-planned (M1 board stages).
+headlessly by STM32CubeMX from each app's `<app>.ioc` and never edited by hand. Connect (`discover.sh`)
+and flash (`flash.sh`) go through the on-board ST-LINK/V2; the test stage (SWO reader) is planned.
 
 Same commands and gates as cubemx-hal-stm32n6570dk with `S=skills/cubemx-hal-stm32f407disco/scripts`
 and board `stm32f407g-disc1`. The `.ioc` starts from the CubeMX board configuration

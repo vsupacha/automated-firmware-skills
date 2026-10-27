@@ -42,6 +42,10 @@ verification log, not here.
   gates; results are read by `scripts/unity_read.py` (start byte) because the USB Serial/JTAG drops
   output and cannot be reset by `pio test`; `unit_test.sh --read-only`; build.sh's flash map is
   the shared `pio_flash_map` in env.sh.
+- cubemx-hal-stm32f407disco: stage 4 connect (`discover.sh`) and stage 5 flash (`flash.sh`, asks
+  first) through the on-board ST-LINK/V2 (no virtual COM port, reports no board name, so several
+  ST-LINKs stop with `ACTION: CHOOSE`). blink flashed on an STM32F4DISCOVERY and seen blinking
+  (observed); the test stage (SWO reader) is still planned.
 
 ### Changed
 - `serial_test.py` (lib/fwtest.py), sensor-debug and web-wizard read the bench file and apps from

@@ -5,7 +5,7 @@ Firmware for the ST STM32F407G-DISC1 (STM32F4DISCOVERY) - STM32F407VGT6, STM32F4
 same scripts yourself in Git Bash. Thai: [README_TH.md](README_TH.md). The agent's instructions are
 in [SKILL.md](SKILL.md).
 
-Build stages only - board stages are planned. Demo levels per template and the exact tool versions:
+Build, connect and flash; the test stage is planned. Demo levels per template and the exact tool versions:
 [boards/stm32f407g-disc1/README.md](../../boards/stm32f407g-disc1/README.md).
 
 | On the board | |
@@ -46,6 +46,8 @@ every board instead - pick one of the two.
 | "Create a hello-world app called hello-f4" | `new_app.sh stm32f407g-disc1 hello-f4 "" hello-world` | `Created <app folder>` (first time on a PC: which workspace?) |
 | "Open it in the IDE" | `open_ide.sh <app>` (new_app does it) | `IDE: OPENED` - STM32CubeIDE for VS Code |
 | "Build it" | `build.sh <app>` | `BUILD: PASS` with 0 warnings + a manifest (tool versions, image hash) |
+| "Find my board" | `discover.sh stm32f407g-disc1` | `IDENTITY: PASS` - read-only; saves this PC's probe serial (no COM port on this ST-LINK) |
+| "Flash it" | `flash.sh <app> --yes` **after you said yes** | `FLASH: PASS` - then look at the LEDs (no automatic test yet) |
 | "Clean up" | `clean.sh` (dry run first) | a list, then deletion only after your yes; `--apps` also deletes app sources |
 
 - **First app on a PC:** if `apps/` is in Dropbox/OneDrive or its path is too long, `new_app.sh`
@@ -65,6 +67,8 @@ S=skills/cubemx-hal-stm32f407disco/scripts
 bash $S/check_tools.sh stm32f407g-disc1
 bash $S/new_app.sh stm32f407g-disc1 hello-f4 "" hello-world   # prints: Created <app folder>
 bash $S/build.sh <app folder>
+bash $S/discover.sh stm32f407g-disc1
+bash $S/flash.sh <app folder> --yes          # only after you decided to flash
 ```
 
 `<app folder>` is what `new_app.sh` printed - `apps/hello-f4`, or e.g. `C:/fw-ws/hello-f4` with a
@@ -73,7 +77,7 @@ per-PC workspace. Exit codes: 0 pass, 1 fail, 2 warnings that block the gate, **
 
 ## 5. Notes for this board
 
-- Board stages (connect, flash, test) are **planned**: the console is SWO output only, read in the debugger's SWV view, so the serial tests need an SWO reader first. Until then the skill creates, opens in the IDE and builds.
+- Connect (`discover.sh`) and flash (`flash.sh`, Claude asks first) work through the on-board ST-LINK/V2. The test stage is **planned**: the console is SWO output only, read in the debugger's SWV view, so the serial tests need an SWO reader first. Until then check the LEDs by eye (blink: LD3 orange toggles every 0.5 s).
 - Every app's `<app>.ioc` starts from the CubeMX board configuration (`loadboard STM32F407G-DISC1`) plus SWO; never edit `mx/` by hand.
 
 ## More

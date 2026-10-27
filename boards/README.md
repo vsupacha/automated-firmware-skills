@@ -38,7 +38,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-espidf-esp32s3box` | tested | built | observed * |
 | [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-arduino-esp32s3box` | tested | built | observed * |
 | [ST STM32N6570-DK](stm32n6570-dk/README.md) | `cubemx-hal-stm32n6570dk` | built | not built yet | built |
-| [ST STM32F407G-DISC1 (STM32F4DISCOVERY)](stm32f407g-disc1/README.md) | `cubemx-hal-stm32f407disco` | built | built | built |
+| [ST STM32F407G-DISC1 (STM32F4DISCOVERY)](stm32f407g-disc1/README.md) | `cubemx-hal-stm32f407disco` | built | observed | built |
 | [ST B-L475E-IOT01A (Discovery kit IoT node)](b-l475e-iot01a/README.md) | `cubemx-hal-stm32l475iot` | tested | built | observed * |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | `pio-arduino-unor4wifi` | tested | built | observed * |
 | [RT-Thread Vision Board (RA8D1)](vision-board/README.md) | `scons-rtthread-visionboard` | tested | built | built |

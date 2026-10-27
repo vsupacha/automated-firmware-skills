@@ -4,7 +4,7 @@ firmware สำหรับ ST STM32F407G-DISC1 (STM32F4DISCOVERY) - STM32F407VG
 "ทดสอบบนบอร์ดผ่านแล้ว" โดยมีด่านตรวจ (gate) ทุกขั้น สั่ง Claude ด้วยภาษาของคุณเอง หรือรัน script ชุดเดียวกันเองใน
 Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) คำสั่งที่ agent ทำตาม: [SKILL.md](SKILL.md)
 
-ทำได้ถึงขั้น build - ขั้นที่ใช้บอร์ดยังอยู่ในแผน ระดับหลักฐานของแต่ละ template และเวอร์ชันเครื่องมือที่แน่นอน:
+ทำได้ถึงขั้น build, connect และ flash - ขั้น test ยังอยู่ในแผน ระดับหลักฐานของแต่ละ template และเวอร์ชันเครื่องมือที่แน่นอน:
 [boards/stm32f407g-disc1/README.md](../../boards/stm32f407g-disc1/README.md)
 
 | บนบอร์ด | |
@@ -45,6 +45,8 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 | "สร้างแอป hello-world ชื่อ hello-f4" | `new_app.sh stm32f407g-disc1 hello-f4 "" hello-world` | `Created <โฟลเดอร์แอป>` (ครั้งแรกบนเครื่อง: ถามที่เก็บแอป) |
 | "เปิดใน IDE" | `open_ide.sh <app>` (new_app เปิดให้เอง) | `IDE: OPENED` - STM32CubeIDE for VS Code |
 | "build ให้หน่อย" | `build.sh <app>` | `BUILD: PASS` ไม่มี warning + manifest (เวอร์ชันเครื่องมือ, hash ของ image) |
+| "หาบอร์ด" | `discover.sh stm32f407g-disc1` | `IDENTITY: PASS` - อ่านอย่างเดียว บันทึก serial ของ probe ของเครื่องนี้ (ST-LINK ตัวนี้ไม่มี COM port) |
+| "แฟลช" | `flash.sh <app> --yes` **หลังจากคุณตอบตกลง** | `FLASH: PASS` - แล้วดูไฟ LED (ยังไม่มี test อัตโนมัติ) |
 | "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
 
 - **แอปแรกบนเครื่อง:** ถ้า `apps/` อยู่ใน Dropbox/OneDrive หรือ path ยาวเกิน `new_app.sh` จะหยุดด้วย
@@ -62,6 +64,8 @@ S=skills/cubemx-hal-stm32f407disco/scripts
 bash $S/check_tools.sh stm32f407g-disc1
 bash $S/new_app.sh stm32f407g-disc1 hello-f4 "" hello-world   # พิมพ์: Created <โฟลเดอร์แอป>
 bash $S/build.sh <โฟลเดอร์แอป>
+bash $S/discover.sh stm32f407g-disc1
+bash $S/flash.sh <โฟลเดอร์แอป> --yes          # เมื่อคุณตัดสินใจแฟลชแล้วเท่านั้น
 ```
 
 `<โฟลเดอร์แอป>` คือที่ `new_app.sh` พิมพ์ออกมา - `apps/hello-f4` หรือเช่น `C:/fw-ws/hello-f4` ถ้าเครื่องตั้ง
@@ -70,7 +74,7 @@ workspace ไว้ exit code: 0 ผ่าน, 1 ล้มเหลว, 2 มี
 
 ## 5. หมายเหตุของบอร์ดนี้
 
-- ขั้นที่ใช้บอร์ด (connect, flash, test) ยัง**อยู่ในแผน** เพราะ console เป็น SWO อย่างเดียว ต้องอ่านผ่านหน้า SWV ของ debugger serial test จึงต้องมีตัวอ่าน SWO ก่อน ระหว่างนี้ skill ทำได้ถึงสร้างแอป เปิดใน IDE และ build
+- ขั้น connect (`discover.sh`) และ flash (`flash.sh` Claude ถามก่อนทุกครั้ง) ใช้ ST-LINK/V2 บนบอร์ดได้แล้ว ส่วนขั้น test ยัง**อยู่ในแผน** เพราะ console เป็น SWO อย่างเดียว ต้องอ่านผ่านหน้า SWV ของ debugger serial test จึงต้องมีตัวอ่าน SWO ก่อน ระหว่างนี้ให้ดูไฟ LED ด้วยตา (blink: LD3 สีส้มสลับทุก 0.5 วินาที)
 - ไฟล์ `<app>.ioc` ของทุกแอปเริ่มจาก board configuration ของ CubeMX (`loadboard STM32F407G-DISC1`) บวก SWO ห้ามแก้ `mx/` ด้วยมือ
 
 ## อ่านต่อ (ภาษาอังกฤษ)

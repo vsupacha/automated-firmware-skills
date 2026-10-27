@@ -28,3 +28,15 @@ package and bundles, `MX_START`, `MX_CONFIG`). Hardware: [../README.md](../READM
 - 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
   name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
   warnings. Both built only, not flashed (the earlier results above were with the old name).
+- 2026-10-27 board stages 4 connect + 5 flash added (`discover.sh`, `flash.sh`, from the L475
+  skill; no VCP on this ST-LINK, so no console port). Home PC, STM32CubeProgrammer 2.23.0:
+  check_tools `missing/bad=0`; discover `IDENTITY: PASS` (ST-LINK/V2 FW V2J46S0 reports no board
+  name, device STM32F405xx/F407xx/F415xx/F417xx, ID 0x413, 3.23 V).
+  - `blink` (app `blink-f4`, template unchanged): build PASS 0 warnings (text 13,400 B), ELF
+    `6f766437...`; flashed with the user's OK: `FLASH: PASS` (download verified + reset). The user
+    saw LD3 (orange) blinking - **observed**. No SWO reader, so not tested.
+  - Same app with a local change in `app_main.c` only (LED1..LED4 lit one at a time, 0.5 s each):
+    build PASS 0 warnings, ELF `85d2b924...`, `FLASH: PASS`; the user saw LD3 orange, LD4 green,
+    LD5 red, LD6 blue light in turn - all four LED pins of `board.c` confirmed on hardware. Not a
+    repo template.
+  - Not checked on hardware: button B1 (push-to-light), SWO output, hello-world.

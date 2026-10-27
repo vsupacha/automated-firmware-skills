@@ -64,7 +64,7 @@ M1 per skill - the bring-up demos are `hello-world` (UART), `blink` (LED) and `p
 | pio-arduino-unor4wifi | yes | verified on hardware |
 | scons-rtthread-visionboard | yes | hello-world tested on hardware |
 | cubemx-hal-stm32n6570dk | yes | planned (dev boot mode, connect under reset) |
-| cubemx-hal-stm32f407disco | yes | planned (SWO console) |
+| cubemx-hal-stm32f407disco | yes | connect + flash scripts; test planned (SWO console) |
 
 Next: finish M1 (the M1 items of the roadmap below, then the bring-up certificate), then start M2
 on a board with sensors (B-L475E-IOT01A). The roadmap lists every planned item per milestone.

@@ -1,6 +1,7 @@
 # Common environment for cubemx-hal-stm32f407disco scripts. Source it: . "$(dirname "$0")/env.sh"
 # Windows + Git Bash: classic STM32CubeMX 6.x (headless script mode), the STM32CubeF4 firmware
-# package from the CubeMX repository, and the pinned STM32Cube bundles (GCC, CMake, Ninja).
+# package from the CubeMX repository, the pinned STM32Cube bundles (GCC, CMake, Ninja) and
+# STM32CubeProgrammer + the board's ST-LINK/V2 (SWD only, no virtual COM port) for discover/flash.
 # Shared helpers (board lookup, paths, need_user/exit 10, .gitignore): <repo>/lib/common.sh
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -51,6 +52,7 @@ if [ -z "$STM32CUBE_ROOT" ] && [ -n "$LOCALAPPDATA" ]; then STM32CUBE_ROOT="$(cy
 # load_board <id>: board profile + bench file, then the pinned tool paths
 load_board() {
   fw_load_profile "$1"
+  [ -n "$F4_PROBE_SERIAL" ] && PROBE_SERIAL="$F4_PROBE_SERIAL"
   local B="$STM32CUBE_ROOT/bundles"
   GCC_BIN="$B/gnu-tools-for-stm32/$GCC_VERSION/bin"
   CMAKE_BIN="$B/cmake/$CMAKE_VERSION/bin"
@@ -100,6 +102,16 @@ mx_check_log() {
   [ "$lost" -eq 0 ] || echo "  $lost FileNotFoundException(s) - generated files missing"
   grep -q '^Bye bye' "$1" || echo "  CubeMX did not reach 'exit' (timeout or crash)"
   [ "$ko" -eq 0 ] && [ "$lost" -eq 0 ] && grep -q '^Bye bye' "$1"
+}
+
+# ---- ST-LINK ----------------------------------------------------------------------------------
+# probe_serials: serial numbers of connected ST-LINKs (STM32_Programmer_CLI -l st-link)
+probe_serials() {
+  "$PROGRAMMER" -l st-link 2>&1 | tr -d '\r' | sed -n 's/.*ST-LINK SN *: *\([0-9A-Fa-f]*\).*/\1/p'
+}
+# probe_identity <probe_serial>: read-only hot-plug connect; prints the CLI output
+probe_identity() {
+  "$PROGRAMMER" -c port=SWD sn="$1" mode=HOTPLUG 2>&1 | tr -d '\r'
 }
 
 # write_workspace_gitignore <workspace>: this skill's per-PC / regenerable files

@@ -173,14 +173,14 @@
       "mcu_family": "ST STM32F4",
       "profiles": {
         "cubemx-hal-stm32f407disco": {
-          "level": "built",
-          "date": "2026-10-07",
+          "level": "observed",
+          "date": "2026-10-27",
           "templates": {
             "hello-world": "built",
-            "blink": "built",
+            "blink": "observed",
             "push-to-light": "built"
           },
-          "note": "M1 build stages only (create, build); console is SWO output only; hardware stages planned",
+          "note": "M1 create, build, connect, flash; blink flashed and LD3 seen blinking (2026-10-27); console is SWO output only, so the test stage is planned",
           "log": "boards/stm32f407g-disc1/cubemx-hal-stm32f407disco/README.md"
         }
       }
