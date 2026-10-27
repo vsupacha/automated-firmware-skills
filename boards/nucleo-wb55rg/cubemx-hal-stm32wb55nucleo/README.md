@@ -41,3 +41,20 @@ package and bundles, `MX_START`, `MX_CONFIG`, identity gate). Hardware: [../READ
     skill's push_to_light.json; re-run `--only-interactive`: `RESULT: PASS (6/6)` - **interactive**.
     The owner saw LED1 (blue) light after SW1 and LED2 (green) after SW2 - **observed**.
     LED3 and SW3 not exercised (the spec covers 2 LEDs / 2 buttons).
+- 2026-10-27 on-target unit tests (prototype, `unit_test.sh`), TDD of `lib/func/gesture`. The
+  owner wrote `FLASH_POLICY=auto` into this PC's bench file for the loop (identity gates stay).
+  Unit image = app `ptl-wb` built with `-DFW_UNIT=ON` (Unity 2.6.1 from `lib/unity`), 0 warnings.
+  - Red: stub `gesture_update()` -> `UNIT: FAIL (10 of 12 failed)` - Unity FAIL lines and the
+    failing gate seen on hardware.
+  - Green: state machine -> `UNIT: PASS (12/12)`. Second cycle: new case "click, then hold" ->
+    `UNIT: FAIL (1 of 13)` -> fix -> `UNIT: PASS (13/13)`. Each cycle (build + flash + read) about
+    20 s.
+  - Gesture demo app `gst-wb` (app-only `app_main.c`: short / long / double click on any button
+    toggle LED1 / LED2 / LED3): the owner confirmed it behaves so on the board. A 90 s console
+    capture during the owner's tries showed no `EVT` lines - console output of that demo not
+    explained yet.
+  - `fxscale` (CMSIS-DSP V1.6.0 from the firmware package, q31): stub -> 4 of 17 failed (100 %);
+    one fixed Q format (x/2^7, gain/2^4) -> 1 of 17 failed, random pairs 1.31 % (corners 0.82 %);
+    block floating point (frexpf + q31 mantissas + ldexpf) -> `UNIT: PASS (17/17)`, worst
+    0.000006 %. App build with the CMSIS-DSP block: 0 warnings.
+

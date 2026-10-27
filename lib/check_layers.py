@@ -7,7 +7,7 @@ Usage:
 Several dirs are checked as one tree (e.g. a template plus templates/_common). Layers by folder:
   board/, shared/   board layer - the only place for vendor headers, vendor calls, BOARD_xxx #ifs
   func/             logic layer - C library (or <Arduino.h> in Arduino skills), its own headers,
-                    board-layer headers (board.h)
+                    board-layer headers (board.h); on Cortex-M boards also CMSIS-DSP (arm_math.h)
   <root>/*.c|cpp|h  execution layer (main, app_main) in a folder that has board/ or func/ - may
                     also use func/ and its own headers
 Everything else (generated mx/, BSPs, libs, build outputs, vendor projects) is not ours: skipped.
@@ -43,6 +43,14 @@ optional string string_view tuple type_traits utility vector
 # Serial port stay in board/ (VENDOR_CALL below).
 STD_HEADERS |= {"Arduino.h"}
 
+# CMSIS-DSP (Arm's DSP library, Apache-2.0 - not a vendor HAL) is allowed in func/ and the execution
+# layer of Cortex-M boards: <arm_math.h> or "arm_math.h" (owner's decision 2026-10-27, first user
+# lib/func_dsp/fxscale). The board comes from APP_BOARD in the app's *-app.env and its mcu_family in
+# boards/index.json; a tree without an app env (a template) is treated as Cortex-M - the
+# compiler stops a non-Cortex-M build anyway.
+CMSIS_DSP_HEADERS = {"arm_math.h", "arm_common_tables.h", "arm_const_structs.h"}
+NON_CORTEX_M_FAMILIES = ("Espressif",)       # mcu_family prefixes in boards/index.json
+
 # vendor APIs that belong in board/ only (ModusToolbox PDL/HAL/BSP, STM32 HAL/LL + CubeMX2
 # generated getters, arduino-pico / Arduino, pico-sdk GPIO)
 VENDOR_CALL = re.compile(
@@ -70,6 +78,25 @@ def milestone_gate():
               f"add M2 to ACTIVE_MILESTONES in {REPO_ROOT / 'milestones.env'}, or export "
               f'FW_ACTIVE_MILESTONES="{(active + " ") if active else ""}M2" for one session')
         sys.exit(10)
+
+
+def cortex_m(tops):
+    """(True, why) unless an app env in tops names a board of a non-Cortex-M family"""
+    try:
+        import json
+        index = json.loads((REPO_ROOT / "boards" / "index.json").read_text(encoding="utf-8"))
+        family = {b["id"]: b.get("mcu_family", "") for b in index.get("boards", [])}
+    except (OSError, ValueError):
+        family = {}
+    for t in tops:
+        for env in sorted(t.glob("*-app.env")):
+            m = re.search(r"^APP_BOARD=(\S+)", env.read_text(encoding="utf-8", errors="replace"), re.M)
+            if m:
+                fam = family.get(m.group(1), "")
+                if fam.startswith(NON_CORTEX_M_FAMILIES):
+                    return False, f"board {m.group(1)} ({fam}) is not Cortex-M"
+                return True, f"board {m.group(1)} ({fam or 'not in boards/index.json'})"
+    return True, "no app env (template)"
 
 
 def walk(top):
@@ -132,6 +159,7 @@ def main(argv):
         return None
 
     allowed = {"func": {"func", "board"}, "exec": {"exec", "func", "board"}, "board": {"board"}}
+    dsp_ok, dsp_why = cortex_m(tops)
     fails, warns, counts = [], [], {"board": 0, "func": 0, "exec": 0}
 
     for p, t, rel in files:
@@ -146,7 +174,10 @@ def main(argv):
             if m:
                 kind, name = m.groups()
                 base = name.replace("\\", "/").split("/")[-1]
-                if kind == "<" and lay != "board":
+                if base in CMSIS_DSP_HEADERS and lay != "board":
+                    if not dsp_ok:
+                        fails.append(f"{where}:{n}: {lay} includes {name} (CMSIS-DSP) - Cortex-M only, but {dsp_why}")
+                elif kind == "<" and lay != "board":
                     if base not in STD_HEADERS and name not in STD_HEADERS:
                         fails.append(f"{where}:{n}: {lay} includes <{name}> - vendor/system header, only board/ may use it")
                 elif kind == '"':

@@ -55,8 +55,25 @@ verification log, not here.
   `firmware-stm32` and all-in-one plugins. STM32CubeMX2 1.1.2 cannot create a WB55 project yet.
 - docs/related-work.md: what the STM32CubeMX 6.18.1 and STM32CubeMX2 1.1.2 command lines offer,
   and which commands our scripts rely on that ST does not document.
+- On-target unit tests for the CubeMX C skills (prototype on cubemx-hal-stm32wb55nucleo):
+  `lib/unity/` (Unity 2.6.1, pinned copy with hashes), `lib/test_func/` (runner with start-byte
+  handshake + suites), `lib/unity_read.py`; `unit_test.sh <app>` builds the app's CubeMX project
+  again with `-DFW_UNIT=ON` (overlay switch: `test/*.c` replace `src/app_main.c`), flashes it
+  behind the identity gates (asks first unless `FLASH_POLICY=auto`) and reads `UNIT: PASS (n/n)`.
+- `lib/func/gesture` (short / long / double click from one button's raw level and the time; pure,
+  no `board.h`), written test-first: 13 Unity cases incl. tick wrap, red then green on a
+  NUCLEO-WB55RG in two TDD cycles.
+- `lib/func_dsp/fxscale` (CMSIS-DSP): float -> q31 -> `arm_scale_q31` -> float with per-value scaling
+  (frexpf / ldexpf); worst relative error 6e-8 on the board over x 0.01..100, gain 0.01..10
+  (bound 1 %). Test-first: one fixed Q format reached 1.31 % on random pairs while corners and a
+  grid passed. The CubeMX overlay compiles CMSIS-DSP BasicMath + Support for func/ modules; the
+  unit image prints floats (`-u _printf_float`). Unity's per-suite `setUp`/`tearDown` go through
+  `lib/test_func/unit.h`.
 
 ### Changed
+- Layer rule: `func/` and the execution layer may include CMSIS-DSP (`arm_math.h` ...) on Cortex-M
+  boards (owner's decision); `lib/check_layers.py` checks the board family from `APP_BOARD` and
+  `boards/index.json` and fails such includes on other boards (ESP32-S3). docs/board-api.md, lib/README.
 - `serial_test.py` (lib/fwtest.py), sensor-debug and web-wizard read the bench file and apps from
   the same workspace as the shell scripts; project board profiles are looked up in `<project>/boards`.
 - B-L475E-IOT01A: hello-world recorded as tested (flashed, 9/9).

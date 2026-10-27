@@ -8,7 +8,9 @@ the user sections of mx/CMakeLists.txt (a file CubeMX generates once):
   main.c         #include "board.h" + "app_main.h"; app_main() after the MX_..._Init() calls
                  (USER CODE BEGIN 2)
   CMakeLists.txt every ../src/**/*.c, include paths src, src/board, src/func, -D<BOARD_DEFINE>,
-                 -Wall -Wextra for those sources only
+                 -Wall -Wextra for those sources only; the FW_UNIT switch (unit_test.sh: test/*.c
+                 replace src/app_main.c, Unity, float printf, libm); CMSIS-DSP BasicMath + Support
+                 from mx/Drivers/CMSIS/DSP for func/ modules
 Exit 0 = done, 1 = a marker was not found (a new CubeMX changed the generated files - update this
 script, never edit mx/ by hand).
 """
@@ -63,6 +65,40 @@ def main(argv):
             if not m:
                 fail("'# Add sources to executable' not found (CMakeLists.txt)")
             s = s[:m.start()] + glob + "\n\n" + s[m.start():]
+        unit = (f"# {TAG}: FW_UNIT=ON builds the on-target unit-test image (unit_test.sh): <app>/test\n"
+                "# (test runner + suites + Unity) replaces src/app_main.c; the rest of src/ stays\n"
+                "option(FW_UNIT \"on-target unit-test image\" OFF)\n"
+                "if(FW_UNIT)\n"
+                "    list(FILTER APP_SOURCES EXCLUDE REGEX \"/src/app_main\\\\.c$\")\n"
+                "    file(GLOB UNIT_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../test/*.c)\n"
+                "    set_source_files_properties(${UNIT_SOURCES} PROPERTIES COMPILE_OPTIONS \"-Wall;-Wextra\")\n"
+                "    list(APPEND APP_SOURCES ${UNIT_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/../test/unity/unity.c)\n"
+                "    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../test/unity)\n"
+                "    target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -u _printf_float)  # suites print floats\n"
+                "    target_link_libraries(${CMAKE_PROJECT_NAME} m)\n"
+                "endif()")
+        dsp = (f"# {TAG}: CMSIS-DSP (Arm, Apache-2.0; the copy CubeMX puts in mx/Drivers) for func/ modules\n"
+               "# such as fxscale - BasicMath + Support compiled from source (the copied prebuilt lib is\n"
+               "# soft-float only); --gc-sections drops what no module calls\n"
+               "set(FW_DSP ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/DSP)\n"
+               "if(EXISTS ${FW_DSP}/Source/BasicMathFunctions/BasicMathFunctions.c)\n"
+               "    target_sources(${CMAKE_PROJECT_NAME} PRIVATE\n"
+               "        ${FW_DSP}/Source/BasicMathFunctions/BasicMathFunctions.c\n"
+               "        ${FW_DSP}/Source/SupportFunctions/SupportFunctions.c)\n"
+               "    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${FW_DSP}/Include)\n"
+               "    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ARM_MATH_CM4)\n"
+               "endif()")
+        old_unit_inc = "    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../test/unity)\n"
+        if "option(FW_UNIT" not in s:
+            m = re.search(r"^# Add sources to executable", s, re.M)
+            s = s[:m.start()] + unit + "\n\n" + s[m.start():]
+        elif "_printf_float" not in s:           # an app from before the float / libm lines
+            s = s.replace(old_unit_inc, old_unit_inc
+                          + "    target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -u _printf_float)  # suites print floats\n"
+                          + "    target_link_libraries(${CMAKE_PROJECT_NAME} m)\n", 1)
+        if "set(FW_DSP" not in s:
+            m = re.search(r"^# Add sources to executable", s, re.M)
+            s = s[:m.start()] + dsp + "\n\n" + s[m.start():]
         s = insert_after(s, "    # Add user defined symbols", f"    {define}  # {TAG}", "CMakeLists symbols")
         s = insert_after(s, "    # Add user defined include paths",
                          f"    ${{CMAKE_CURRENT_SOURCE_DIR}}/../src  # {TAG}\n"

@@ -37,6 +37,7 @@ skill cubemx-hal-stm32wb55nucleo (NUCLEO-WB55RG, STM32CubeMX + STM32CubeWB HAL +
  Run on hardware (milestone M1; Claude asks before every flash)
   "flash it"                                -> flash.sh <app> --yes   (identity gates: ST-LINK board, device ID)
   "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
+  "run the unit tests on the board"         -> unit_test.sh <app> [--yes]  (Unity, func/ code; test image replaces the app)
  Housekeeping
   "clean the build outputs"                 -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
 EOF
@@ -56,6 +57,7 @@ skill cubemx-hal-stm32wb55nucleo (NUCLEO-WB55RG, STM32CubeMX + STM32CubeWB HAL +
  ใช้กับบอร์ดจริง (milestone M1; Claude ถามก่อนแฟลชทุกครั้ง)
   "แฟลชให้หน่อย"                               -> flash.sh <app> --yes   (ตรวจตัวตนบอร์ด: ST-LINK, device ID)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                   -> serial_test.py auto <spec> <log> --board <b> [--interactive]
+  "รัน unit test บนบอร์ด"                       -> unit_test.sh <app> [--yes]  (Unity, โค้ดใน func/; image ทดสอบจะแทนแอป)
  งานอื่น
   "clean ให้หน่อย"                              -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
 EOF

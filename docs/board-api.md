@@ -7,11 +7,21 @@
 host tests' expectations below on the PC and the shared `tests/*.json` on the board.
 
 ```
-execution   main / app_main      may use board.h + func/*.h + the C library
-logic       func/  (lib/func)    may use board.h + the C library only
+execution   main / app_main      may use board.h + func/*.h + the C library (+ CMSIS-DSP*)
+logic       func/  (lib/func)    may use board.h + the C library only (+ CMSIS-DSP*)
 board       board/ (board.h)     this contract; vendor headers stay in board.c
 BSP/driver  generated / vendor   never edited
 ```
+
+\* **CMSIS-DSP on Cortex-M boards:** `func/` and the execution layer may also include CMSIS-DSP
+(`arm_math.h`, `arm_common_tables.h`, `arm_const_structs.h` - Arm's DSP library, Apache-2.0, not a
+vendor HAL). A module that does is Cortex-M only (all boards here except the ESP32-S3-BOX); say so
+in its header, as `lib/func_dsp/fxscale.h` does. Such modules live in `lib/func_dsp/` (not copied
+into every new app) and the skill must compile the library: so far only the WB55 skill's overlay
+compiles CMSIS-DSP BasicMath + Support from `mx/Drivers/CMSIS/DSP`; other skills need the same
+before they can use such a module. `lib/check_layers.py` allows these
+headers when the app's board (`APP_BOARD` -> `mcu_family` in `boards/index.json`) is Cortex-M and
+fails them otherwise. Owner's decision 2026-10-27.
 
 ## Required API (C, `extern "C"`-safe)
 

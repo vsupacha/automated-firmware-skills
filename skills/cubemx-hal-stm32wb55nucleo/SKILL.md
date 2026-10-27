@@ -229,6 +229,24 @@ SW1 / SW2, look at LED1) only with `--interactive`, after telling the user exact
 button press must come within 30 s. **Gate:** `RESULT: PASS`. `led?` reads the GPIO output
 register back.
 
+**Unit tests on the board (prototype):** `bash "$SKILL/scripts/unit_test.sh" <app> [--yes] [--build-only | --read-only]` -
+Unity suites of `func/` code: `gesture` (13 cases, fake clock incl. tick wrap) and `fxscale`
+(CMSIS-DSP fixed point, error bound checked on 5000 random pairs + a grid; the worst error is printed). The
+app gets `test/unity/` (pinned copy of `<repo>/lib/unity`, Unity 2.6.1), and - when missing - the
+runner `test/unit_main.c` and suites from `<repo>/lib/test_func/`, and the `func/` modules they test.
+The image is the app's own CubeMX project built a second time with `-DFW_UNIT=ON` into
+`mx/build/Unit` (`test/*.c` replace `src/app_main.c`; overlay.py adds the switch). 0 warnings in
+`src/` and `test/`. Without `--yes` it stops with `ACTION: APPROVE` (the test image replaces the
+app); `FLASH_POLICY=auto` in the bench file (the developer's setting, never yours) flashes without
+asking - for a TDD loop. Flash goes through `flash.sh --elf` (identity gates); the results are read
+by `<repo>/lib/unity_read.py` (the image waits for a start byte). The unit image links
+`-u _printf_float` and libm; both images compile CMSIS-DSP BasicMath + Support from
+`mx/Drivers/CMSIS/DSP` (overlay block; `--gc-sections` drops what is unused). **Gates:** `UNIT-BUILD: PASS`,
+`UNIT: PASS (n/n)` / `UNIT: FAIL`. The board keeps the test image: `flash.sh <app> --yes` restores
+the app. **TDD loop:** write the test in `<app>/test/`, run (red, `UNIT: FAIL`), change
+`src/func/<module>.c`, run (green), refactor; a module meant for every skill goes into
+`<repo>/lib/func` with its suite in `<repo>/lib/test_func`.
+
 ## Stage 7 - Debug (planned)
 
 No `debug.sh` in this skill yet (the L475 / C5 engine needs the WB55 fault and memory map checked
