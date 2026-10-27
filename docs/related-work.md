@@ -111,6 +111,54 @@ Possible adoption, lowest risk first (not decided):
    `cube --cwd mx cmake --preset ...` - the same pinned tools in the IDE, the scripts and CI.
 4. Later, after GA: `cube mx` instead of `node <mx>/dist/bin.js` in the C5 skill.
 
+## STM32CubeMX 6.18.1 and STM32CubeMX2 1.1.2 command lines (reviewed 2026-10-27)
+
+ST documents both on dev.st.com:
+[STM32CubeMX 6.18.1 "Running STM32CubeMX in command-line mode"](https://dev.st.com/stm32cube-docs/stm32cubemx/6.18.1/en/docs/markup/CubeMX_CLI.html)
+and [STM32CubeMX2 1.1.2 "Command lines interface"](https://dev.st.com/stm32cube-docs/stm32cubemx2/1.1.2/en/docs/markup/CubeMX2_Command_Lines.html).
+Checked against the NUCLEO-WB55RG (new skill `cubemx-hal-stm32wb55nucleo`).
+
+**STM32CubeMX (classic) 6.18.1**
+- Three modes: interactive `-i`, script `-s <file>`, quiet script `-q <file>`; on Windows through
+  the bundled `jre/bin/java -jar STM32CubeMX.exe` - what our `cubemx_script` already does.
+- Documented commands: `load <mcu>`, `loadboard <board> allmodes|nomode`, `config load / save /
+  saveext / saveas`, `project name / toolchain / path / compiler / generate`, `generate code`,
+  `setDriver <IP> HAL|LL`, `project couplefilesbyip`, `SetStructure`, `SetCopyLibrary`,
+  `project setCustomFWPath`, `set tpl_path / dest_path`, `swmgr refresh / install / remove`,
+  `pack enable / validate`, `csv pinout`, `script`, `login`, `exit`. Toolchains include CMake.
+- Not in the table but used by our scripts and printed by the CLI's own `help` / `set` usage:
+  `set mode`, `set pin`, `set context`, `get mode <active|available|all> <IP>`, `clearpinout`,
+  `set ip parameters`, `set AllIpInContext`. They work on 6.18.1 but ST does not promise them -
+  each skill's `reference/cubemx-cli.md` records the versions they were seen on.
+- Release notes: authenticate (`login`) before downloading packages or generating from the command
+  line; our skills never log in or store credentials and use packages that are already installed.
+  STM32WB known limitation: regeneration drops the STM32_WPAN middleware from CMake / Makefile
+  files (no impact while the demos use no BLE).
+- WB55 finding: after `loadboard NUCLEO-WB55RG nomode`, `set mode USART1 Asynchronous` answers KO
+  (with `allmodes` USART1 is left out too); `clearpinout` first fixes it and keeps the board and
+  its clocks. The firmware package list of 6.18.1 names CubeWB V1.24.0, CubeF4 V1.28.3, CubeL4
+  V1.18.2 (our pins) and CubeN6 V1.4.0 (we pin 1.4.1).
+
+**STM32CubeMX2 1.1.2**
+- One JSON CLI against a backend (`--host` / `--port`, `-p <project.ioc2>`), grouped as `project`
+  (create-from-board / -mcu, save, set-linked, set-read-only), `peripherals`, `pinout`, `clock`
+  (find / get / set values, constraints, `solver-on-demand`), `nvic`, `dma`, `exti`, `middleware`,
+  `utilities`, `composer` (CMSIS components), `parts` (mounted and standalone HW parts),
+  `sw-config` (component parameters), `pack-manager` (install / list-boards / list-devices /
+  list-packs / remove), `ide-project` (generate, build-target, flags, format, source),
+  `preferences`, `data-analytics` (telemetry opt-in/out), `hw-platform`, `global-services`,
+  `finder`. Our C5 skill uses `project`, `peripherals`, `pinout`, `hw-platform` and
+  `ide-project generate`.
+- 1.1.2 = security fixes only; CMake 3.30 or newer required; project names without spaces, dots or
+  most punctuation; regeneration never merges IDE files (overwrite / skip / backup); a Release
+  build target only through the CLI (`ide-project generate --build-target ...`).
+- **Series coverage:** the release limitations list only STM32C5. On this PC `pack-manager
+  list-boards` shows 214 boards incl. `NUCLEO-WB55RG`, but `list-packs` marks every WB pack
+  (`stm32wbxx_dfp` 1.2.0, `nucleo-wb55rg_hw-board` 1.0.0) "metadata only - incompatible" - only
+  the C5 and G5 template packs are compatible - and `project create-from-board --cpn NUCLEO-WB55RG`
+  answers "Board not found". So a WB55 port uses classic STM32CubeMX until ST ships HAL2 packs for
+  the series.
+
 ## Suggested order
 
 Status in the current milestone plan ([milestones.md](milestones.md)), updated 2026-10-27:

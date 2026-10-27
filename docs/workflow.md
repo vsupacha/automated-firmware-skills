@@ -21,6 +21,7 @@ Reference implementations:
 | [cubemx-hal-stm32n6570dk](../skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeN6 HAL, CMake | STM32N6570-DK | M1 build stages only; FSBL in internal SRAM; shares `lib/func` |
 | [cubemx-hal-stm32f407disco](../skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeF4 HAL, CMake | STM32F407G-DISC1 | M1 build, connect, flash (test planned); console SWO output (ST-LINK/V2, no VCP); shares `lib/func` |
 | [cubemx-hal-stm32l475iot](../skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | B-L475E-IOT01A | M1 incl. board stages; ST-LINK/V2-1 VCP console (RX by interrupt: no USART FIFO); shares `lib/func` |
+| [cubemx-hal-stm32wb55nucleo](../skills/cubemx-hal-stm32wb55nucleo/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeWB HAL, CMake, STM32CubeProgrammer | NUCLEO-WB55RG | M1 incl. board stages (debug planned); CM4 application only, wireless stack untouched; `.ioc` from `loadboard` + `clearpinout`; shares `lib/func` |
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
 | [pio-arduino-unor4wifi](../skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino (renesas-ra), bossac | UNO R4 WiFi | RA4M1 through the ESP32-S3 USB bridge (1200 baud touch, no read-back); Arduino style like the BOX skill, `console_printf()` |
 | [scons-rtthread-visionboard](../skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons, GNU Arm 13.3, pyOCD (RT-Thread Studio SDK) | Vision Board (RA8D1) | IDE = RT-Thread Studio (`IDE_APP`); msh console; code flash only, read back |
@@ -314,7 +315,7 @@ regen + build (0 warnings), flash (asks first), the bring-up tests, and for an e
 IDE path once in VS Code (open, build, debug, no "fix"/"configure" prompt). Then add the dated result
 line. The profile diff (old -> new pins) plus that line is the evidence for the upgrade.
 
-`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6); the `IDE_EXT_VERSION` check in
+`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6, WB55); the `IDE_EXT_VERSION` check in
 `check_tools.sh` covers every skill whose profile sets it (STM32 and ModusToolbox).
 
 ## Common options
@@ -338,6 +339,7 @@ line. The profile diff (old -> new pins) plus that line is the evidence for the 
   | pio-arduino-rpipico2w | `PICO_WS` | `PICO_BOARDS_DIR` | `PICO_USB_SERIAL` | `PICO_CONSOLE` |
   | cubemx2-hal2-stm32c562nucleo | `CUBE_WS` | `CUBE_BOARDS_DIR` | `CUBE_PROBE_SERIAL` | `CUBE_CONSOLE` |
   | cubemx-hal-stm32l475iot | `L4_WS` | `L4_BOARDS_DIR` | `L4_PROBE_SERIAL` | `L4_CONSOLE` |
+  | cubemx-hal-stm32wb55nucleo | `WB_WS` | `WB_BOARDS_DIR` | `WB_PROBE_SERIAL` | `WB_CONSOLE` |
   | pio-arduino-unor4wifi | `UNO_WS` | `UNO_BOARDS_DIR` | `UNO_USB_SERIAL` | `UNO_CONSOLE` |
   | scons-rtthread-visionboard | `RTT_WS` | `RTT_BOARDS_DIR` | `RTT_PROBE_SERIAL` | `RTT_CONSOLE` |
 - **Your own board**: put its profile in `<project>/boards/<id>/<skill>/board.env` (copy

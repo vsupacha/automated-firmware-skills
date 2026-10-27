@@ -39,7 +39,7 @@ it there (or for one shell: `export FW_ACTIVE_MILESTONES="M1 M2"`).
 
 | Milestone | State |
 | --- | --- |
-| **M1 bring-up** | active - 10 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 8 boards; `debug.sh` (status + scripted break / watch / step) in the STM32 C5 and L475 skills; bring-up certificate planned |
+| **M1 bring-up** | active - 11 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 9 boards; `debug.sh` (status + scripted break / watch / step) in the STM32 C5 and L475 skills; bring-up certificate planned |
 | **M2 board support** | layer check (`check_layers.py`) and host test (`host_test.sh`) implemented, gated; `parts.json` + board-driver stage planned |
 | **M3 execution model** | planned (design: [trace](#m3-trace-planned-design) below) |
 | **M4 components** | planned |
@@ -61,6 +61,7 @@ M1 per skill - the bring-up demos are `hello-world` (UART), `blink` (LED) and `p
 | pio-espidf-esp32s3box | yes | verified on hardware |
 | pio-arduino-esp32s3box | yes | verified on hardware |
 | cubemx-hal-stm32l475iot | yes | verified on hardware |
+| cubemx-hal-stm32wb55nucleo | yes | hello-world tested on hardware |
 | pio-arduino-unor4wifi | yes | verified on hardware |
 | scons-rtthread-visionboard | yes | hello-world tested on hardware |
 | cubemx-hal-stm32n6570dk | yes | planned (dev boot mode, connect under reset) |

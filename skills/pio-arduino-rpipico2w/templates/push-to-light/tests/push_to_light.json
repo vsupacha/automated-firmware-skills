@@ -19,6 +19,6 @@
     {"name": "BTN1 press",      "interactive": true, "requires_re": "btns=[1-9]", "prompt": "Press and release {btn1} once",
      "expect": ["EVT btn1=pressed", "EVT btn1=released"], "timeout": 30},
     {"name": "LED1 after press","interactive": true, "requires_re": "btns=[1-9]", "send": "led?",
-     "prompt": "Look at the board: the LED should be ON now (tell Claude if it is)", "expect_re": ["^LED led1=1$"], "timeout": 5}
+     "prompt": "Look at the board: the LED should be ON now (tell Claude if it is)", "expect_re": ["^LED led1=1( |$)"], "timeout": 5}
   ]
 }

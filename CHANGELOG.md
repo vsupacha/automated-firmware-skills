@@ -46,6 +46,15 @@ verification log, not here.
   first) through the on-board ST-LINK/V2 (no virtual COM port, reports no board name, so several
   ST-LINKs stop with `ACTION: CHOOSE`). blink flashed on an STM32F4DISCOVERY and seen blinking
   (observed); the test stage (SWO reader) is still planned.
+- New board skill `cubemx-hal-stm32wb55nucleo` (ST NUCLEO-WB55RG, STM32WB55RG Cortex-M4 core) with
+  classic STM32CubeMX 6.18.1 + STM32CubeWB 1.24.0, ported from the L475 skill: create, build,
+  connect, flash (asks first; CM4 application only, the wireless stack is not touched) and serial
+  tests; debug planned. Its `.ioc` starts with `loadboard NUCLEO-WB55RG nomode` + `clearpinout`
+  (without it CubeMX refuses USART1). hello-world tested on the board (9/9), push-to-light
+  observed (SW1/SW2 pressed, 6/6, LED1/LED2 seen). In the
+  `firmware-stm32` and all-in-one plugins. STM32CubeMX2 1.1.2 cannot create a WB55 project yet.
+- docs/related-work.md: what the STM32CubeMX 6.18.1 and STM32CubeMX2 1.1.2 command lines offer,
+  and which commands our scripts rely on that ST does not document.
 
 ### Changed
 - `serial_test.py` (lib/fwtest.py), sensor-debug and web-wizard read the bench file and apps from
@@ -62,6 +71,8 @@ verification log, not here.
   portable logic-layer modules wired from `app_main.c`.
 
 ### Fixed
+- push-to-light specs: the last interactive step expected `^LED led1=1$`, which fails on boards
+  with more than one LED (`LED led1=1 led2=1 ...`); now `^LED led1=1( |$)` in every skill.
 - `serial_test.py`: a missing or invalid test spec prints an `ERROR` line with the specs that
   exist, instead of a Python traceback.
 - cubemx-hal-stm32n6570dk: the SKILL.md description held `STM32C5: ...`, which made its frontmatter

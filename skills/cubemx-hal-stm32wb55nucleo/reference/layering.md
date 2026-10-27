@@ -1,0 +1,45 @@
+# Stage 3 - Layered code (STM32WB, CubeMX + HAL)
+
+```
+src/app_main.c      application: app_main() wiring, command table, policies
+  │ uses
+src/func/*.c/.h     services from <repo>/lib/func (console, led, button) - shared unchanged with
+  │ uses             the other C skills
+src/board/board.*   board adaptation: LED1-LED3 / SW1-SW3 table and pin setup, console glue
+  │ uses             (_write -> HAL_UART_Transmit on huart1; RX: USART1 RXNE interrupt -> ring buffer)
+mx/ (generated)     main(): HAL_Init, SystemClock_Config (board default, MSI 32 MHz), MX_GPIO_Init,
+                    MX_USART1_UART_Init (PB6/PB7, 115200 8N1); STM32CubeWB HAL, CMSIS, startup,
+                    flash linker script
+```
+
+Call chain (mx/Src/main.c, overlay in USER CODE sections):
+`main()` → `HAL_Init()` → `SystemClock_Config()` → `MX_GPIO_Init()` → `MX_USART1_UART_Init()` →
+**`app_main()`** (USER CODE 2, never returns) → `board_init()` (LEDs off, SW1-SW3 inputs with pull-up,
+console RX interrupt on) → services.
+
+Rules
+- Dependency direction is strictly downward; `func/` and `app_main.c` never include HAL headers.
+  The application layer may call the `board.h` API directly (e.g. `board_millis()`) as well as
+  `func/` - "downward" means it never reaches below `board.h` (no vendor HAL calls).
+- A board difference goes in `board/` (an `#elif` I/O table) or in the board's `.ioc` - never
+  `#ifdef` in `func/`.
+- Hardware owned by CubeMX (clocks, peripherals) is configured in `<app>.ioc`. The LED and button
+  pins are set up in `board_init()`: the app's `.ioc` starts with `clearpinout`, so CubeMX
+  configures none of them.
+- `src/**/*.c` is compiled into the target with `-Wall -Wextra` (overlay in `mx/CMakeLists.txt`);
+  the build gate allows 0 warnings there.
+- Console RX: CubeMX leaves the USART1 RX FIFO off (one byte in RDR). Polling it while the
+  console echoes with blocking TX drops bytes (seen on the L4 sibling skill, 2026-10-08), so
+  `board.c` owns `USART1_IRQHandler` and fills a 256-byte ring buffer; `board_console_getc()`
+  reads from it. Keep the USART1 global interrupt **disabled** in the `.ioc` NVIC page - otherwise
+  CubeMX generates a second `USART1_IRQHandler` in `stm32wbxx_it.c` and the link fails.
+
+## Console protocol (test contract)
+
+| Line | Meaning |
+| --- | --- |
+| `READY` | boot finished (printed after `INFO ...`) |
+| `INFO app=<name> v=<ver> board=<id> ...` | identity - a test checks `board=<id>` |
+| `OK ...` / `ERR <reason>` | command result |
+| `EVT ...` | asynchronous event (`EVT btn1=pressed name=SW1 pin=PC4 led1=1`) |
+| `<TAG> k=v ...` | state report (`LED led1=0`, `BTN btn1=0`) |

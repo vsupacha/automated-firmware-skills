@@ -11,6 +11,7 @@ a dated verification log). Machine-readable: [index.json](index.json).
 | [RT-Thread Edgi-Talk](edgi-talk/README.md) | Infineon PSOC Edge E84 (PSE846GPS2DBZC4A) | `modus-pdl-edgitalk` | KitProg3 USB-UART | LED1 (red) | SW2 |
 | [ST NUCLEO-C562RE](nucleo-c562re/README.md) | ST STM32C5 (STM32C562RET6) | `cubemx2-hal2-stm32c562nucleo` | ST-LINK virtual COM port | LD1 (green) | B1 (USER) |
 | [ST B-L475E-IOT01A (IoT node)](b-l475e-iot01a/README.md) | ST STM32L4 (STM32L475VGT6) | `cubemx-hal-stm32l475iot` | ST-LINK virtual COM port | LED2 (green) | B1 USER (blue) |
+| [ST NUCLEO-WB55RG](nucleo-wb55rg/README.md) | ST STM32WB (STM32WB55RGV6) | `cubemx-hal-stm32wb55nucleo` | ST-LINK virtual COM port | LED1 (blue) | SW1 |
 | [ST STM32N6570-DK](stm32n6570-dk/README.md) | ST STM32N6 (STM32N657X0H3Q) | `cubemx-hal-stm32n6570dk` | ST-LINK virtual COM port | LED1 (green) | USER1 |
 | [ST STM32F407G-DISC1](stm32f407g-disc1/README.md) | ST STM32F4 (STM32F407VGT6) | `cubemx-hal-stm32f407disco` | SWO (no virtual COM port) | LD3 (orange) | B1 (blue) |
 | [Raspberry Pi Pico 2 W](rpi-pico-2w/README.md) | Raspberry Pi RP2350 (RP2350A) | `pio-arduino-rpipico2w` | USB CDC | LED (on the Wi-Fi module) | BOOTSEL |
@@ -40,6 +41,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | [ST STM32N6570-DK](stm32n6570-dk/README.md) | `cubemx-hal-stm32n6570dk` | built | not built yet | built |
 | [ST STM32F407G-DISC1 (STM32F4DISCOVERY)](stm32f407g-disc1/README.md) | `cubemx-hal-stm32f407disco` | built | observed | built |
 | [ST B-L475E-IOT01A (Discovery kit IoT node)](b-l475e-iot01a/README.md) | `cubemx-hal-stm32l475iot` | tested | built | observed * |
+| [ST NUCLEO-WB55RG](nucleo-wb55rg/README.md) | `cubemx-hal-stm32wb55nucleo` | tested | built | observed |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | `pio-arduino-unor4wifi` | tested | built | observed * |
 | [RT-Thread Vision Board (RA8D1)](vision-board/README.md) | `scons-rtthread-visionboard` | tested | built | built |
 <!-- board-status:end -->
