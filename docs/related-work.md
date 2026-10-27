@@ -75,6 +75,42 @@ Prompt scenarios that check how the agent follows the skill, not just the script
 - an unknown board must stop and ask;
 - a blocked physical step ("I have no meter") is accepted without claiming success.
 
+## STM32CubeCLI (reviewed 2026-10-27)
+
+[STM32CubeCLI](https://dev.st.com/stm32cube-docs/stm32cubecli/latest/en/index.html) (ST,
+[announced 2026-10-01](https://community.st.com/stm32-software-tools-165/introducing-stm32cubecli-your-stm32-toolchain-from-the-command-line-168704),
+**beta**) is the successor of STM32CubeCLT: one `cube` command, a bundle manager (`cube bundle`) and
+independently installable bundles (cmake, ninja, gnu-tools-for-stm32, programmer, stlink-gdbserver,
+mx, jlink-gdbserver ...) from a public registry, no login. STM32CubeIDE for VS Code uses it since
+2025-04 and STM32CubeMX2 since 2026-03, so it is already on every PC where our STM32 skills run
+(`cube` wrapper 0.10.3 seen on one PC).
+
+- **Per-project pins:** `.settings/bundles.store.json` (requirements, version ranges) +
+  `.settings/bundles-lock.store.json` (exact versions per OS/arch); commit both, then
+  `cube bundle install --project` reproduces the toolchain on another PC or CI runner.
+- **Script-friendly:** `--json` on list / show / list-online; `cube --json --resolve <cmd>` prints the
+  executable, bundle and environment without running it; `--with <range>`; `cube bundle --yes
+  install ...`; `--cwd <dir>`; `CUBE_BUNDLE_PATH`, `CMSIS_PACK_ROOT` etc. override the defaults
+  (`%LOCALAPPDATA%\stm32cube\bundles`, `...\packs`).
+- **Beta caveat:** ST says command names may change before GA (tool-named `cube cmake` / `cube mx`
+  vs possible task-level `cube build` / `cube flash`); the manifest/lock mechanism will not.
+
+Where we stand: the four STM32 skills already pin bundle versions in `board.env` and read the same
+bundle store, but by direct folder paths (`set_tools` in each `env.sh`), and `fw_vscode_cube_setup`
+writes `bundles.store.json` without a lock file. `update_tools.sh` compares pins with installed
+versions only, not with the registry. Registry versions vanish: STM32CubeMX2 1.1.1 (the C5 pin
+until 2026-10-27) is no longer offered - only 1.1.2.
+
+Possible adoption, lowest risk first (not decided):
+1. `check_tools.sh` / `update_tools.sh` read `cube --json bundle list` and `list-online`, and offer
+   `cube bundle --yes install <name>@<version>` behind `ACTION: APPROVE` for a missing pin; add
+   `update_tools.sh` to the C5 skill.
+2. `set_tools` resolves executables with `cube --json --resolve`, keeping the direct paths as a
+   fallback while the command surface is beta.
+3. New apps get a lock file (`cube bundle install --project` in `mx/`) and build with
+   `cube --cwd mx cmake --preset ...` - the same pinned tools in the IDE, the scripts and CI.
+4. Later, after GA: `cube mx` instead of `node <mx>/dist/bin.js` in the C5 skill.
+
 ## Suggested order
 
 Status in the current milestone plan ([milestones.md](milestones.md)), updated 2026-10-27:

@@ -7,7 +7,7 @@ quirks and the verification log of the `cubemx2-hal2-stm32c562nucleo` skill. Mac
 
 | Item | Value |
 | --- | --- |
-| STM32CubeMX2 | 1.1.1, headless CLI (`node <mx>/dist/bin.js`, bundled node 22.22.2+st.1) |
+| STM32CubeMX2 | 1.1.2, headless CLI (`node <mx>/dist/bin.js`, bundled node 22.22.2+st.1) |
 | Board project | `mx project create-from-board --cpn NUCLEO-C562RE --pack-version 2.1.0`, then `peripherals enable USART2 --mode Async` |
 | Packs | stm32c5xx_dfp 2.1.0, stm32c5xx_hal_drivers 2.1.0 (HAL2), templates_no_os_stm32c5 2.1.0, nucleo-c562re_hw-board 2.1.0 |
 | Generation | `ide-project generate --format CMake --source include-packs-from-local --remove-board --build-target .debug_GCC+NUCLEO-C562RE` |
@@ -52,3 +52,7 @@ quirks and the verification log of the `cubemx2-hal2-stm32c562nucleo` skill. Mac
   `scenarios/push-to-light.json` -> **DEBUG: PASS 7/7** (break `cmd_led` from the console line,
   argc/argv, step 2, `uwTick` hardware watchpoint 513824 -> 513825, CFSR/HFSR 0), console
   answered normally after the detach. ST-LINK_gdbserver needs `-m 1` (core on AP 1, `DEBUG_APID`).
+- 2026-10-27 STM32CubeMX2 re-pinned 1.1.1 -> 1.1.2 (owner): the ST bundle registry offers only
+  1.1.2 now and 1.1.1 can no longer be installed; 1.1.2 bundles the same node 22.22.2+st.1. Other
+  pins unchanged. **Not re-qualified yet** - regen, build and the bring-up tests must pass again
+  with MX 1.1.2 before the levels above count for it.
