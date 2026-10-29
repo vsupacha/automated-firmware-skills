@@ -295,6 +295,31 @@
           "log": "boards/vision-board/scons-rtthread-visionboard/README.md"
         }
       }
+    },
+    {
+      "id": "frdm-mcxn947",
+      "name": "NXP FRDM-MCXN947",
+      "aliases": [
+        "FRDM-MCXN947",
+        "frdmmcxn947",
+        "MCXN947 FRDM",
+        "MCX N947 FRDM"
+      ],
+      "mcu": "MCXN947VDF",
+      "mcu_family": "NXP MCX N",
+      "profiles": {
+        "mcux-sdk-frdmmcxn947": {
+          "level": "built",
+          "templates": {
+            "hello-world": "built",
+            "blink": "built",
+            "push-to-light": "built"
+          },
+          "note": "M1 stages 0-3 with the skill's scripts (2026-10-30): check_tools 0 bad, new_app + build PASS 0 warnings for all 3 templates; board stages planned (proven by hand 2026-10-29: docs/related-work.md)",
+          "log": "boards/frdm-mcxn947/mcux-sdk-frdmmcxn947/README.md",
+          "date": "2026-10-30"
+        }
+      }
     }
   ]
 }

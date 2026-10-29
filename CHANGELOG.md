@@ -8,6 +8,11 @@ verification log, not here.
 ## [Unreleased]
 
 ### Added
+- New board skill `mcux-sdk-frdmmcxn947` (NXP FRDM-MCXN947, MCXN947 Cortex-M33 core 0) with the
+  MCUXpresso SDK 26.09 (west), Kitware CMake and the MCUXpresso Installer tools - M1 stages 1-3
+  (check_tools, new_app from `west export_app` + trim, open_ide writing the MCUXpresso for VS Code
+  project files directly, build with the IDE's preset); board stages planned. NXP tools only (no
+  ST cube-cmake / CLT tools). Vendor plugin `firmware-mcuxpresso`.
 - Step-by-step guides per board skill: `skills/<skill>/README.md` (English) and `README_TH.md`
   (Thai) - install, what to ask Claude, the Git Bash commands, board notes; linked from the README
   skills table, each board README and README_TH.md (which also shows the per-vendor plugins). The

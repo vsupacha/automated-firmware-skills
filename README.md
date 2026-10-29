@@ -63,6 +63,7 @@ pulls in `firmware-tools`):
 | `firmware-platformio` | Pico 2 W, ESP32-S3-BOX (ESP-IDF, Arduino), UNO R4 WiFi | `/plugin install firmware-platformio --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-modustoolbox` | Edgi-Talk (PSOC Edge E84) | `/plugin install firmware-modustoolbox --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-rtthread` | Vision Board (RA8D1) | `/plugin install firmware-rtthread --marketplace vsupacha/automated-firmware-skills` |
+| `firmware-mcuxpresso` | FRDM-MCXN947 (MCX N) | `/plugin install firmware-mcuxpresso --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-tools` | web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting (installed with each of the above) | `/plugin install firmware-tools --marketplace vsupacha/automated-firmware-skills` |
 | `automated-firmware-skills` | everything above in one plugin - install this **or** the vendor plugins, not both | `/plugin install automated-firmware-skills --marketplace vsupacha/automated-firmware-skills` |
 
@@ -115,7 +116,7 @@ Common options and overrides: [docs/workflow.md](docs/workflow.md#common-options
 
 ## Status
 
-Milestone **M1 bring-up** is active: 11 board skills, board stages verified on 9 boards. M2 board support
+Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 9 boards. M2 board support
 (layer checks) is implemented but gated; M3-M5 are planned. Plan and per-skill state:
 [docs/milestones.md](docs/milestones.md).
 
@@ -132,6 +133,7 @@ Milestone **M1 bring-up** is active: 11 board skills, board stages verified on 9
 | [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + arduino-esp32 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-arduino-esp32s3box/README.md) · [ไทย](skills/pio-arduino-esp32s3box/README_TH.md) |
 | [pio-arduino-unor4wifi](skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino UNO R4 core | Renesas RA4M1 | [UNO R4 WiFi](boards/uno-r4-wifi/README.md) | [guide](skills/pio-arduino-unor4wifi/README.md) · [ไทย](skills/pio-arduino-unor4wifi/README_TH.md) |
 | [scons-rtthread-visionboard](skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons (RT-Thread Studio SDK) | Renesas RA8D1 | [Vision Board](boards/vision-board/README.md) | [guide](skills/scons-rtthread-visionboard/README.md) · [ไทย](skills/scons-rtthread-visionboard/README_TH.md) |
+| [mcux-sdk-frdmmcxn947](skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 + CMake | NXP MCX N | [FRDM-MCXN947](boards/frdm-mcxn947/README.md) | [guide](skills/mcux-sdk-frdmmcxn947/README.md) · [ไทย](skills/mcux-sdk-frdmmcxn947/README_TH.md) |
 
 **Tool skills** (shared by all board skills, no board of their own):
 
@@ -152,6 +154,7 @@ project and build folders as the scripts. Details: [docs/workflow.md](docs/workf
 | VS Code | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) | modus-pdl-edgitalk |
 | VS Code | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32wb55nucleo |
 | VS Code | PlatformIO IDE (`platformio.platformio-ide`) | pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box, pio-arduino-unor4wifi |
+| VS Code | MCUXpresso for VS Code (`nxpsemiconductors.mcuxpresso`) | mcux-sdk-frdmmcxn947 |
 | RT-Thread Studio | - (standalone Eclipse-based IDE) | scons-rtthread-visionboard |
 
 ## Documentation

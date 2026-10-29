@@ -1,0 +1,1 @@
+LED1 (red) toggles every 500 ms and prints "BLINK led1=0|1" on the MCU-Link virtual COM port

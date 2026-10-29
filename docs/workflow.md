@@ -25,6 +25,7 @@ Reference implementations:
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
 | [pio-arduino-unor4wifi](../skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino (renesas-ra), bossac | UNO R4 WiFi | RA4M1 through the ESP32-S3 USB bridge (1200 baud touch, no read-back); Arduino style like the BOX skill, `console_printf()` |
 | [scons-rtthread-visionboard](../skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons, GNU Arm 13.3, pyOCD (RT-Thread Studio SDK) | Vision Board (RA8D1) | IDE = RT-Thread Studio (`IDE_APP`); msh console; code flash only, read back |
+| [mcux-sdk-frdmmcxn947](../skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 (west), Arm GNU 14.2 + Ninja (MCUXpresso Installer), Kitware CMake; LinkServer planned | FRDM-MCXN947 | M1 stages 1-3; board stages planned; app = `west export_app` of hello_world, trimmed; VS Code project files written directly; never ST tools |
 
 ## Milestones (summary)
 
@@ -342,6 +343,7 @@ line. The profile diff (old -> new pins) plus that line is the evidence for the 
   | cubemx-hal-stm32wb55nucleo | `WB_WS` | `WB_BOARDS_DIR` | `WB_PROBE_SERIAL` | `WB_CONSOLE` |
   | pio-arduino-unor4wifi | `UNO_WS` | `UNO_BOARDS_DIR` | `UNO_USB_SERIAL` | `UNO_CONSOLE` |
   | scons-rtthread-visionboard | `RTT_WS` | `RTT_BOARDS_DIR` | `RTT_PROBE_SERIAL` | `RTT_CONSOLE` |
+  | mcux-sdk-frdmmcxn947 | `MCX_WS` | `MCX_BOARDS_DIR` | `MCX_PROBE_SERIAL` | `MCX_CONSOLE` |
 - **Your own board**: put its profile in `<project>/boards/<id>/<skill>/board.env` (copy
   `boards/_template/`). The scripts find it before the repo's boards.
 - **Flashing**: always check the board, the app and the image hash yourself before `flash.sh --yes`.

@@ -47,6 +47,7 @@
 | ESP32-S3-BOX (Arduino) | [skills/pio-arduino-esp32s3box/README_TH.md](skills/pio-arduino-esp32s3box/README_TH.md) |
 | Arduino UNO R4 WiFi | [skills/pio-arduino-unor4wifi/README_TH.md](skills/pio-arduino-unor4wifi/README_TH.md) |
 | RT-Thread Vision Board | [skills/scons-rtthread-visionboard/README_TH.md](skills/scons-rtthread-visionboard/README_TH.md) |
+| NXP FRDM-MCXN947 (build เท่านั้น; ยังไม่มี flash/test) | [skills/mcux-sdk-frdmmcxn947/README_TH.md](skills/mcux-sdk-frdmmcxn947/README_TH.md) |
 
 ## เอกสาร (ภาษาอังกฤษ)
 

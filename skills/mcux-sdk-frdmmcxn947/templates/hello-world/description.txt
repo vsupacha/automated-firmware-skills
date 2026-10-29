@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the MCU-Link virtual COM port (SysTick time base)

@@ -44,6 +44,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | [ST NUCLEO-WB55RG](nucleo-wb55rg/README.md) | `cubemx-hal-stm32wb55nucleo` | tested | built | observed |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | `pio-arduino-unor4wifi` | tested | built | observed * |
 | [RT-Thread Vision Board (RA8D1)](vision-board/README.md) | `scons-rtthread-visionboard` | tested | built | built |
+| [NXP FRDM-MCXN947](frdm-mcxn947/README.md) | `mcux-sdk-frdmmcxn947` | built | built | built |
 <!-- board-status:end -->
 
 Levels: unverified < built < flashed < tested (automatic test PASS) < interactive (a person pressed

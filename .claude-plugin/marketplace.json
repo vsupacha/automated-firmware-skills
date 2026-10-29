@@ -9,7 +9,7 @@
       "name": "automated-firmware-skills",
       "displayName": "Automated firmware skills (all boards)",
       "source": "./",
-      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), RT-Thread (Vision Board), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting.",
+      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), RT-Thread (Vision Board), MCUXpresso SDK (FRDM-MCXN947), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting.",
       "version": "0.2.0",
       "author": { "name": "Supachai Vorapojpisut" },
       "homepage": "https://github.com/vsupacha/automated-firmware-skills",
@@ -91,6 +91,21 @@
       "keywords": ["firmware", "embedded", "rt-thread", "scons", "renesas-ra8", "pyocd"],
       "dependencies": ["firmware-tools"],
       "skills": ["./skills/scons-rtthread-visionboard"]
+    },
+    {
+      "name": "firmware-mcuxpresso",
+      "displayName": "Firmware skills: NXP MCUXpresso",
+      "source": "./",
+      "description": "NXP FRDM-MCXN947 (MCX N, Cortex-M33) with the MCUXpresso SDK 26.09 (west), CMake and MCUXpresso for VS Code - NXP tools only; board stages (LinkServer / MCU-Link) planned.",
+      "version": "0.2.0",
+      "author": { "name": "Supachai Vorapojpisut" },
+      "homepage": "https://github.com/vsupacha/automated-firmware-skills",
+      "repository": "https://github.com/vsupacha/automated-firmware-skills",
+      "license": "MIT",
+      "category": "embedded",
+      "keywords": ["firmware", "embedded", "nxp", "mcx", "mcuxpresso", "cmake"],
+      "dependencies": ["firmware-tools"],
+      "skills": ["./skills/mcux-sdk-frdmmcxn947"]
     }
   ]
 }
