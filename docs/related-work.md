@@ -181,7 +181,7 @@ No skill code yet - the spikes below ran outside the repo.
 | --- | --- | --- |
 | 1 | check_tools | Arm GNU 14.2 (`~/.mcuxpressotools`), CMake, Ninja, west (venv `~/.mcuxpressotools/.mcux-venv-3.12`), LinkServer (GLOBAL `C:/NXP/LinkServer_*`, not on PATH), SDK workspace at the pinned version, VS Code + MCUXpresso extension |
 | 2 | new_app | `west export_app <sdk example> -b frdmmcxn947 -Dcore_id=cm33_core0 --bf -o <app>` (*seen*; needs `ARMGCC_DIR`), then trim the SDK board files and add the layered `src/` |
-| 2d | open_ide | VS Code + MCUXpresso extension: `.vscode/mcuxpresso-tools.json` (`projectType` `sdk-freestanding`, `sdk.path/boardId/coreId/deviceId`, `toolchainPath`) + `CMakePresets.json` - exact content to be copied from the extension's own import (S5) |
+| 2d | open_ide | VS Code + MCUXpresso extension: write `.vscode/{mcuxpresso-tools,settings,launch}.json` + `CMakePresets.json` + `mcux_include.json` (*seen*, S5 below), then `code <app>` |
 | 3 | build | plain CMake (*seen*): `cmake -B build -G Ninja -Dboard=frdmmcxn947 -Dcore_id=cm33_core0 -DSdkRootDirPath=<sdk> -DCONFIG_TOOLCHAIN=armgcc -DCMAKE_BUILD_TYPE=debug` with `ARMGCC_DIR`; `west build` only works inside the SDK workspace |
 | 4 | discover | `LinkServer probes` + `LinkServer probe '#n' dapinfo` (*seen*: target `MCXN947VDF`, board `FRDM-MCXN947`, probe firmware version, SWO capability) |
 | 5 | flash | `LinkServer flash -u none MCXN947:FRDM-MCXN947 load <elf>`, then `... verify <elf>`; ask first |
@@ -210,7 +210,29 @@ No skill code yet - the spikes below ran outside the repo.
   L475 push-to-light scenario (tick variable `ticks_ms`): image read-back match, breakpoint, print,
   step, watchpoint **7/7** - after one change to the engine (next list); the app runs on after
   the detach.
-- S5 open: needs one import by hand in VS Code to capture the extension's files.
+- S5 PASS (2026-10-30, no GUI import): the project files are written directly, from the
+  extension's own generators (26.9.44 `dist/extension.js`: Import Project keeps an existing
+  `.vscode/mcuxpresso-tools.json` and `CMakePresets.json`). Files: `.vscode/mcuxpresso-tools.json`
+  (`"projectType": "sdk-v2-freestanding"` - a west/git SDK is "v2"; `sdk.path` = west topdir,
+  `boardId`, `deviceId`, `coreId`, `toolchainPath`), `.vscode/settings.json` (CMake Tools with
+  presets), `.vscode/launch.json` (one `mcuxpresso-debug` "Debug" configuration - the extension
+  reads it on load), `CMakePresets.json` (`debug` / `release`, cache variables `APP_DIR`,
+  `SdkRootDirPath=$env{SdkRootDirPath}/mcuxsdk`, `CONFIG_TOOLCHAIN=armgcc`, `WEST=TRUE`, `board`,
+  `core_id`) + `mcux_include.json` (hidden `<preset>-env` presets with `ARMGCC_DIR`,
+  `SdkRootDirPath`, `MCUX_VENV_PATH`, `PATH`). The SDK must be in the user setting
+  `mcuxpresso.sdks` (`{"type": "git-repositoryv2", "path": <west topdir>, "basePath":
+  <topdir>/mcuxsdk}`) - one entry per PC, the scripted form of "Import Repository" (owner's OK
+  needed: it is a user-wide setting). Owner saw the app listed in the MCUXpresso Projects view
+  with no prompt, and built it there.
+- **No ST tools in the NXP skill (owner, 2026-10-30):** CMake Tools ran ST's `cube-cmake` for the
+  NXP app because of the user-wide `cmake.cmakePath` left by the STM32 extension. Each app's
+  `.vscode/settings.json` sets `cmake.cmakePath` to Kitware CMake and the presets set
+  `CMAKE_MAKE_PROGRAM` to NXP's Ninja (`~/.mcuxpressotools/ninja-*`); check_tools must not accept
+  STM32CubeCLT's CMake / Ninja / GCC that sit early on PATH. Clean rebuild: NXP GCC 14.2 + NXP
+  Ninja 1.13.2 + Kitware CMake 4.1, 0 warnings, no ST path in the CMake cache. Then a build from
+  VS Code (owner clicked Build) ran `C:/Program Files/CMake/bin/cmake.exe` with the NXP Ninja and
+  re-linked the ELF. (The extension's `$env{binaryDir}` output-dir variables expand to empty -
+  harmless, kept as the extension writes them.)
 
 **Findings for the skill**
 - **`board.h` name clash:** the SDK has its own `board.h` (it also defines `BOARD_NAME`), included
@@ -266,7 +288,7 @@ run in a fixed RAM budget. For a Zephyr skill here: `west config manifest.projec
 "-.*,+cmsis_6,+hal_nxp"`, `west update --narrow --fetch-opt=--depth=1`, Zephyr SDK minimal +
 `setup -t arm-zephyr-eabi`; the LLEXT model is an option for M3 (prebuilt kernel + EDK for `func/`).
 
-**Next:** S5 (owner imports `hello_world` once in VS Code -> copy its files), then P1 skill skeleton (stages 0-3 + validator) -> P2 stages 4-6 on the board
+**Next:** P1 skill skeleton (stages 0-3 + validator) -> P2 stages 4-6 on the board
 (hello-world, blink, push-to-light) -> P3 `unit_test.sh`, `debug.sh`, `update_tools.sh` -> later
 a Zephyr skill (M3) and PowerQuad / NPU components (M4).
 
