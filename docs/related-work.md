@@ -159,6 +159,117 @@ Checked against the NUCLEO-WB55RG (new skill `cubemx-hal-stm32wb55nucleo`).
   answers "Board not found". So a WB55 port uses classic STM32CubeMX until ST ships HAL2 packs for
   the series.
 
+## NXP FRDM-MCXN947: first NXP skill - plan and spikes (reviewed 2026-10-29)
+
+Board: [FRDM-MCXN947](https://www.nxp.com/document/guide/getting-started-with-frdm-mcxn947:GS-FRDM-MCXN947)
+(MCXN947, dual Cortex-M33 + eIQ Neutron NPU, on-board MCU-Link = CMSIS-DAP + VCOM on J17).
+Owner's decisions (2026-10-29): skill `mcux-sdk-frdmmcxn947`, board `frdm-mcxn947`, SDK pinned to
+the newest 26.x = **MCUXpresso SDK v26.09.00** (`v26.06.00-LTS` is the long-term alternative).
+No skill code yet - the spikes below ran outside the repo.
+
+**Framework choice**
+
+| Path | Fit |
+| --- | --- |
+| **A. MCUXpresso SDK (GitHub, west + CMake/Kconfig) + LinkServer + MCUXpresso for VS Code (chosen)** | NXP's own stack, every stage has a command line; like the CubeMX skills but without a code generator - pins and clocks come from the SDK board files (the `.mex` for MCUXpresso Config Tools is copied too) |
+| B. Zephyr (`frdm_mcxn947/mcxn947/cpu0`) | a second skill for M3 (execution model); shows the same `tests/*.json` passing under two frameworks |
+| C. MCUXpresso IDE (Eclipse) / PlatformIO | not chosen: GUI-only IDE; PlatformIO has no official MCX support |
+
+**Stage mapping for path A** (*seen* = ran in the spikes)
+
+| # | Stage | Tool |
+| --- | --- | --- |
+| 1 | check_tools | Arm GNU 14.2 (`~/.mcuxpressotools`), CMake, Ninja, west (venv `~/.mcuxpressotools/.mcux-venv-3.12`), LinkServer (GLOBAL `C:/NXP/LinkServer_*`, not on PATH), SDK workspace at the pinned version, VS Code + MCUXpresso extension |
+| 2 | new_app | `west export_app <sdk example> -b frdmmcxn947 -Dcore_id=cm33_core0 --bf -o <app>` (*seen*; needs `ARMGCC_DIR`), then trim the SDK board files and add the layered `src/` |
+| 2d | open_ide | VS Code + MCUXpresso extension: `.vscode/mcuxpresso-tools.json` (`projectType` `sdk-freestanding`, `sdk.path/boardId/coreId/deviceId`, `toolchainPath`) + `CMakePresets.json` - exact content to be copied from the extension's own import (S5) |
+| 3 | build | plain CMake (*seen*): `cmake -B build -G Ninja -Dboard=frdmmcxn947 -Dcore_id=cm33_core0 -DSdkRootDirPath=<sdk> -DCONFIG_TOOLCHAIN=armgcc -DCMAKE_BUILD_TYPE=debug` with `ARMGCC_DIR`; `west build` only works inside the SDK workspace |
+| 4 | discover | `LinkServer probes` + `LinkServer probe '#n' dapinfo` (*seen*: target `MCXN947VDF`, board `FRDM-MCXN947`, probe firmware version, SWO capability) |
+| 5 | flash | `LinkServer flash -u none MCXN947:FRDM-MCXN947 load <elf>`, then `... verify <elf>`; ask first |
+| 6 | test | MCU-Link VCOM 115200 -> `serial_test.py` with the shared specs; `unit_test.sh` ported from the WB55 skill |
+| 7 | debug | `LinkServer gdbserver -u none [-a] MCXN947:FRDM-MCXN947` -> `lib/fwdebug.py` (GDB/MI) |
+
+**Spike results (2026-10-29, one PC, board on USB)**
+- S1 PASS: SDK `hello_world` (`west build ... --toolchain armgcc --config debug -b frdmmcxn947
+  -Dcore_id=cm33_core0`; `west list_project` shows `core_id` is required) builds in 10 s with 0
+  compiler warnings; the ELF loads only to flash 0x0-0x42D8 and RAM.
+- S2 PASS: the exported app builds with plain CMake; then the layered version (our
+  `src/board/board.c|h` on `fsl_gpio` / `fsl_port` / `fsl_lpuart`, `lib/func` copied unchanged,
+  the WB55 push-to-light `app_main.c`, a 4-line `main.c`) builds with **0 warnings under the SDK's
+  own `-Wall -Werror`**, 25.8 kB text, flash 0x0-0x68D8.
+- S3 PASS (owner's OK): factory flash backed up first (`flash dump` per 1 MB region - one 2 MB
+  dump fails with "No flash configured at the specified address"; image used up to 0x2E000);
+  gate = load segments inside internal flash; `flash -u none ... load` + `verify` (3 sections
+  succeeded); shared `push_to_light.json` over VCOM **15/15 automatic**. Interactive run 3/5 (SW2
+  passed; the SW3 step got SW2 presses instead - the spike runner had no `--board`, so the prompts
+  said BTN1/BTN2, not SW2/SW3); a button watch then saw SW2 on P0_23 and SW3 on P0_6, each
+  toggling its LED - the SDK pin map is right. A second interactive run was again 3/5 (presses out
+  of order and one in the gap between steps); the owner skipped a formal 5/5 - the button watch is
+  the evidence for the spike.
+- S4 PASS: `LinkServer gdbserver -u none -a --gdb-port 3333 --semihost-port -1
+  MCXN947:FRDM-MCXN947` (ready line `GDB server listening on port`) + `lib/fwdebug.py run` with the
+  L475 push-to-light scenario (tick variable `ticks_ms`): image read-back match, breakpoint, print,
+  step, watchpoint **7/7** - after one change to the engine (next list); the app runs on after
+  the detach.
+- S5 open: needs one import by hand in VS Code to capture the extension's files.
+
+**Findings for the skill**
+- **`board.h` name clash:** the SDK has its own `board.h` (it also defines `BOARD_NAME`), included
+  by the example's `hardware_init.c`, its `board.c` and `fsl_debug_console.c`. new_app removes the
+  SDK `board.c/.h`, `hardware_init.c`, `app.h`, `se_board_config.h`, `sdmmc_config.h` and
+  `wifi_bt_config.h` from the app copy, keeps `clock_config.*` + `pin_mux.*`, and turns off the SDK
+  debug console in `prj.conf` (`utility.debug_console_lite`, `component.lpuart_adapter`,
+  `utility.str`, `utility.assert_lite`); `printf` goes through our `_write`.
+- **Console IRQ:** `fsl_lpflexcomm.c` owns `LP_FLEXCOMM4_IRQHandler`; the RX handler is registered
+  with `LP_FLEXCOMM_SetIRQHandler(4, ..., LP_FLEXCOMM_PERIPH_LPUART)` instead of defining it.
+- **Pins (SDK `board.h`, matches UM12018):** RGB LED D2 active low - red P0_10, green P0_27,
+  blue P1_2; SW2 (wakeup) P0_23, SW3 (ISP) P0_6, pressed low; console LP_FLEXCOMM4 (FRO 12 MHz)
+  115200 -> MCU-Link VCOM; the example's `pin_mux.c` also routes SWO to P0_2. PORT pins need
+  `inputBuffer` enabled to read buttons.
+- **Memory map (`LinkServer device MCXN947:FRDM-MCXN947 info`):** internal flash 0x00000000-
+  0x00200000 (secure alias 0x10000000), RAM from 0x20000000, FlexSPI flash at 0x80000000 (8 MB).
+  Flash gate = every load segment inside 0x00000000-0x00200000; never PFR/IFR or FlexSPI in M1.
+- **MCU-Link firmware updates:** LinkServer's default `--update-mode` is `check`; every script
+  passes `-u none` so a probe firmware update never happens as a side effect.
+- **`flash verify` leaves the core halted:** after `load` (which resets) a separate `verify`
+  connects again and the app does not run until a reset; flash.sh ends with
+  `LinkServer probe '#n' wiretimedreset 100` (seen: banner + READY after it).
+- **GDB and the System Control Space:** the memory map LinkServer gives GDB leaves out
+  0xE000E000.., so `-data-read-memory-bytes` of CFSR/HFSR fails ("Unable to read memory");
+  `-gdb-set mem inaccessible-by-default off` after `-target-select` fixes it. To add to
+  `lib/fwdebug.py` in P1 and re-run the C5 / L475 scenarios (tested only on a copy so far).
+- **Interactive tests through an agent (all skills, `lib/fwtest.py`):** the developer does not
+  see the runner's `ACTION >>>` prompts while a tool call runs, so presses come out of order or
+  too late for a 30 s window; and a line that arrives in the 0.3 s pause after a step is lost
+  (`reset_input_buffer()` before the next step - an SW2 press toggled LED1 with no EVT line in
+  the log). Ideas: run one interactive step per call with the prompt shown first, longer
+  timeouts, keep reading during the pause instead of clearing the buffer.
+- **Partial SDK workspace:** the SDK Kconfig reads every middleware present; a half-fetched
+  `eiq/mpp` without FreeRTOS gave 3 Kconfig warnings. Minimal set that builds clean: core, CMSIS,
+  examples, components, devices/MCX, tool_data, `freertos-kernel` + `freertos-kernel-upstream`.
+- **Download size:** `update_board` for this board selects 54 repositories (the 26.09 manifest
+  already filters `se_hostlib` / `emwin`); `mcuxsdk-examples` alone is 1.4 GB (all boards, shallow)
+  and the eIQ / TensorFlow / ExecuTorch middleware is large. Stopped at 2.6 GB; fetch middleware
+  per milestone (`west update --narrow -o=--depth=1 <project>`), not all at once.
+- **Tools that appear on their own:** `~/.mcuxpressotools/ninja-1.13.2` (dated the day of the
+  spikes) - most likely installed by the MCUXpresso extension; check_tools must not assume a fixed
+  tool list.
+
+**Zephyr size note (owner's question, 2026-10-29).** A full Zephyr workspace is large because
+`west update` fetches every module (all vendors' HALs) with full git history, and the Zephyr SDK
+ships toolchains for about 10 architectures. The Arduino UNO Q avoids it: the
+[Arduino Core for Zephyr](https://github.com/leonardocavagnis/ArduinoCore-zephyr) ships a
+**precompiled Zephyr "loader"** per board plus an LLEXT EDK (headers + flags); a sketch is compiled
+into a relocatable LLEXT ELF that the loader links at run time, with one Arm cross compiler - no
+west workspace, no modules, no kernel build on the board (which also has 16 GB+ eMMC). Price:
+kernel config, devicetree and drivers stay fixed until the loader is rebuilt on a PC, and sketches
+run in a fixed RAM budget. For a Zephyr skill here: `west config manifest.project-filter --
+"-.*,+cmsis_6,+hal_nxp"`, `west update --narrow --fetch-opt=--depth=1`, Zephyr SDK minimal +
+`setup -t arm-zephyr-eabi`; the LLEXT model is an option for M3 (prebuilt kernel + EDK for `func/`).
+
+**Next:** S5 (owner imports `hello_world` once in VS Code -> copy its files), then P1 skill skeleton (stages 0-3 + validator) -> P2 stages 4-6 on the board
+(hello-world, blink, push-to-light) -> P3 `unit_test.sh`, `debug.sh`, `update_tools.sh` -> later
+a Zephyr skill (M3) and PowerQuad / NPU components (M4).
+
 ## Suggested order
 
 Status in the current milestone plan ([milestones.md](milestones.md)), updated 2026-10-27:
