@@ -77,7 +77,39 @@ load_board() {
   CMAKE="$(find_cmake)"
   SDK_ROOT="$(sdk_root_default)"
   LINKSERVER_DIR="$(fw_find_dirs "/c/NXP/LinkServer_$LINKSERVER_VERSION" "/c/nxp/LinkServer_$LINKSERVER_VERSION" | tail -1)"
+  LINKSERVER="$LINKSERVER_DIR/LinkServer.exe"
   return 0
+}
+
+# ---- MCU-Link via LinkServer (board stages). Every LinkServer call passes -u none where the command
+# takes it: LinkServer's default (-u check) may offer an MCU-Link firmware update - never ours to do.
+require_linkserver() {
+  [ -x "$LINKSERVER" ] || die "LinkServer $LINKSERVER_VERSION not found in C:/NXP - run check_tools.sh"
+}
+# probe_list: "<serial> <target>" per connected LinkServer probe (LinkServer probes --json)
+probe_list() {
+  "$LINKSERVER" probes --json 2>/dev/null | tr -d '\r' | "$PYTHON" -c "
+import json, sys
+try:
+    for p in json.loads(sys.stdin.read() or '[]'): print(p.get('serial', ''), p.get('target', '') or '-')
+except ValueError:
+    pass"
+}
+# probe_dapinfo <serial>: CMSIS-DAP information of the MCU-Link (read-only, no target access)
+probe_dapinfo() { "$LINKSERVER" probe "$1" dapinfo 2>&1 | tr -d '\r'; }
+# dap_field <dapinfo-output> <name>: value of "<name> = value"
+dap_field() { echo "$1" | sed -n "s/^ *$2 *= *//p" | head -1; }
+# find_console_port <serial>: the MCU-Link VCOM port (its USB serial number = the probe serial)
+find_console_port() {
+  [ -n "$1" ] || return 0
+  "$PYTHON" - "$1" "${PROBE_VID:-1FC9}" <<'EOF'
+import sys
+from serial.tools import list_ports
+want, vid = sys.argv[1].upper(), int(sys.argv[2], 16)
+for p in list_ports.comports():
+    if p.vid == vid and (p.serial_number or "").upper() == want:
+        print(p.device); break
+EOF
 }
 
 # require_build_tools: die unless the SDK and the NXP build tools are there (check_tools.sh lists them)

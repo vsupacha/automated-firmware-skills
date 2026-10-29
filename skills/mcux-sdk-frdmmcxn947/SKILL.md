@@ -1,6 +1,6 @@
 ---
 name: mcux-sdk-frdmmcxn947
-description: Firmware workflow for the NXP FRDM-MCXN947 (MCXN947, Cortex-M33 core 0) with the MCUXpresso SDK (GitHub west workspace), CMake and the MCUXpresso Installer tools on Windows - check the SDK and NXP tools (never ST tools), create an app from the SDK hello_world example (west export_app) trimmed to clocks and pin mux with a layered board/func/app_main source tree, write the MCUXpresso for VS Code project files directly and open it there, build with the same CMake preset as the IDE and a manifest, clean. Board stages (discover, LinkServer flash, serial tests, debug) are planned. Use when asked to create or build FRDM-MCXN947 / MCXN947 / MCX N firmware with the MCUXpresso SDK, open such an app in VS Code, or how to use this skill (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for Zephyr, MCUXpresso IDE projects, core 1 or the NPU.
+description: Firmware workflow for the NXP FRDM-MCXN947 (MCXN947, Cortex-M33 core 0) with the MCUXpresso SDK (GitHub west workspace), CMake and the MCUXpresso Installer tools on Windows - check the SDK and NXP tools (never ST tools), create an app from the SDK hello_world example (west export_app) trimmed to clocks and pin mux with a layered board/func/app_main source tree, write the MCUXpresso for VS Code project files directly and open it there, build with the same CMake preset as the IDE and a manifest, discover the MCU-Link, flash with LinkServer behind identity and region gates (never PFR / FlexSPI, never an MCU-Link firmware update), run automated and interactive UART tests (SW2/SW3, RGB LED), clean. Debug is planned. Use when asked to create, build, flash (แฟลช) or test FRDM-MCXN947 / MCXN947 / MCX N firmware with the MCUXpresso SDK, open such an app in VS Code, or how to use this skill (ขอวิธีใช้, มีคำสั่งอะไรบ้าง, help). Not for Zephyr, MCUXpresso IDE projects, core 1 or the NPU.
 license: MIT
 compatibility: Claude Code or another agent that runs bash; Windows 10/11 + Git Bash, Python 3; needs the MCUXpresso SDK 26.09 west workspace, the MCUXpresso Installer tools (Arm GNU 14.2, Ninja, west venv) and Kitware CMake 3.30+; uses this repo's lib/ and boards/ (install the whole plugin or clone the repo)
 ---
@@ -14,8 +14,8 @@ Kitware CMake - never ST's `cube-cmake`, STM32CubeCLT CMake/Ninja/GCC or any oth
 tools, even when they come first on PATH or in the VS Code user settings.
 
 ```
-1 tools ─► 2 create ─► 2d IDE ─► 2e code ─► 3 build ─► (4 connect, 5 flash, 6 test, 7 debug: planned) ─► 16 clean
-check_tools  new_app     open_ide   src/board   build.sh                                                      clean.sh
+1 tools ─► 2 create ─► 2d IDE ─► 2e code ─► 3 build ─► 4 connect ─► 5 flash ─► 6 test ─► 16 clean
+check_tools  new_app     open_ide   src/board   build.sh   discover    flash.sh   serial_test  clean.sh
              (export_app) (VS Code) src/func
                                     app_main.c
 ```
@@ -34,7 +34,7 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
 | M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2, Stage 2d, Stage 3 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug **planned** (proven by hand: docs/related-work.md "NXP FRDM-MCXN947") | Stage 5, Stage 6 (planned) |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test; 7 debug *(planned - proven by hand: docs/related-work.md "NXP FRDM-MCXN947")* | Stage 4, Stage 5, Stage 6 |
 | M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(optional)* | Stage 2e (rules, shared `lib/func`, `check_layers.py`, `host_test.sh`) |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
@@ -43,11 +43,13 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 **Exit codes:** 0 gate passed, 1 failed, 2 warnings, **10 = developer action needed**. On exit 10
 the script's last line is `ACTION: <TYPE> <what to do>` (SETUP, APPROVE, CHOOSE...): tell the user
 exactly that, wait for their OK, then re-run the same command. Never work around an ACTION
-yourself - installing the SDK or tools, registering the SDK in VS Code (`--register-sdk` edits
-the user's VS Code settings) and approving deletions are the developer's.
+yourself - installing the SDK or tools, plugging the board, registering the SDK in VS Code
+(`--register-sdk` edits the user's VS Code settings) and approving flashes or deletions are the developer's.
 
-**Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**). The
-board stages of this skill are not written yet: do not flash this board from this skill.
+**Release scope:** `<repo>/milestones.env` lists the active milestones (this release: **M1**).
+M1 includes the board stages: discover, flash and serial tests run when the developer asks for
+them, and **every flash needs the developer's yes first** (`flash.sh --yes` only after they said
+yes in chat, or `FLASH_POLICY=auto` that they wrote into their own bench file).
 Scripts of an inactive milestone (e.g. M2 `check_layers.py`) stop with `ACTION: SETUP ... not
 active`; never edit `milestones.env` or set `FW_ACTIVE_MILESTONES` yourself.
 
@@ -83,10 +85,12 @@ off in `prj.conf` and adds `-Wno-error` (the SDK compiles with `-Werror`; build.
 
 - **Board type** (`boards/<id>/`): `README.md` = hardware; `mcux-sdk-frdmmcxn947/board.env` =
   pinned SDK and tool versions, the SDK board / core / example, `BOARD_DEFINE`, `BTN_LABELS`,
-  expected probe identity (for the planned discover stage).
+  expected probe identity (`EXPECTED_TARGET`, `EXPECTED_PROBE_BOARD`, `LINKSERVER_DEVICE`).
 - **This PC:** the SDK folder (`MCUX_SDK_ROOT` in the environment or `~/.fw-skills.env`, default
-  `C:/mcux-26.09`) and the apps workspace. Bench files (`<workspace>/.bench/<id>.env`) come with
-  the board stages. Never write PC-specific paths, serials or COM ports into `boards/`.
+  `C:/mcux-26.09`) and the apps workspace.
+- **Bench instance** (`<workspace>/.bench/<id>.env`, written by `discover.sh`): `PROBE_SERIAL`
+  (MCU-Link) and `CONSOLE_PORT` (its VCOM). Override with `MCX_PROBE_SERIAL` / `MCX_CONSOLE`.
+  Never write PC-specific paths, serials or COM ports into `boards/`.
 
 | id | board | status |
 | --- | --- | --- |
@@ -162,18 +166,45 @@ with Kitware CMake (the same preset and `debug/` folder as the VS Code Build but
 them), no ST tool in the CMake cache. Writes `app_cm33_core0.hex` and `debug/manifest.txt` (SDK and
 tool versions, ELF/HEX sha256, size) **only on PASS**.
 
-## Stage 5 - Flash (planned)
+## Stage 4 - Connect (discover the board)
 
-Not in this skill yet. Proven by hand on 2026-10-29 (docs/related-work.md): `LinkServer flash -u
-none MCXN947:FRDM-MCXN947 load <elf>` (never let LinkServer update the MCU-Link firmware), then
-`verify`, then a reset (`verify` leaves the core halted); load segments only inside internal flash
-0x00000000-0x00200000 - never the protected flash region (PFR / IFR) or FlexSPI. Until
-`flash.sh` exists, do not flash this board from this skill.
+```bash
+bash "$SKILL/scripts/discover.sh" frdm-mcxn947 [--serial <probe-serial>]
+```
+Read-only: `LinkServer probes --json` + `LinkServer probe <serial> dapinfo` (CMSIS-DAP info of the
+MCU-Link - no target access, no reset). **Gate:** `IDENTITY: PASS` = the probe reports target
+`MCXN947VDF` and board `FRDM-MCXN947`; writes the bench file (probe serial + VCOM port, found by
+the probe's USB serial number). Several probes: picks the one reporting `MCXN947:FRDM-MCXN947`, else
+`ACTION: CHOOSE`. No probe: `ACTION: CONNECT` (USB-C J17).
 
-## Stage 6 - Test (planned)
+## Stage 5 - Flash
 
-`serial_test.py` (a `lib/fwtest.py` wrapper) on the MCU-Link VCOM at 115200 with the app's
-`tests/*.json` comes with the board stages; the shared push-to-light spec passed 15/15 by hand.
+**Ask the user first** (board, app, ELF sha256 prefix), then:
+```bash
+bash "$SKILL/scripts/flash.sh" <app> --yes [--elf <file>]
+```
+Gates, in order: the ELF matches the PASS manifest (`--elf` skips only this one) -> every load
+segment inside internal flash 0x00000000-0x00200000 (never PFR / IFR / FlexSPI; checked before
+anything touches the probe) -> approval -> bench probe connected -> dapinfo identity -> `LinkServer
+flash -p <serial> -u none MCXN947:FRDM-MCXN947 load` (`-u none`: never an MCU-Link firmware
+update) -> `verify` -> `probe <serial> wiretimedreset 100` (`verify` leaves the core halted).
+**Gate:** `FLASH: PASS (programmed + verified n section(s) + reset)`.
+
+## Stage 6 - Test (after flashing)
+
+```bash
+python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test.log --board frdm-mcxn947 --sync [--interactive]
+```
+`auto` = the VCOM port of the bench probe. `--board` checks that the running image reports
+`board=frdm-mcxn947` and names the buttons SW2/SW3 in interactive prompts. **Gate:**
+`RESULT: PASS (n/m passed, k skipped)`. Interactive steps need a person at the board: say which
+button to press **before** you start the run (the person cannot see the runner's prompts), press
+one button at a time, and allow time between steps.
+
+## Stage 7 - Debug (planned)
+
+`LinkServer gdbserver -u none -a --gdb-port 3333 MCXN947:FRDM-MCXN947` + `lib/fwdebug.py` ran the
+push-to-light scenario 7/7 by hand (docs/related-work.md); `debug.sh` is not written yet.
 
 ## Stage 16 - Clean
 
@@ -204,6 +235,8 @@ observed by a human**. Quote ELF sha256, SDK / tool versions, log paths. Add a d
 - Never use ST tools (or another vendor's) for an NXP app; build.sh fails if one shows up in the
   CMake cache.
 - Never edit the VS Code user settings without the developer's OK (`--register-sdk` only on request).
-- No flashing from this skill until its board stages exist; then: ask before every flash, LinkServer
-  with `-u none`, internal flash only, never PFR / IFR / FlexSPI, never core 1 in M1.
+- Identity and region gates before every write; never flash an ELF without a PASS manifest (except
+  `--elf` chosen by the user). Ask before every flash; LinkServer always with `-u none` (never
+  update the MCU-Link firmware); internal flash only, never PFR / IFR / FlexSPI, never core 1 in M1.
+- SW3 is the ISP button: never ask anyone to hold it while the board resets.
 - Ask before `clean.sh --yes`. Never delete or update the SDK folder or `~/.mcuxpressotools`.

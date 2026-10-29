@@ -96,7 +96,7 @@
       "name": "firmware-mcuxpresso",
       "displayName": "Firmware skills: NXP MCUXpresso",
       "source": "./",
-      "description": "NXP FRDM-MCXN947 (MCX N, Cortex-M33) with the MCUXpresso SDK 26.09 (west), CMake and MCUXpresso for VS Code - NXP tools only; board stages (LinkServer / MCU-Link) planned.",
+      "description": "NXP FRDM-MCXN947 (MCX N, Cortex-M33) with the MCUXpresso SDK 26.09 (west), CMake and MCUXpresso for VS Code, LinkServer / MCU-Link - NXP tools only.",
       "version": "0.2.0",
       "author": { "name": "Supachai Vorapojpisut" },
       "homepage": "https://github.com/vsupacha/automated-firmware-skills",

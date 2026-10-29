@@ -3,7 +3,7 @@
 Step-by-step guide for people. The agent's instructions are in [SKILL.md](SKILL.md); the shared
 contract (stages, gates, exit codes) is in [docs/workflow.md](../../docs/workflow.md). Hardware:
 [boards/frdm-mcxn947](../../boards/frdm-mcxn947/README.md). Status of this skill: **create, open in
-VS Code and build work; flash, test and debug are planned** (they were proven by hand - see
+VS Code, build, connect, flash and test work; debug is planned** (proven by hand - see
 [docs/related-work.md](../../docs/related-work.md), "NXP FRDM-MCXN947").
 
 | On the board | |
@@ -42,9 +42,13 @@ In Claude Code: `/plugin marketplace add vsupacha/automated-firmware-skills`, th
 | "Open it in the IDE" | `open_ide.sh <app>` (new_app does it) | `IDE: OPENED` - MCUXpresso for VS Code lists the app in its Projects view |
 | "Register the SDK in VS Code" | `open_ide.sh <app> --register-sdk` **after you said yes** | `SDK: REGISTERED` - one entry in your VS Code user settings |
 | "Build it" | `build.sh <app>` | `BUILD: PASS` with 0 warnings + a manifest (tool versions, image hash) |
+| "Find my board" | `discover.sh frdm-mcxn947` | `IDENTITY: PASS` - read-only; saves this PC's MCU-Link serial and VCOM port |
+| "Flash it" | `flash.sh <app> --yes` **after you said yes** | `FLASH: PASS` (programmed + verified + reset) |
+| "Run the test" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
+| "Run the interactive test" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` | press SW2 / SW3 when Claude says so and watch the red / green LED |
 | "Clean up" | `clean.sh` (dry run first) | a list, then deletion only after your yes; `--apps` also deletes app sources |
 
-Flashing, tests and debugging are not in this skill yet - Claude will say so instead of flashing.
+Debugging (breakpoints, watchpoints) is not in this skill yet.
 
 ## 4. The same without Claude (Git Bash, from the repo root)
 
@@ -53,6 +57,9 @@ S=skills/mcux-sdk-frdmmcxn947/scripts
 bash $S/check_tools.sh frdm-mcxn947
 bash $S/new_app.sh frdm-mcxn947 btn-led "" push-to-light     # prints: Created C:/fw-ws/btn-led
 bash $S/build.sh C:/fw-ws/btn-led
+bash $S/discover.sh frdm-mcxn947
+bash $S/flash.sh C:/fw-ws/btn-led --yes
+python $S/serial_test.py auto C:/fw-ws/btn-led/tests/push_to_light.json C:/fw-ws/btn-led/logs/test.log --board frdm-mcxn947 --sync
 ```
 
 In VS Code the Build button uses the same preset (`debug`) and the same `debug/` folder.
@@ -65,8 +72,8 @@ In VS Code the Build button uses the same preset (`debug`) and the same `debug/`
 - The SDK compiles with `-Werror`; the skill turns that off so `build.sh` reports warnings itself
   (exit 2) - fix them before you continue.
 - SW3 is the ISP button: held while the board resets, it starts the ROM bootloader instead of your app.
-- When flashing comes to this skill it will never write the protected flash region or update the
-  MCU-Link firmware on its own.
+- `flash.sh` writes only internal flash (never the protected flash region or FlexSPI) and never
+  updates the MCU-Link firmware (`LinkServer -u none`).
 
 ## More
 

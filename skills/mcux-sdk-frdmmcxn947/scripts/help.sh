@@ -30,9 +30,12 @@ skill mcux-sdk-frdmmcxn947 (NXP FRDM-MCXN947, MCUXpresso SDK + CMake) - ask Clau
   "create a hello-world app for the MCXN947" -> new_app.sh <board> <app> "" hello-world  (west export_app, ~20 s)
   "write an app: SW2 toggles the green LED" -> template + code in src/board, src/func, src/app_main.c
   "open it in VS Code"                      -> open_ide.sh <app>  (MCUXpresso for VS Code; new_app does it)
-     then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build (script path) - switch any time
+     then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                -> build.sh <app>   (NXP / Kitware tools only, never ST's)
- Run on hardware - planned in this skill (discover, flash with LinkServer, serial tests)
+ Run on hardware (milestone M1; Claude asks before every flash)
+  "find my board"                           -> discover.sh <board>   (read-only; saves MCU-Link serial + COM port)
+  "flash it"                                -> flash.sh <app> --yes   (identity + internal-flash gates, LinkServer -u none)
+  "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  Housekeeping
   "clean the build outputs"                 -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
 EOF
@@ -45,9 +48,12 @@ skill mcux-sdk-frdmmcxn947 (NXP FRDM-MCXN947, MCUXpresso SDK + CMake) - สั�
   "สร้างแอป hello-world สำหรับบอร์ด MCXN947"     -> new_app.sh <board> <app> "" hello-world  (west export_app ประมาณ 20 วินาที)
   "เขียนแอป กด SW2 แล้ว LED เขียวสลับ"          -> template + โค้ดใน src/board, src/func, src/app_main.c
   "เปิดใน VS Code"                             -> open_ide.sh <app>  (MCUXpresso for VS Code; new_app เปิดให้เอง)
-     จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build (ทางสคริปต์) - สลับได้ทุกเมื่อ
+     จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                              -> build.sh <app>   (ใช้เครื่องมือ NXP / Kitware เท่านั้น ไม่ใช้ของ ST)
- ใช้กับบอร์ดจริง - ยังเป็นแผนใน skill นี้ (discover, แฟลชด้วย LinkServer, ทดสอบผ่าน serial)
+ ใช้กับบอร์ดจริง (milestone M1; Claude ถามก่อนแฟลชทุกครั้ง)
+  "หาบอร์ดที่เสียบอยู่"                           -> discover.sh <board>   (อ่านอย่างเดียว; บันทึก serial ของ MCU-Link + COM port)
+  "แฟลชให้หน่อย"                               -> flash.sh <app> --yes   (ตรวจตัวตนบอร์ด + เขียนเฉพาะ internal flash, LinkServer -u none)
+  "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                   -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  งานอื่น
   "clean ให้หน่อย"                              -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
 EOF

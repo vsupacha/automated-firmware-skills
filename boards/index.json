@@ -309,13 +309,13 @@
       "mcu_family": "NXP MCX N",
       "profiles": {
         "mcux-sdk-frdmmcxn947": {
-          "level": "built",
+          "level": "tested",
           "templates": {
-            "hello-world": "built",
+            "hello-world": "tested",
             "blink": "built",
-            "push-to-light": "built"
+            "push-to-light": "tested"
           },
-          "note": "M1 stages 0-3 with the skill's scripts (2026-10-30): check_tools 0 bad, new_app + build PASS 0 warnings for all 3 templates; board stages planned (proven by hand 2026-10-29: docs/related-work.md)",
+          "note": "M1 incl. board stages (debug planned): discover IDENTITY PASS, hello-world flashed + 9/9, push-to-light flashed + 16/16 automatic (interactive not run with the skill; SW2/SW3 seen by a button watch 2026-10-29)",
           "log": "boards/frdm-mcxn947/mcux-sdk-frdmmcxn947/README.md",
           "date": "2026-10-30"
         }

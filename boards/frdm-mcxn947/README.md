@@ -6,15 +6,15 @@ virtual COM port) on USB-C J17. Tool-independent hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [mcux-sdk-frdmmcxn947/](mcux-sdk-frdmmcxn947/README.md) | [`skills/mcux-sdk-frdmmcxn947`](../../skills/mcux-sdk-frdmmcxn947/README.md) ([ไทย](../../skills/mcux-sdk-frdmmcxn947/README_TH.md)) (MCUXpresso SDK 26.09 + CMake) | M1 stages 1-3 (tools, create, IDE, build); board stages planned |
+| [mcux-sdk-frdmmcxn947/](mcux-sdk-frdmmcxn947/README.md) | [`skills/mcux-sdk-frdmmcxn947`](../../skills/mcux-sdk-frdmmcxn947/README.md) ([ไทย](../../skills/mcux-sdk-frdmmcxn947/README_TH.md)) (MCUXpresso SDK 26.09 + CMake) | M1 incl. board stages (connect, flash, test); debug planned |
 
 ## Bring-up demos
 
 | Demo | Uses | `mcux-sdk-frdmmcxn947` |
 | --- | --- | --- |
-| hello-world | console: MCU-Link virtual COM port | built |
+| hello-world | console: MCU-Link virtual COM port | tested |
 | blink | LED1 = red | built |
-| push-to-light | BTN1..2 = SW2, SW3 toggle LED1..2 = red, green | built |
+| push-to-light | BTN1..2 = SW2, SW3 toggle LED1..2 = red, green | tested |
 
 Levels: built < flashed < tested (automatic test PASS) < interactive (a person pressed a
 button) < observed (a person saw the LED). Dated evidence: the profile README of each skill.
@@ -41,6 +41,9 @@ S=skills/mcux-sdk-frdmmcxn947/scripts
 | 2 create | `bash $S/new_app.sh frdm-mcxn947 my-app "" push-to-light` | `Created <folder>` |
 | 2d IDE | `bash $S/open_ide.sh <folder>` | `IDE: READY` |
 | 3 build | `bash $S/build.sh <folder>` | `BUILD: PASS` |
+| 4 connect | `bash $S/discover.sh frdm-mcxn947` | `IDENTITY: PASS` |
+| 5 flash | `bash $S/flash.sh <folder> --yes` (ask first) | `FLASH: PASS` |
+| 6 test | `python $S/serial_test.py auto <folder>/tests/push_to_light.json <folder>/logs/t.log --board frdm-mcxn947 --sync` | `RESULT: PASS` |
 | 16 clean | `bash $S/clean.sh` (dry run), then `--yes` | `CLEAN: done` |
 
 ## Hardware

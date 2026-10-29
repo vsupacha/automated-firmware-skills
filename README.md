@@ -116,7 +116,7 @@ Common options and overrides: [docs/workflow.md](docs/workflow.md#common-options
 
 ## Status
 
-Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 9 boards. M2 board support
+Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 10 boards. M2 board support
 (layer checks) is implemented but gated; M3-M5 are planned. Plan and per-skill state:
 [docs/milestones.md](docs/milestones.md).
 

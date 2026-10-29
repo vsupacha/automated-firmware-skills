@@ -27,3 +27,9 @@ build tools, the SDK example new apps start from, identity values). Hardware: [.
     22,392 B, ELF `324fc729...`), `blink` (text 22,872 B), `push-to-light` (text 25,096 B, ELF
     `58e8dccf...`). Warning gate checked: one unused variable in `src/` = `BUILD: WARNINGS`, exit 2;
     the next build rebuilt clean and passed. Not flashed with the skill (no flash.sh yet).
+  - P2 (same day, owner approved both flashes): discover `IDENTITY: PASS` (MCU-Link firmware 3.128,
+    target MCXN947VDF / FRDM-MCXN947, VCOM by probe serial). flash.sh refused an ELF moved to FlexSPI
+    (0x80000000) before touching the probe, and stopped with `ACTION: APPROVE` without `--yes`.
+    `hello-world` (ELF `324fc729...`) FLASH PASS (3 sections verified + reset), test `RESULT: PASS
+    (9/9)`; `push-to-light` (ELF `58e8dccf...`) FLASH PASS, `RESULT: PASS (16/16, 4 interactive
+    skipped)`. Board left running push-to-light.

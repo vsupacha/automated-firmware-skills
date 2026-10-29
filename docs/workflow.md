@@ -25,7 +25,7 @@ Reference implementations:
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
 | [pio-arduino-unor4wifi](../skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino (renesas-ra), bossac | UNO R4 WiFi | RA4M1 through the ESP32-S3 USB bridge (1200 baud touch, no read-back); Arduino style like the BOX skill, `console_printf()` |
 | [scons-rtthread-visionboard](../skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons, GNU Arm 13.3, pyOCD (RT-Thread Studio SDK) | Vision Board (RA8D1) | IDE = RT-Thread Studio (`IDE_APP`); msh console; code flash only, read back |
-| [mcux-sdk-frdmmcxn947](../skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 (west), Arm GNU 14.2 + Ninja (MCUXpresso Installer), Kitware CMake; LinkServer planned | FRDM-MCXN947 | M1 stages 1-3; board stages planned; app = `west export_app` of hello_world, trimmed; VS Code project files written directly; never ST tools |
+| [mcux-sdk-frdmmcxn947](../skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 (west), Arm GNU 14.2 + Ninja (MCUXpresso Installer), Kitware CMake, LinkServer 26.5 | FRDM-MCXN947 | M1 incl. board stages (debug planned); LinkServer `-u none`, internal flash only; app = `west export_app` of hello_world, trimmed; VS Code project files written directly; never ST tools |
 
 ## Milestones (summary)
 
