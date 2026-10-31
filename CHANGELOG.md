@@ -35,6 +35,10 @@ verification log, not here.
   from the running image.
   Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
   hardware (GCC 13.3 image, 17/17).
+- `scons-rtthread-visionboard` apps take their FSP side (configuration.xml, ra/, ra_gen/, linker
+  scripts) from `FSP_PROJECT` = `vision_board_openmv`, which generates every peripheral the driver
+  recipes need; Kconfig and board/ stay blink's, so no driver is enabled. Unused interrupt handlers
+  get weak stubs; dave2d is always compiled.
 - HW driver recipes for `scons-rtthread-visionboard` (Kconfig level): `recipes/drivers/*.json` for
   `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6`, each derived (`recipe.sh derive`) from the one SDK
   example project whose README is about that hardware;

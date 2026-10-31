@@ -17,7 +17,7 @@ GLOBAL or LOCAL); the board profile pins the package versions inside it.
 | --- | --- | --- |
 | workspace / app | no spaces, English characters only, ≤100 characters | the deepest file in an app is 105 characters (rt-thread/components/vmm/...): Windows 260-char limit |
 | Studio paths for Eclipse | Windows backslash paths | `C:/...` is read as a URI scheme ("No file system is defined for scheme: C") |
-| cloud-synced folder | allowed (WARN) | ~38 MB per app; pause sync if a build hits locked files |
+| cloud-synced folder | allowed (WARN) | ~40 MB per app; pause sync if a build hits locked files |
 
 ## Troubleshooting
 

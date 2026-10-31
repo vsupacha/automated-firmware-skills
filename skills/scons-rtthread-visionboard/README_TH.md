@@ -18,7 +18,7 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 
 - Windows 10/11 พร้อม Git for Windows (Git Bash) และ Python 3 กับ `pyserial`
 - RT-Thread Studio พร้อมของจาก SDK Manager: support package ของ VISION-BOARD, GNU_Tools_for_ARM_Embedded_Processors 13.3 และ RealThread PyOCD (Studio มี scons มาให้)
-- แต่ละแอปเป็นสำเนาแยกขนาดประมาณ 38 MB
+- แต่ละแอปเป็นสำเนาแยกขนาดประมาณ 40 MB
 - ไม่บังคับ: VS Code และ RT-Thread Studio สำหรับทาง IDE (RT-Thread Studio เป็น IDE แยกของตัวเอง); Claude Code สำหรับทาง agent
 
 `check_tools.sh` (ข้อ 3) จะบอกสิ่งที่ขาดพร้อมเวอร์ชันที่ board profile pin ไว้

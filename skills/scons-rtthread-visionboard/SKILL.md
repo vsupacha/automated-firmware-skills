@@ -83,7 +83,7 @@ Studio workspace is `<apps>/.rtstudio` (per-PC metadata, git-ignored). Board pro
 ## What an app looks like
 
 ```
-apps/<app>/                 (~38 MB: a standalone copy - Studio needs real folders)
+apps/<app>/                 (~40 MB: a standalone copy - Studio needs real folders)
   SConstruct SConscript rtconfig.py rtconfig.h Kconfig    RT-Thread project (rtconfig.py: GCC, -DBOARD_<ID>)
   board/ ra/ ra_gen/ ra_cfg/ script/                      the SDK project's BSP + FSP (generated - do not edit)
   rt-thread/                                              RT-Thread 5.0.2 (without docs/examples)
@@ -146,7 +146,14 @@ flash (asks first) and the tests. Run it after the user installed or updated pac
      (docs/workflow.md "Apps workspace").
    - copies the SDK project `vision_board_blink_led` (without pictures/Keil files), `rt-thread/`
      (without documentation/examples) and `libraries/HAL_Drivers`, then `templates/_common/src` +
-     the template's `src/` and `tests/` (about 15 s, 38 MB).
+     the template's `src/` and `tests/` (about 15 s, 40 MB).
+   - **FSP side from `FSP_PROJECT`** (profile; Vision Board: `vision_board_openmv`, the SDK project
+     that generates the most peripherals - SPI1, SCI3 I2C, SDHI1, GPT6/7/13, IRQ10/11, UART2, flash,
+     display, CEU, USB): `configuration.xml`, `ra/`, `ra_cfg/`, `ra_gen/` and the linker scripts are
+     copied from it; Kconfig, `.config` and `board/` stay blink's, so **no driver is enabled** - the
+     drivers come later through recipes. dave2d is compiled always (the FSP has a drw module), and
+     interrupt handlers that only an un-integrated driver would define (USB) get weak empty stubs in
+     `board/ports/fsp_unused_irq.c`. Recorded as `APP_FSP` in `rtt-app.env`.
    - patches the copy: `rtconfig.py` (GCC + `-DBOARD_<ID>`), the Studio project (name = app,
      toolchain = GCC 13.3, `-DBOARD_<ID>`), and the app's `rt-thread/tools/options.py` default
      `--project-name` = app (RT-Thread 5.0.2 would rename it to `project` on every Studio sync).

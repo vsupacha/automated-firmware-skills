@@ -39,3 +39,9 @@ range). Hardware: [../README.md](../README.md).
   `msh_status.py`: 11 msh commands (`info`, `led`, `btn` + built-ins), 4 threads, memheap pools
   `sdram` + `heap` - MSH: PASS. Test `push_to_light.json`: step "spec commands exported by the
   image" PASS, RESULT PASS 17/17 (10 interactive steps skipped - nobody looked at the LEDs).
+- 2026-10-31 profile: `FSP_PROJECT=vision_board_openmv` - new apps take the FSP side from the openmv
+  project (all driver-recipe instances generated, no driver enabled). New push-to-light app (`fsp2-vb`):
+  build PASS 0 warnings, app.hex 0x02000000..0x02013244 (`37fd66c0...`); flash: 9 sectors erased, 613 pages,
+  78404 bytes read back equal; `msh_status.py` MSH: PASS (same 11 commands, 4 threads, devices uart9 + pin);
+  test `push_to_light.json` RESULT PASS 17/17 (10 interactive steps skipped by the runner); the owner then tested
+  KEY0 and the LEDs by hand on this image and reported it working (KEY0 is IRQ10 in the openmv FSP pin setup).

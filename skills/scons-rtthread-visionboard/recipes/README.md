@@ -19,6 +19,18 @@ The apps from `new_app.sh` have no `rt-thread/examples`, which `rt-thread/Kconfi
 Kconfig tree of RT-Thread comes from the pinned SDK (same RT-Thread 5.0.2); the package index comes
 from RT-Thread Studio's env (`platform/env_released/env-new/packages`).
 
+## FSP of the apps
+
+`new_app.sh` takes the FSP side of every app from `FSP_PROJECT` = `vision_board_openmv` (board profile):
+the only SDK project whose `ra_gen/` declares every instance the recipes need (`g_spi1`,
+`g_external_irq11`, `g_sci3`, `g_sdmmc1`, `g_timer6`, also `g_uart2`, `g_flash`, `g_timer7/13`, CEU,
+display, USB). Kconfig, `.config` and `board/` stay those of `vision_board_blink_led`, so nothing is
+integrated: an app still enables only GPIO, UART9 and SDRAM. With it, `check` reports no `FSP` action
+(2026-10-31, app built 0 warnings): `i2c1-soft spi1 sci3-i2c sdcard pwm6` are `READY`, `rw007` still
+needs its `board/Kconfig` block, board port and package. Apps made before keep blink's FSP (`ioport`
++ `uart` only; `rtt-app.env` has no `APP_FSP`). Ranking of the 19 projects by recipe instances:
+openmv 10, rgb_4.3inch_nes / rgb_4.3inch_doom 4, wifi 3 (spi1, irq11), blink 1 (uart9).
+
 ## One project per recipe, chosen by its README
 
 Each recipe names the **one** SDK example project whose README is about that hardware (`project`,

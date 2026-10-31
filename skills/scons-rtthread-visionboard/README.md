@@ -19,7 +19,7 @@ Board stages: hello-world is tested on hardware. Demo levels per template and th
 
 - Windows 10/11 with Git for Windows (Git Bash) and Python 3 with `pyserial`.
 - RT-Thread Studio with, from its SDK Manager: the VISION-BOARD support package, GNU_Tools_for_ARM_Embedded_Processors 13.3 and RealThread PyOCD (Studio brings scons).
-- Each app is a standalone copy of about 38 MB.
+- Each app is a standalone copy of about 40 MB.
 - Optional: VS Code and RT-Thread Studio for the IDE path (RT-Thread Studio is its own IDE); Claude Code for the agent path.
 
 `check_tools.sh` (step 3) lists anything missing with the version the board profile pins.

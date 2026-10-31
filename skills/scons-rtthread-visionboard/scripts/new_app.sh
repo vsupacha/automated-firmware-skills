@@ -11,6 +11,10 @@
 #   examples), libraries/HAL_Drivers + libraries/Kconfig; src/ = templates/_common/src (board/,
 #   func/, SConscript) + the template's src (hal_entry.c); tests/; rtt-app.env (record).
 #   -DBOARD_<ID> goes into rtconfig.py (scons) and .cproject (Studio's managed build).
+#   FSP_PROJECT (profile, optional): the FSP side - configuration.xml, ra/ ra_cfg/ ra_gen/, linker
+#   scripts - comes from that SDK project instead (more peripherals generated, none integrated: the
+#   Kconfig/.config/board stay BSP_PROJECT's, so no driver is enabled). Interrupt handlers its vector
+#   table names but no source of the app defines get weak empty stubs (board/ports/fsp_unused_irq.c).
 
 . "$(dirname "$0")/env.sh"
 OPEN=1; ARGS=()
@@ -31,7 +35,7 @@ fw_ws_choose "$WS" "$APPDIR" 100   # ACTION: CHOOSE when no workspace was chosen
 require_safe_path "$APPDIR" "app" 100
 [ -e "$APPDIR" ] && die "$APPDIR already exists - pick another name (or delete it after asking the user)"
 write_workspace_gitignore "$WS"
-svc="$(path_synced "$WS")"; [ -n "$svc" ] && echo "WARN: $WS is in a $svc folder (about 38 MB per app) - pause sync if a build fails on locked files"
+svc="$(path_synced "$WS")"; [ -n "$svc" ] && echo "WARN: $WS is in a $svc folder (about 40 MB per app) - pause sync if a build fails on locked files"
 
 info "Creating $APPDIR (board $BOARD_ID, SDK $BSP_NAME $BSP_VERSION/$BSP_PROJECT, template $TPL)"
 mkdir -p "$APPDIR" "$APPDIR/libraries"
@@ -42,6 +46,49 @@ mkdir -p "$APPDIR" "$APPDIR/libraries"
   | ( cd "$APPDIR" && tar xf - ) || die "copy of rt-thread failed"
 cp -r "$BSP_DIR/libraries/HAL_Drivers" "$APPDIR/libraries/" && cp "$BSP_DIR/libraries/Kconfig" "$APPDIR/libraries/" \
   || die "copy of libraries failed"
+
+# FSP side from FSP_PROJECT (see the header); the RT-Thread side (Kconfig, .config, board/) stays
+if [ -n "$FSP_PROJECT" ] && [ "$FSP_PROJECT" != "$BSP_PROJECT" ]; then
+  FSP_SRC="$BSP_DIR/projects/$FSP_PROJECT"
+  [ -f "$FSP_SRC/configuration.xml" ] || die "FSP_PROJECT $FSP_PROJECT not found in the SDK ($FSP_SRC)"
+  rm -rf "${APPDIR:?}/ra" "${APPDIR:?}/ra_cfg" "${APPDIR:?}/ra_gen"
+  ( cd "$FSP_SRC" && tar cf - ra ra_cfg ra_gen configuration.xml buildinfo.gpdsc memory_regions.ld memory_regions.scat script ) \
+    | ( cd "$APPDIR" && tar xf - ) || die "copy of the FSP side of $FSP_SRC failed"
+  "$PYTHON" - "$(winpath "$APPDIR")" <<'EOF' || die "adapting the FSP side failed"
+import re, sys
+from pathlib import Path
+app = Path(sys.argv[1])
+# dave2d: FSP projects with a 2D-drawing (drw) module need it whatever the Kconfig says
+gen = "".join(f.read_text(errors="replace") for f in (app / "ra_gen").glob("*.[ch]"))
+if "dave_driver.h" in gen:
+    sc = app / "ra" / "SConscript"
+    t = sc.read_text()
+    old = ("        if GetDepend('BSP_USING_LCD') or GetDepend('BSP_USING_LVGL'):\n"
+           "            src += Glob(cwd + '/tes/dave2d/src/*.c')\n"
+           "            CPPPATH += [cwd + '/tes/dave2d/inc']\n")
+    if old in t:
+        sc.write_text(t.replace(old, "        # FSP_PROJECT has a drw module: dave2d always (new_app.sh)\n"
+                                     "        src += Glob(cwd + '/tes/dave2d/src/*.c')\n"
+                                     "        CPPPATH += [cwd + '/tes/dave2d/inc']\n"))
+# vector table handlers that no compiled source defines (their driver is not integrated yet)
+names = re.findall(r"void (\w+_(?:handler|isr))\(void\);", (app / "ra_gen" / "vector_data.h").read_text())
+code = ""
+for d in ("ra", "libraries", "board", "rt-thread/libcpu"):
+    for f in (app / d).rglob("*.c"):
+        code += f.read_text(errors="replace")
+missing = [n for n in names if not re.search(r"\b" + n + r"\s*\([^;]*\)\s*\{", code)]
+if missing:
+    lines = ["/*",
+             " * Written by new_app.sh: interrupts that the FSP configuration (ra_gen/vector_data.c) lists but no",
+             " * driver of this app provides yet. The FSP enables an interrupt only when its driver is opened, so",
+             " * these never run; a driver integrated later overrides them (they are weak).",
+             " */",
+             "#include <rtthread.h>", ""]
+    lines += [f"rt_weak void {n}(void) {{ }}" for n in missing]
+    (app / "board" / "ports" / "fsp_unused_irq.c").write_text("\n".join(lines) + "\n", newline="\n")
+print(f"FSP side from FSP_PROJECT; weak stubs for {len(missing)} unused interrupt handler(s)")
+EOF
+fi
 
 # templates/_common (board + func layers) first, then the app template on top
 rm -f "$APPDIR/src/hal_entry.c"
@@ -106,6 +153,7 @@ APP_BOARD=$BOARD_ID
 APP_BOARD_DEFINE=$BOARD_DEFINE
 APP_TEMPLATE=$TPL
 APP_SDK=$BSP_VENDOR/$BSP_NAME/$BSP_VERSION/$BSP_PROJECT
+APP_FSP=${FSP_PROJECT:-$BSP_PROJECT}
 APP_GCC=$GCC_VERSION
 EOF
 info "Created $APPDIR  (board $BOARD_ID, template $TPL, $(du -sh "$APPDIR" | cut -f1))"
