@@ -18,7 +18,6 @@ a dated verification log). Machine-readable: [index.json](index.json).
 | [Espressif ESP32-S3-BOX (2021)](esp32-s3-box/README.md) | Espressif ESP32-S3 (ESP32-S3) | `pio-espidf-esp32s3box` | USB Serial/JTAG | LCD backlight | BOOT |
 | [Espressif ESP32-S3-BOX (2021)](esp32-s3-box/README.md) | Espressif ESP32-S3 (ESP32-S3) | `pio-arduino-esp32s3box` | USB Serial/JTAG | LCD backlight | BOOT |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | Renesas RA4M1 (R7FA4M1AB3CFM) | `pio-arduino-unor4wifi` | UART via the USB bridge | L (yellow) | none |
-| [RT-Thread Vision Board](vision-board/README.md) | Renesas RA8D1 (R7FA8D1BH) | `scons-rtthread-visionboard` | ART-Link virtual COM port (msh) | blue LED (P102) | KEY0 |
 
 ## Bring-up demos
 
@@ -43,9 +42,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | [ST B-L475E-IOT01A (Discovery kit IoT node)](b-l475e-iot01a/README.md) | `cubemx-hal-stm32l475iot` | tested | built | observed * |
 | [ST NUCLEO-WB55RG](nucleo-wb55rg/README.md) | `cubemx-hal-stm32wb55nucleo` | tested | built | observed |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | `pio-arduino-unor4wifi` | tested | built | observed * |
-| [RT-Thread Vision Board (RA8D1)](vision-board/README.md) | `scons-rtthread-visionboard` | tested | built | tested |
 | [NXP FRDM-MCXN947](frdm-mcxn947/README.md) | `mcux-sdk-frdmmcxn947` | tested | built | tested |
-| [RT-Thread Titan Board (RA8P1)](titan-board/README.md) | `scons-rtthread-titanboard` | built | tested | tested |
 <!-- board-status:end -->
 
 Levels: unverified < built < flashed < tested (automatic test PASS) < interactive (a person pressed

@@ -23,7 +23,7 @@
 2. ติดตั้ง plugin ใน Claude Code ตามค่ายของบอร์ด (จะได้ `firmware-tools` มาด้วย):
    `/plugin marketplace add vsupacha/automated-firmware-skills` แล้ว
    `/plugin install firmware-stm32@automated-firmware-skills` (หรือ `firmware-platformio`,
-   `firmware-modustoolbox`, `firmware-rtthread`) - ถ้าต้องการทุกบอร์ดใช้
+   `firmware-modustoolbox`, `firmware-mcuxpresso`) - ถ้าต้องการทุกบอร์ดใช้
    `automated-firmware-skills@automated-firmware-skills` แทน เลือกอย่างใดอย่างหนึ่ง
 3. พิมพ์ถามเป็นภาษาไทยได้เลย เช่น "ขอวิธีใช้หน่อย", "ตรวจเครื่องมือให้หน่อย", "สร้างแอป blink แล้ว build ให้หน่อย",
    "แฟลชเลย" (Claude ถามก่อน flash ทุกครั้ง), "ทดสอบ"
@@ -46,8 +46,6 @@
 | ESP32-S3-BOX (ESP-IDF) | [skills/pio-espidf-esp32s3box/README_TH.md](skills/pio-espidf-esp32s3box/README_TH.md) |
 | ESP32-S3-BOX (Arduino) | [skills/pio-arduino-esp32s3box/README_TH.md](skills/pio-arduino-esp32s3box/README_TH.md) |
 | Arduino UNO R4 WiFi | [skills/pio-arduino-unor4wifi/README_TH.md](skills/pio-arduino-unor4wifi/README_TH.md) |
-| RT-Thread Vision Board | [skills/scons-rtthread-visionboard/README_TH.md](skills/scons-rtthread-visionboard/README_TH.md) |
-| RT-Thread Titan Board | [skills/scons-rtthread-titanboard/README_TH.md](skills/scons-rtthread-titanboard/README_TH.md) |
 | NXP FRDM-MCXN947 (ยังไม่มี debug) | [skills/mcux-sdk-frdmmcxn947/README_TH.md](skills/mcux-sdk-frdmmcxn947/README_TH.md) |
 
 ## เอกสาร (ภาษาอังกฤษ)

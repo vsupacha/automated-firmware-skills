@@ -24,8 +24,6 @@ Reference implementations:
 | [cubemx-hal-stm32wb55nucleo](../skills/cubemx-hal-stm32wb55nucleo/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeWB HAL, CMake, STM32CubeProgrammer | NUCLEO-WB55RG | M1 incl. board stages (debug planned); CM4 application only, wireless stack untouched; `.ioc` from `loadboard` + `clearpinout`; shares `lib/func` |
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
 | [pio-arduino-unor4wifi](../skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino (renesas-ra), bossac | UNO R4 WiFi | RA4M1 through the ESP32-S3 USB bridge (1200 baud touch, no read-back); Arduino style like the BOX skill, `console_printf()` |
-| [scons-rtthread-visionboard](../skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons, GNU Arm 13.3, pyOCD (RT-Thread Studio SDK) | Vision Board (RA8D1) | IDE = RT-Thread Studio (`IDE_APP`); msh console; code flash only, read back |
-| [scons-rtthread-titanboard](../skills/scons-rtthread-titanboard/SKILL.md) | RT-Thread 5.1.0 + scons, GNU Arm 13.3, pyOCD (RT-Thread Studio SDK) | Titan Board (RA8P1) | as the Vision Board skill; CMSIS-DAP v2 probe (WinUSB with a GUID); code MRAM only, read back |
 | [mcux-sdk-frdmmcxn947](../skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 (west), Arm GNU 14.2 + Ninja (MCUXpresso Installer), Kitware CMake, LinkServer 26.5 | FRDM-MCXN947 | M1 incl. board stages (debug planned); LinkServer `-u none`, internal flash only; app = `west export_app` of hello_world, trimmed; VS Code project files written directly; never ST tools |
 
 ## Milestones (summary)
@@ -46,7 +44,7 @@ Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own 
 | --- | --- | --- | --- | --- | --- |
 | **M1 bring-up** | 0 | help | `help.sh [--en]` | - | no |
 | | 1 | setup | `check_tools.sh <board>` | `missing/bad=0` | no |
-| | 1b | tool updates | `update_tools.sh <board> [--apply --yes]` (STM32 CubeMX skills, RT-Thread so far) - see [Tool updates](#tool-updates) | `UPDATE: NONE` / `UPDATE: APPLIED n` | no |
+| | 1b | tool updates | `update_tools.sh <board> [--apply --yes]` (STM32 CubeMX skills; RT-Thread in its own repository) - see [Tool updates](#tool-updates) | `UPDATE: NONE` / `UPDATE: APPLIED n` | no |
 | | 2 | create | `new_app.sh <board> <app> [ws\|""] [template] [--no-open]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
 | | 2d | open in IDE | `open_ide.sh <app> [--no-open]` (new_app.sh runs it) - see [IDE handoff](#ide-handoff-stage-2d) | `IDE: READY` | no |
 | | 2e | code | edit `src/` in layers (board > func > app) - the developer in the IDE or the agent; rules: [board-api.md](board-api.md) | stage 3 build + stage 9 layer check | no |
@@ -121,7 +119,7 @@ later. The IDE is **VS Code with the toolchain vendor's extension**:
 | ModusToolbox | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) | `<app>.code-workspace` + `.vscode/` | ModusToolbox's own `make vscode` (this PC's tool paths: git-ignored, re-made per PC) |
 | STM32CubeMX / STM32CubeMX2 | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | `<app>.code-workspace` (`mx/`, `src/`, `tests/` as folders) + `mx/.settings/*.store.json`, `mx/.vscode/{settings,launch}.json` | `lib/common.sh` `fw_vscode_cube_setup`, from the board profile's pinned bundles |
 | PlatformIO | PlatformIO IDE (`platformio.platformio-ide`) | `<app>.code-workspace` (the app folder; `platformio.ini` at its root); PlatformIO IDE adds `.vscode/` | `lib/common.sh` `fw_code_workspace` |
-| RT-Thread (scons) | none: **RT-Thread Studio**, a standalone Eclipse IDE (`IDE_APP=rt-thread-studio` in env.sh instead of `IDE_EXT`) | the app's own `.project`/`.cproject`/`.settings` (synced with `scons --target=eclipse` by new_app.sh) in the Studio workspace `<apps>/.rtstudio` | the skill's `open_ide.sh`: headless Eclipse import, then `studio.exe -data <workspace>` |
+| RT-Thread (scons) | none: **RT-Thread Studio**, a standalone Eclipse IDE (`IDE_APP=rt-thread-studio` in env.sh instead of `IDE_EXT`) | the app's own `.project`/`.cproject`/`.settings` (synced with `scons --target=eclipse` by new_app.sh) in the Studio workspace `<apps>/.rtstudio` | the skill's `open_ide.sh`: headless Eclipse import, then `studio.exe -data <workspace>` (skills now in automated-firmware-skills-rtthread) |
 
 Rules for `open_ide.sh <app> [--no-open]`:
 
@@ -317,8 +315,8 @@ regen + build (0 warnings), flash (asks first), the bring-up tests, and for an e
 IDE path once in VS Code (open, build, debug, no "fix"/"configure" prompt). Then add the dated result
 line. The profile diff (old -> new pins) plus that line is the evidence for the upgrade.
 
-`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6, WB55) and the RT-Thread skill
-(SDK Manager packages: BSP, GNU Arm, pyOCD); the `IDE_EXT_VERSION` check in
+`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6, WB55) and in the RT-Thread skills
+(SDK Manager packages: BSP, GNU Arm, pyOCD - repository automated-firmware-skills-rtthread); the `IDE_EXT_VERSION` check in
 `check_tools.sh` covers every skill whose profile sets it (STM32 and ModusToolbox).
 
 ## Common options
@@ -344,8 +342,6 @@ line. The profile diff (old -> new pins) plus that line is the evidence for the 
   | cubemx-hal-stm32l475iot | `L4_WS` | `L4_BOARDS_DIR` | `L4_PROBE_SERIAL` | `L4_CONSOLE` |
   | cubemx-hal-stm32wb55nucleo | `WB_WS` | `WB_BOARDS_DIR` | `WB_PROBE_SERIAL` | `WB_CONSOLE` |
   | pio-arduino-unor4wifi | `UNO_WS` | `UNO_BOARDS_DIR` | `UNO_USB_SERIAL` | `UNO_CONSOLE` |
-  | scons-rtthread-visionboard | `RTT_WS` | `RTT_BOARDS_DIR` | `RTT_PROBE_SERIAL` | `RTT_CONSOLE` |
-  | scons-rtthread-titanboard | `RTT_WS` | `RTT_BOARDS_DIR` | `RTT_PROBE_SERIAL` | `RTT_CONSOLE` |
   | mcux-sdk-frdmmcxn947 | `MCX_WS` | `MCX_BOARDS_DIR` | `MCX_PROBE_SERIAL` | `MCX_CONSOLE` |
 - **Your own board**: put its profile in `<project>/boards/<id>/<skill>/board.env` (copy
   `boards/_template/`). The scripts find it before the repo's boards.

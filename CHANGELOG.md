@@ -7,6 +7,12 @@ verification log, not here.
 
 ## [Unreleased]
 
+### Removed
+- 2026-11-01: RT-Thread skills `scons-rtthread-visionboard` and `scons-rtthread-titanboard`, boards
+  `vision-board` and `titan-board` and the `firmware-rtthread` plugin moved to the new repository
+  automated-firmware-skills-rtthread (RT-Thread builds, flashes and tests differently). `lib/msh.py`
+  stays here for `fwtest.py`'s optional `command_list`.
+
 ### Added
 - New board skill `mcux-sdk-frdmmcxn947` (NXP FRDM-MCXN947, MCXN947 Cortex-M33 core 0) with the
   MCUXpresso SDK 26.09 (west), Kitware CMake and the MCUXpresso Installer tools - M1 stages 1-3

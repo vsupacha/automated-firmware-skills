@@ -272,31 +272,6 @@
       }
     },
     {
-      "id": "vision-board",
-      "name": "RT-Thread Vision Board (RA8D1)",
-      "aliases": [
-        "Vision Board",
-        "Vision-Board",
-        "RT-Thread Vision Board",
-        "VisionBoard",
-        "RA8D1 Vision Board"
-      ],
-      "mcu": "R7FA8D1BH",
-      "mcu_family": "Renesas RA8D1",
-      "profiles": {
-        "scons-rtthread-visionboard": {
-          "level": "tested",
-          "date": "2026-10-31",
-          "templates": {
-            "hello-world": "tested",
-            "blink": "built",
-            "push-to-light": "tested"
-          },
-          "log": "boards/vision-board/scons-rtthread-visionboard/README.md"
-        }
-      }
-    },
-    {
       "id": "frdm-mcxn947",
       "name": "NXP FRDM-MCXN947",
       "aliases": [
@@ -318,31 +293,6 @@
           "note": "M1 incl. board stages (debug planned): discover IDENTITY PASS, hello-world flashed + 9/9, push-to-light flashed + 16/16 automatic (interactive not run with the skill; SW2/SW3 seen by a button watch 2026-10-29)",
           "log": "boards/frdm-mcxn947/mcux-sdk-frdmmcxn947/README.md",
           "date": "2026-10-30"
-        }
-      }
-    },
-    {
-      "id": "titan-board",
-      "name": "RT-Thread Titan Board (RA8P1)",
-      "aliases": [
-        "Titan Board",
-        "Titan-Board",
-        "RT-Thread Titan Board",
-        "TitanBoard",
-        "RA8P1 Titan Board"
-      ],
-      "mcu": "R7KA8P1KF",
-      "mcu_family": "Renesas RA8P1",
-      "profiles": {
-        "scons-rtthread-titanboard": {
-          "level": "tested",
-          "date": "2026-10-31",
-          "templates": {
-            "hello-world": "built",
-            "blink": "tested",
-            "push-to-light": "tested"
-          },
-          "log": "boards/titan-board/scons-rtthread-titanboard/README.md"
         }
       }
     }

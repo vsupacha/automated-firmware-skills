@@ -5,7 +5,7 @@
 | `common.sh` | every `skills/*/scripts/env.sh` | board profile lookup (project before repo), path safety, `need_user` (`ACTION:` + exit 10), `.gitignore` merging |
 | `fwtest.py` | every `skills/*/scripts/serial_test.py` (thin wrapper) | Stage 6 engine: data-driven serial tests from `tests/*.json` |
 | `fw_workspace.sh` | the developer / agent, once per PC (`new_app.sh` asks with `ACTION: CHOOSE`) | this PC's apps workspace: `show`, `set <dir>`, `unset` (`~/.fw-skills.env`, never in git) |
-| `msh.py` | `fwtest.py` (cfg `command_list: "msh"`), RT-Thread `msh_status.py` | RT-Thread msh console: wait for the prompt, run a command, parse `help` (exported commands), `ps`, `free`, `list device`, `version` (5.0.2 formats) |
+| `msh.py` | `fwtest.py` (cfg `command_list: "msh"`), the RT-Thread skills (now in automated-firmware-skills-rtthread) | RT-Thread msh console: wait for the prompt, run a command, parse `help` (exported commands), `ps`, `free`, `list device`, `version` (5.0.2 formats) |
 | `fwpaths.py` | `fwtest.py`, sensor-debug, web-wizard | the same apps-workspace and `.bench/` rules as `common.sh`, for Python |
 | `func/` | modus-pdl-edgitalk, cubemx2-hal2-stm32c562nucleo (`new_app.sh` copies it into each app) | logic layer in portable C: console, led, button - depends only on `board.h`; gesture (short / long / double click) - pure, no `board.h` |
 | `check_layers.py` | stage 9 (M2), any skill's app | include / vendor-call / `#if BOARD_*` rules per layer: `LAYERS: PASS` |

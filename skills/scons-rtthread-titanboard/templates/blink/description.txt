@@ -1,1 +1,0 @@
-LED1 toggles every 500 ms and prints "BLINK led1=0|1" on the msh console (uart8 via the RA4M2-VCOM port), RT-Thread thread timing

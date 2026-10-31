@@ -63,8 +63,6 @@ M1 per skill - the bring-up demos are `hello-world` (UART), `blink` (LED) and `p
 | cubemx-hal-stm32l475iot | yes | verified on hardware |
 | cubemx-hal-stm32wb55nucleo | yes | hello-world tested on hardware |
 | pio-arduino-unor4wifi | yes | verified on hardware |
-| scons-rtthread-visionboard | yes | hello-world tested on hardware |
-| scons-rtthread-titanboard | yes | blink, push-to-light tested on hardware |
 | cubemx-hal-stm32n6570dk | yes | planned (dev boot mode, connect under reset) |
 | cubemx-hal-stm32f407disco | yes | connect + flash scripts; test planned (SWO console) |
 | mcux-sdk-frdmmcxn947 | yes | hello-world + push-to-light tested on hardware; debug planned |

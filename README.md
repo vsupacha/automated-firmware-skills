@@ -6,6 +6,10 @@ developer (or another agent) can run every stage by hand.
 
 Other languages: [ภาษาไทย](README_TH.md) · [日本語](README_JA.md)
 
+> RT-Thread skills (Vision Board, Titan Board) live in the separate repository
+> **automated-firmware-skills-rtthread** since 2026-11-01: RT-Thread builds, flashes and tests
+> differently (board SDK project, Kconfig driver recipes, msh shell).
+
 ## Concepts
 
 - **Skill = toolchain + framework + board.** Each skill (`skills/<toolchain>-<framework>-<board>/`,
@@ -40,7 +44,7 @@ Other languages: [ภาษาไทย](README_TH.md) · [日本語](README_JA.
 | **Python 3** with `pyserial` (`pip install --user pyserial`) | tests, debug, tool skills | tested with Python 3.12 |
 | **[Claude Code](https://claude.com/claude-code)** | the agent path | optional: every stage also runs by hand |
 | **The vendor toolchain of your board** | setup onward | not bundled - each board's README lists the exact versions (ModusToolbox, STM32CubeMX / CubeMX2 + STM32Cube bundles, PlatformIO, RT-Thread Studio) |
-| **VS Code + the vendor's extension** | the IDE path | optional; RT-Thread Studio for the Vision Board |
+| **VS Code + the vendor's extension** | the IDE path | optional |
 | **The board and its USB cable** | connect, flash, test, debug | build stages need no board |
 
 Keep apps on a short local path without spaces, outside Dropbox/OneDrive if you can (Windows tools
@@ -62,7 +66,6 @@ pulls in `firmware-tools`):
 | `firmware-stm32` | NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG | `/plugin install firmware-stm32 --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-platformio` | Pico 2 W, ESP32-S3-BOX (ESP-IDF, Arduino), UNO R4 WiFi | `/plugin install firmware-platformio --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-modustoolbox` | Edgi-Talk (PSOC Edge E84) | `/plugin install firmware-modustoolbox --marketplace vsupacha/automated-firmware-skills` |
-| `firmware-rtthread` | Vision Board (RA8D1) | `/plugin install firmware-rtthread --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-mcuxpresso` | FRDM-MCXN947 (MCX N) | `/plugin install firmware-mcuxpresso --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-tools` | web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting (installed with each of the above) | `/plugin install firmware-tools --marketplace vsupacha/automated-firmware-skills` |
 | `automated-firmware-skills` | everything above in one plugin - install this **or** the vendor plugins, not both | `/plugin install automated-firmware-skills --marketplace vsupacha/automated-firmware-skills` |
@@ -92,7 +95,7 @@ row says what to install. Next ask "create a hello-world app and build it": expe
 2. **Pick your board** in [boards/README.md](boards/README.md); its README lists the tools to
    install and the commands.
 3. **Ask** in your own words: "how do I use this?" / "ขอวิธีใช้หน่อย" (the skill shows its command
-   menu), "check my tools for the Vision Board", "create a blink app and build it", "flash it and
+   menu), "check my tools for the NUCLEO-WB55RG", "create a blink app and build it", "flash it and
    run the test".
 
 Without an agent, run the same scripts in **Git Bash** from the repo root, e.g. for the B-L475E-IOT01A:
@@ -132,8 +135,6 @@ Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 1
 | [pio-espidf-esp32s3box](skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF 5.5 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-espidf-esp32s3box/README.md) · [ไทย](skills/pio-espidf-esp32s3box/README_TH.md) |
 | [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + arduino-esp32 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-arduino-esp32s3box/README.md) · [ไทย](skills/pio-arduino-esp32s3box/README_TH.md) |
 | [pio-arduino-unor4wifi](skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino UNO R4 core | Renesas RA4M1 | [UNO R4 WiFi](boards/uno-r4-wifi/README.md) | [guide](skills/pio-arduino-unor4wifi/README.md) · [ไทย](skills/pio-arduino-unor4wifi/README_TH.md) |
-| [scons-rtthread-visionboard](skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons (RT-Thread Studio SDK) | Renesas RA8D1 | [Vision Board](boards/vision-board/README.md) | [guide](skills/scons-rtthread-visionboard/README.md) · [ไทย](skills/scons-rtthread-visionboard/README_TH.md) |
-| [scons-rtthread-titanboard](skills/scons-rtthread-titanboard/SKILL.md) | RT-Thread 5.1.0 + scons (RT-Thread Studio SDK) | Renesas RA8P1 | [Titan Board](boards/titan-board/README.md) | [guide](skills/scons-rtthread-titanboard/README.md) · [ไทย](skills/scons-rtthread-titanboard/README_TH.md) |
 | [mcux-sdk-frdmmcxn947](skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 + CMake | NXP MCX N | [FRDM-MCXN947](boards/frdm-mcxn947/README.md) | [guide](skills/mcux-sdk-frdmmcxn947/README.md) · [ไทย](skills/mcux-sdk-frdmmcxn947/README_TH.md) |
 
 **Tool skills** (shared by all board skills, no board of their own):
@@ -156,7 +157,6 @@ project and build folders as the scripts. Details: [docs/workflow.md](docs/workf
 | VS Code | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32wb55nucleo |
 | VS Code | PlatformIO IDE (`platformio.platformio-ide`) | pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box, pio-arduino-unor4wifi |
 | VS Code | MCUXpresso for VS Code (`nxpsemiconductors.mcuxpresso`) | mcux-sdk-frdmmcxn947 |
-| RT-Thread Studio | - (standalone Eclipse-based IDE) | scons-rtthread-visionboard, scons-rtthread-titanboard |
 
 ## Documentation
 
