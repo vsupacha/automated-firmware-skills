@@ -178,6 +178,16 @@ it on the app's Kconfig tree and lists what must exist first. **Gate:** `RECIPE:
 ACTION n` (exit 10: `KCONFIG` board/Kconfig block, `FSP` instance in `ra_gen/` - FSP configurator,
 the developer's step -, `PORT` board port, `PACKAGE` source) | `RECIPE: FAIL` (pin or peripheral
 taken twice). It writes nothing; tell the developer the ACTION lines. See `recipes/README.md`.
+Applying a recipe is not scripted yet: with the developer's go-ahead, do what the ACTION lines say
+(board/Kconfig block, ports, packages + `packages/SConscript` from the named SDK project; recipe
+values into `.config` with kconfiglib, then `rtconfig.h` with RT-Thread's `mk_rtconfig`), re-run
+`check` until `RECIPE: READY`, then build (`recipes/README.md` "On the board"). Tested on hardware:
+`spi1` + `rw007` (msh `wifi scan`, `wifi join`, `ping`); the others are `prepared`.
+
+**Wi-Fi (rw007) over msh:** `wifi scan` (no credentials), `wifi join <ssid> <password>`,
+`wifi status`, `ifconfig`, `ping <host>`. Credentials come from the developer only; never write
+them, the SSID list or addresses into files, logs (`--log`), reports or git. Auto-connect is off:
+a reset forgets the join.
 
 ## Stage 3 - Code in layers, build
 
@@ -291,3 +301,5 @@ fact is newly verified.
   lock-out risks. Stop and ask.
 - Identity gate before every write; never flash an image without a PASS manifest. Ask before every
   flash and before `clean.sh --yes`. Never run installers or update the probe firmware.
+- Wi-Fi credentials (SSID, password) and network data seen on the board (scan list, IP and MAC
+  addresses) never go into files, logs, reports or git - send them to the board only.

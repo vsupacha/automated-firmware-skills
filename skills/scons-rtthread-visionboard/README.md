@@ -45,12 +45,13 @@ every board instead - pick one of the two.
 | "Are my tools still the pinned versions?" | `update_tools.sh vision-board` | `UPDATE: NONE`, or a question before anything is re-pinned |
 | "Create a hello-world app called hello" | `new_app.sh vision-board hello "" hello-world` | `Created <app folder>` (first time on a PC: which workspace?) |
 | "Open it in the IDE" | `open_ide.sh <app>` (new_app does it) | `IDE: OPENED` - RT-Thread Studio |
-| "Can this app use Wi-Fi (RW007) and an SD card?" | `recipe.sh check <app> rw007 sdcard` | `RECIPE: READY`, or `ACTION:` lines: board/Kconfig block, FSP instance, board port, package to add first ([recipes](recipes/README.md)) |
+| "Can this app use Wi-Fi (RW007) and an SD card?" | `recipe.sh check <app> rw007 sdcard` | `RECIPE: READY`, or `ACTION:` lines: board/Kconfig block, board port, package to add first (new apps already have every FSP instance - [recipes](recipes/README.md)) |
 | "Build it" | `build.sh <app>` | `BUILD: PASS` with 0 warnings + a manifest (tool versions, image hash) |
 | "Find my board" | `discover.sh vision-board` | `IDENTITY: PASS` - read-only; saves this PC's probe / USB serial and console port |
 | "Flash it" | `flash.sh <app> --yes` **after you said yes** | `FLASH: PASS` |
 | "Run the test" | `serial_test.py auto <app>/tests/hello_world.json ...` | `RESULT: PASS (n/n passed ...)` |
 | "What is running on the board?" | `msh_status.py auto --board vision-board` | `MSH: PASS` - RT-Thread version, every msh command with its description, threads with stack use, heap, devices (read-only, no probe) |
+| "Scan and join Wi-Fi" (an app with the `rw007` recipe) | msh `wifi scan`, `wifi join <ssid> <password>`, `ping <host>` | access points listed; "wifi connect success" + an address; ping replies - credentials are never written to a file or log |
 | "Run the interactive test" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (a push-to-light app) | press KEY0 when asked and watch blue LED (P102) |
 | "Clean up" | `clean.sh` (dry run first) | a list, then deletion only after your yes; `--apps` also deletes app sources |
 

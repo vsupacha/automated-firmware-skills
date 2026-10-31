@@ -31,6 +31,21 @@ needs its `board/Kconfig` block, board port and package. Apps made before keep b
 + `uart` only; `rtt-app.env` has no `APP_FSP`). Ranking of the 19 projects by recipe instances:
 openmv 10, rgb_4.3inch_nes / rgb_4.3inch_doom 4, wifi 3 (spi1, irq11), blink 1 (uart9).
 
+## On the board
+
+- 2026-10-31 `rw007` (+ `spi1`) on a push-to-light app with the openmv FSP: applied by hand (prototype
+  of an apply step: the `board/Kconfig` block from `vision_board_wifi`, `board/ports/wifi`,
+  `packages/rw007-v2.1.0` + `packages/SConscript`, recipe values set with kconfiglib, `.config` ->
+  `rtconfig.h` with RT-Thread's `mk_rtconfig`); `check` READY with 0 symbols changed. Build PASS,
+  0 warnings in the app (3 in RT-Thread's own `components/drivers/wlan/wlan_mgnt.c`), app.hex
+  0x02000000..0x02039F94. On the board: `msh_status.py` MSH: PASS - 16 commands (`wifi ifconfig ping
+  dns netstat` added), threads `wifi_xfer wifi_handle wlan tcpip etx erx`, devices `w0 w1 wlan0 wlan1
+  wspi spi1`; msh `wifi scan` listed 3 access points (names not recorded); push-to-light test still
+  17/17. Then (developer's own access point, credentials given in the session, not stored): `wifi join`
+  -> "wifi connect success" + DHCP address, `wifi status` RSSI -62, `ifconfig` w0 default with gateway
+  and DNS, `ping www.rt-thread.org` 4 replies (57-127 ms). Auto-connect is off: the join is not kept
+  after a reset.
+
 ## One project per recipe, chosen by its README
 
 Each recipe names the **one** SDK example project whose README is about that hardware (`project`,
@@ -89,7 +104,7 @@ and hardware (README), `.config`, `packages/`, FSP modules and pins in `configur
 
 | Key | Meaning |
 |---|---|
-| `recipe`, `kind`, `board`, `level`, `status` | name; `hw-driver` (or `base`); board id; `kconfig`; `prepared` = derived from the SDK, not yet built or run in an app of ours |
+| `recipe`, `kind`, `board`, `level`, `status` | name; `hw-driver` (or `base`); board id; `kconfig`; `prepared` = derived from the SDK, not yet built or run in an app of ours; `tested` = applied to an app, built and run on the board (see below) |
 | `summary` | one line |
 | `requires` | other recipes, checked first (e.g. `rw007` needs `spi1`) |
 | `project`, `readme`, `anchors` | the SDK project whose README is about this hardware, what that README says it shows, the symbols that name the driver |

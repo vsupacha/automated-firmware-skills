@@ -3,7 +3,7 @@
   "kind": "hw-driver",
   "board": "vision-board",
   "level": "kconfig",
-  "status": "prepared",
+  "status": "tested",
   "summary": "Hardware SPI bus spi1 (RSPI B channel 1) - the RW007 Wi-Fi module bus.",
   "pins": {
     "P410": "SPI1 MISO",

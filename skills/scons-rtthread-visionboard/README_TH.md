@@ -50,6 +50,7 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 | "แฟลชเลย" | `flash.sh <app> --yes` **หลังคุณตอบ yes** | `FLASH: PASS` |
 | "ทดสอบ" | `serial_test.py auto <app>/tests/hello_world.json ...` | `RESULT: PASS (n/n passed ...)` |
 | "บนบอร์ดรันอะไรอยู่" | `msh_status.py auto --board vision-board` | `MSH: PASS` - เวอร์ชัน RT-Thread, คำสั่ง msh ทั้งหมดพร้อมคำอธิบาย, thread และการใช้ stack, heap, device (อ่านอย่างเดียว ไม่ใช้ probe) |
+| "scan และเชื่อม Wi-Fi" (แอปที่ใส่ recipe `rw007`) | msh `wifi scan`, `wifi join <ssid> <password>`, `ping <host>` | รายชื่อ access point; "wifi connect success" + IP; ping ตอบกลับ - ไม่บันทึกรหัสผ่านลงไฟล์หรือ log |
 | "ทดสอบแบบกดปุ่ม" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (แอป push-to-light) | กด KEY0 เมื่อถูกบอก แล้วดู blue LED (P102) |
 | "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
 

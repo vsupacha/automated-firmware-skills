@@ -3,7 +3,7 @@
   "kind": "hw-driver",
   "board": "vision-board",
   "level": "kconfig",
-  "status": "prepared",
+  "status": "tested",
   "summary": "RW007 Wi-Fi module (SPI) with RT-Thread WLAN, lwIP, SAL and netdev (wifi / ifconfig / ping commands).",
   "requires": [
     "spi1"

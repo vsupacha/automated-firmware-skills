@@ -39,6 +39,7 @@ skill scons-rtthread-visionboard (RT-Thread Vision Board RA8D1, RT-Thread + scon
   "flash it"                                   -> flash.sh <app> --yes  (code flash only, read back)
   "test it" / "test with button presses"       -> serial_test.py auto <spec> <log> --board <b> [--interactive]  (checks the image exports every command first)
   "what is running on the board?"              -> msh_status.py auto --board <b>  (version, msh commands, threads + stack, heap, devices; read-only)
+  "scan / join Wi-Fi" (app with rw007)        -> msh: wifi scan | wifi join <ssid> <password> | ifconfig | ping <host>  (credentials never logged)
  Housekeeping
   "clean the build outputs"                    -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
   "add a new board" / "add a template"         -> boards/_template/, SKILL.md "Extending"
@@ -61,6 +62,7 @@ skill scons-rtthread-visionboard (RT-Thread Vision Board RA8D1, RT-Thread + scon
   "แฟลชเลย"                                       -> flash.sh <app> --yes  (เฉพาะ code flash แล้วอ่านกลับมาตรวจ)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                       -> serial_test.py auto <spec> <log> --board <b> [--interactive]  (ตรวจก่อนว่า image มีทุกคำสั่งที่ spec ใช้)
   "บนบอร์ดรันอะไรอยู่"                              -> msh_status.py auto --board <b>  (เวอร์ชัน, คำสั่ง msh, thread + stack, heap, device; อ่านอย่างเดียว)
+  "scan / เชื่อม Wi-Fi" (แอปที่ใส่ rw007)            -> msh: wifi scan | wifi join <ssid> <password> | ifconfig | ping <host>  (ไม่บันทึกรหัสผ่าน)
  งานอื่น
   "clean ให้หน่อย"                                 -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
   "เพิ่มบอร์ดใหม่" / "เพิ่ม template"                -> boards/_template/, SKILL.md หัวข้อ Extending

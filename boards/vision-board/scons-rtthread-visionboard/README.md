@@ -45,3 +45,8 @@ range). Hardware: [../README.md](../README.md).
   78404 bytes read back equal; `msh_status.py` MSH: PASS (same 11 commands, 4 threads, devices uart9 + pin);
   test `push_to_light.json` RESULT PASS 17/17 (10 interactive steps skipped by the runner); the owner then tested
   KEY0 and the LEDs by hand on this image and reported it working (KEY0 is IRQ10 in the openmv FSP pin setup).
+- 2026-10-31 recipe `rw007` (+ `spi1`) applied to a push-to-light app (openmv FSP): build PASS (0 warnings in the
+  app; 3 in RT-Thread's wlan_mgnt.c), flash 237460 bytes read back equal, MSH: PASS with RW007 threads and
+  devices, msh `wifi scan` found 3 access points, push-to-light test 17/17. Then `wifi join` to the
+  developer's access point (credentials not recorded): connected, DHCP address, `ping www.rt-thread.org`
+  4 replies 57-127 ms.

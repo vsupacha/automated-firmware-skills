@@ -35,6 +35,9 @@ verification log, not here.
   from the running image.
   Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
   hardware (GCC 13.3 image, 17/17).
+- Vision Board Wi-Fi: recipes `spi1` + `rw007` applied to a push-to-light app and run on the board -
+  msh `wifi scan`, `wifi join`, `ping` work (status `tested`); SKILL.md describes applying a recipe by
+  hand and keeps Wi-Fi credentials and network data out of files and logs.
 - `scons-rtthread-visionboard` apps take their FSP side (configuration.xml, ra/, ra_gen/, linker
   scripts) from `FSP_PROJECT` = `vision_board_openmv`, which generates every peripheral the driver
   recipes need; Kconfig and board/ stay blink's, so no driver is enabled. Unused interrupt handlers

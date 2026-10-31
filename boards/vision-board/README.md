@@ -25,7 +25,7 @@ button) < observed (a person saw the LED). \* = verified under its earlier name 
 - RT-Thread Studio with, from its SDK Manager: the `VISION-BOARD` 1.3.0 board support package,
   GNU_Tools_for_ARM_Embedded_Processors 13.3 and RealThread PyOCD 0.2.9 (`check_tools.sh` lists
   what is missing). Studio brings the RT-Thread env (scons).
-- Workspace path ≤100 characters, English characters only; each app is a standalone ~38 MB copy.
+- Workspace path ≤100 characters, English characters only; each app is a standalone ~40 MB copy.
 
 ## Commands
 
@@ -39,15 +39,20 @@ S=skills/scons-rtthread-visionboard/scripts
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `Created ...` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - import into the RT-Thread Studio workspace + start Studio | `IDE: READY` |
+| 2 compose (read-only) | `bash $S/recipe.sh check apps/<app> <recipe>...` - HW driver recipes (`recipe.sh list`) | `RECIPE: READY` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 4 connect | `bash $S/discover.sh <board> [--serial <probe-serial>]` | `IDENTITY: PASS` |
 | 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
 | 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 7 status | `python $S/msh_status.py auto --board <board>` - version, msh commands, threads, heap, devices (read-only) | `MSH: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `vision-board`. Templates: `hello-world`, `blink`, `push-to-light` (msh commands `info`, `led`, `btn`;
 KEY0 toggles LED1 = the blue LED). An app is the SDK's blink project + RT-Thread + a layered `src/`,
-already synced as an RT-Thread Studio project (GCC 13.3). flash.sh writes code flash only - never
+already synced as an RT-Thread Studio project (GCC 13.3); its FSP side (configuration.xml, ra_gen/) comes
+from the SDK's openmv project, so every peripheral of the driver recipes is generated but none is enabled.
+On-board extras reached by recipes: RW007 Wi-Fi module on SPI1 (`rw007`, tested 2026-10-31: scan,
+join, ping), SD card slot (`sdcard`), camera bus (`i2c1-soft`), LCD backlight and touch (`pwm6`, `sci3-i2c`). flash.sh writes code flash only - never
 the FSP's option-setting memory - and reads every byte back.
 
 Example - hello-world on a Vision Board:
