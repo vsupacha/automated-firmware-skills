@@ -29,6 +29,15 @@ verification log, not here.
   `update_tools.sh <board> [--apply --yes]` in the STM32 CubeMX skills: compares every pin with
   this PC, asks with `ACTION: APPROVE`, re-pins and logs "not re-qualified yet". See
   docs/workflow.md "Tool updates".
+- RT-Thread msh in the tools (`lib/msh.py`): the Vision Board tests first check that the image's
+  `help` lists every command the spec sends (step `command list`), and new `msh_status.py` (stage 7
+  status without a probe) reads version, exported commands, threads with stack use, heap and devices
+  from the running image.
+  Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
+  hardware (GCC 13.3 image, 17/17).
+- `update_tools.sh` for `scons-rtthread-visionboard`: compares the RT-Thread Studio SDK Manager
+  packages pinned in the profile (board support package, GNU Arm toolchain, pyOCD) with the versions
+  installed side by side; same gates as the STM32 skills.
 
 - Per-vendor plugins: `firmware-stm32`, `firmware-platformio`, `firmware-modustoolbox`,
   `firmware-rtthread` (each pulls in `firmware-tools`), next to the all-in-one

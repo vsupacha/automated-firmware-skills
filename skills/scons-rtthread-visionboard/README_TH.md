@@ -41,12 +41,14 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 | --- | --- | --- |
 | "ขอวิธีใช้หน่อย" | `help.sh` | เมนูคำสั่ง บอร์ด และ template |
 | "ตรวจเครื่องมือสำหรับ RT-Thread Vision Board ให้หน่อย" | `check_tools.sh vision-board` | `missing/bad=0`; แถว BAD บอกว่าต้องติดตั้งอะไร |
+| "เครื่องมือยังเป็นเวอร์ชันที่ pin ไว้ไหม" | `update_tools.sh vision-board` | `UPDATE: NONE` หรือคำถามก่อนแก้ pin |
 | "สร้างแอป hello-world ชื่อ hello" | `new_app.sh vision-board hello "" hello-world` | `Created <โฟลเดอร์แอป>` (ครั้งแรกบนเครื่อง: ถามที่เก็บแอป) |
 | "เปิดใน IDE" | `open_ide.sh <app>` (new_app เปิดให้เอง) | `IDE: OPENED` - RT-Thread Studio |
 | "build ให้หน่อย" | `build.sh <app>` | `BUILD: PASS` ไม่มี warning + manifest (เวอร์ชันเครื่องมือ, hash ของ image) |
 | "หาบอร์ดที่ต่ออยู่" | `discover.sh vision-board` | `IDENTITY: PASS` - อ่านอย่างเดียว บันทึก probe และ console port ของเครื่องนี้ |
 | "แฟลชเลย" | `flash.sh <app> --yes` **หลังคุณตอบ yes** | `FLASH: PASS` |
 | "ทดสอบ" | `serial_test.py auto <app>/tests/hello_world.json ...` | `RESULT: PASS (n/n passed ...)` |
+| "บนบอร์ดรันอะไรอยู่" | `msh_status.py auto --board vision-board` | `MSH: PASS` - เวอร์ชัน RT-Thread, คำสั่ง msh ทั้งหมดพร้อมคำอธิบาย, thread และการใช้ stack, heap, device (อ่านอย่างเดียว ไม่ใช้ probe) |
 | "ทดสอบแบบกดปุ่ม" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (แอป push-to-light) | กด KEY0 เมื่อถูกบอก แล้วดู blue LED (P102) |
 | "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
 

@@ -45,7 +45,7 @@ Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own 
 | --- | --- | --- | --- | --- | --- |
 | **M1 bring-up** | 0 | help | `help.sh [--en]` | - | no |
 | | 1 | setup | `check_tools.sh <board>` | `missing/bad=0` | no |
-| | 1b | tool updates | `update_tools.sh <board> [--apply --yes]` (STM32 CubeMX skills so far) - see [Tool updates](#tool-updates) | `UPDATE: NONE` / `UPDATE: APPLIED n` | no |
+| | 1b | tool updates | `update_tools.sh <board> [--apply --yes]` (STM32 CubeMX skills, RT-Thread so far) - see [Tool updates](#tool-updates) | `UPDATE: NONE` / `UPDATE: APPLIED n` | no |
 | | 2 | create | `new_app.sh <board> <app> [ws\|""] [template] [--no-open]` (+ `regen.sh` for generator tools) | `Created ...` / `REGEN: PASS` | no |
 | | 2d | open in IDE | `open_ide.sh <app> [--no-open]` (new_app.sh runs it) - see [IDE handoff](#ide-handoff-stage-2d) | `IDE: READY` | no |
 | | 2e | code | edit `src/` in layers (board > func > app) - the developer in the IDE or the agent; rules: [board-api.md](board-api.md) | stage 3 build + stage 9 layer check | no |
@@ -316,7 +316,8 @@ regen + build (0 warnings), flash (asks first), the bring-up tests, and for an e
 IDE path once in VS Code (open, build, debug, no "fix"/"configure" prompt). Then add the dated result
 line. The profile diff (old -> new pins) plus that line is the evidence for the upgrade.
 
-`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6, WB55); the `IDE_EXT_VERSION` check in
+`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6, WB55) and the RT-Thread skill
+(SDK Manager packages: BSP, GNU Arm, pyOCD); the `IDE_EXT_VERSION` check in
 `check_tools.sh` covers every skill whose profile sets it (STM32 and ModusToolbox).
 
 ## Common options

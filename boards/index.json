@@ -286,11 +286,11 @@
       "profiles": {
         "scons-rtthread-visionboard": {
           "level": "tested",
-          "date": "2026-10-09",
+          "date": "2026-10-31",
           "templates": {
             "hello-world": "tested",
             "blink": "built",
-            "push-to-light": "built"
+            "push-to-light": "tested"
           },
           "log": "boards/vision-board/scons-rtthread-visionboard/README.md"
         }

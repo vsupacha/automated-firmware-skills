@@ -5,7 +5,7 @@ ART-Link (CMSIS-DAP) debugger. Tool-independent hardware sheet.
 
 | Profile | Skill | Status |
 | --- | --- | --- |
-| [scons-rtthread-visionboard/](scons-rtthread-visionboard/README.md) | [`skills/scons-rtthread-visionboard`](../../skills/scons-rtthread-visionboard/README.md) ([ไทย](../../skills/scons-rtthread-visionboard/README_TH.md)) (RT-Thread 5.0.2 + scons + pyOCD, RT-Thread Studio) | hello-world tested on hardware |
+| [scons-rtthread-visionboard/](scons-rtthread-visionboard/README.md) | [`skills/scons-rtthread-visionboard`](../../skills/scons-rtthread-visionboard/README.md) ([ไทย](../../skills/scons-rtthread-visionboard/README_TH.md)) (RT-Thread 5.0.2 + scons + pyOCD, RT-Thread Studio) | hello-world, push-to-light tested on hardware |
 
 ## Bring-up demos
 
@@ -13,7 +13,7 @@ ART-Link (CMSIS-DAP) debugger. Tool-independent hardware sheet.
 | --- | --- | --- |
 | hello-world | console: ART-Link virtual COM port (msh) | tested |
 | blink | LED1 = blue LED (P102) | built |
-| push-to-light | BTN1 = KEY0 toggles LED1 | built |
+| push-to-light | BTN1 = KEY0 toggles LED1 | tested |
 
 Levels: built < flashed < tested (automatic test PASS) < interactive (a person pressed a
 button) < observed (a person saw the LED). \* = verified under its earlier name `uart-btn-led`

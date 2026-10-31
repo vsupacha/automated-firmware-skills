@@ -14,10 +14,17 @@ details in `reference/`. Bash: Git Bash on Windows (Claude's Bash tool). Every t
 the RT-Thread env (scons) and RT-Thread's pyOCD with the Renesas RA packs.
 
 ```
-1 tools ─► 2 project + IDE ─► 3 build ─► 4 connect ─► 5 flash ─► 6 test ─► 16 clean
-check_tools  new_app            build.sh   discover     flash.sh   serial_test  clean.sh
-             open_ide (Studio)  (scons)    (pyOCD)      (pyOCD)    (msh)
+1 tools ─► 2 project + IDE ─► 3 build ─► 4 connect ─► 5 flash ─► 6 test ─► 7 status ─► 16 clean
+check_tools  new_app            build.sh   discover     flash.sh   serial_test  msh_status  clean.sh
+             open_ide (Studio)  (scons)    (pyOCD)      (pyOCD)    (msh)        (msh)
 ```
+
+**RT-Thread's own strength:** the msh shell is always on the console, and every command the code
+exports with `MSH_CMD_EXPORT` / `MSH_CMD_EXPORT_ALIAS` is listed by `help` with its description.
+The tools use that: the tests first check that the image exports every command the spec sends, and
+`msh_status.py` reads version, commands, threads (stack use), heap and devices from the running image
+- no debug probe, no halt. A new app command = one `MSH_CMD_EXPORT_ALIAS(fn, name, description)` in
+`src/`; it shows up in `help`, in `msh_status.py` and can be used in `tests/*.json` at once.
 
 **Two paths after Stage 2** (`docs/workflow.md`): the developer may code in RT-Thread Studio at any
 time - the **IDE path** (`new_app.sh` already imported the app; `open_ide.sh <app>` starts Studio;
@@ -34,7 +41,7 @@ This skill implements the shared contract in `docs/workflow.md` (repo root):
 | Milestone | Shared stage | In this file |
 | --- | --- | --- |
 | M1 bring-up | 1 setup, 2 create, 2d IDE, 3 build | Stage 1, Stage 2, Stage 3 |
-| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(Studio's pyOCD debug; script planned)* | Stage 4, Stage 5, Stage 6 |
+| M1 bring-up (board) | 4 connect, 5 flash, 6 test, 7 debug *(status over msh: `msh_status.py`; breakpoints: Studio's pyOCD debug, script planned)* | Stage 4, Stage 5, Stage 6, Stage 7 |
 | M2 board support | 8 board drivers *(planned)*, 9 layer check, 10 host test *(planned)* | Stage 3 rules, `check_layers.py` |
 | M3 execution, M4 components, M5 application | 11 execution + trace, 12 components, 13 profile *(planned)* | - |
 | - | 14 export *(planned)*, 15 port *(planned)* | Extending |
@@ -122,6 +129,13 @@ Python 3.11 + scons 4.10, as Studio; else env Python 2.7), pyOCD + the `Renesas.
 python + pyserial, connected probes. Read-only. **Gate:** `missing/bad=0`; report every WARN.
 Missing pieces are installed in Studio's SDK Manager by the user - never by you.
 
+**Tool updates (stage 1b):** `bash "$SKILL/scripts/update_tools.sh" <board-id>` compares the SDK
+Manager packages pinned in the board profile (`BSP_VERSION`, `GCC_VERSION`, `PYOCD_VERSION`) with the
+versions installed side by side on this PC. Read-only. **Gate:** `UPDATE: NONE`, or `UPDATE:
+AVAILABLE n` + exit 10 `ACTION: APPROVE` - ask the developer; only after a yes run it again with
+`--apply --yes` (re-pins the profile, logs "not re-qualified"), then re-qualify: new_app + build,
+flash (asks first) and the tests. Run it after the user installed or updated packages in SDK Manager.
+
 ## Stage 2 - Create the project and open it in the IDE
 
 1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
@@ -207,9 +221,24 @@ Spec format (`tests/*.json` keys, JSON escaping, what is not measured): `docs/wo
 python "$SKILL/scripts/serial_test.py" auto <app>/tests/<spec>.json <app>/logs/test-<ts>.log --board <id> [--interactive | --only-interactive]
 ```
 `auto` = the COM port whose USB serial is the bench probe serial. Default `--sync` sends `info`
-until `READY`, checks `board=<id>`, runs the steps. Interactive steps (LED colours, press KEY0)
+until `READY`, checks `board=<id>`, then asks `help` and checks that every command the spec sends is
+exported by the image (step `command list`; a step that expects `command not found` is left out) -
+a stale or wrong image fails there, before the steps run. Then it runs the steps. Interactive steps (LED colours, press KEY0)
 only with `--interactive`: tell the user what to look at first. **Gate:** `RESULT: PASS`. `led`
 reads the pins back; only a human confirms the colours.
+
+## Stage 7 - Status over msh (no debug probe)
+
+```bash
+python "$SKILL/scripts/msh_status.py" auto --board <id> [--json <app>/logs/status-<ts>.json] [--log <app>/logs/status-<ts>.log]
+```
+Runs only read-only built-in commands on the running image - `version`, `help`, `ps`, `free`,
+`list device` - and prints the RT-Thread version, every exported command with its description,
+threads (priority, status, stack size, max stack use), heap and devices. No halt, no reset, nothing
+written. Use it after a flash, when a test fails ("which commands does this image have?"), or to
+watch stack use while developing. **Gate:** `MSH: PASS`; `MSH: WARNINGS n` (exit 2) when a thread
+used >= 90 % of its stack or a command did not return to the prompt - report them; `MSH: FAIL` when no
+shell answers (image not running, wrong port). Breakpoints / watchpoints stay with Studio's debugger.
 
 ## Stage 16 - Clean
 

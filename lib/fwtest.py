@@ -2,7 +2,9 @@
 
 Each skill has a thin scripts/serial_test.py that calls run(cfg) with its own port lookup:
   cfg = {skill_dir, env_prefix (PSE84|PICO|CUBE), serial_key (bench variable with the USB serial of
-         the console), serial_env (env override suffix), vid_key, default_vid (hex), title}
+         the console), serial_env (env override suffix), vid_key, default_vid (hex), title,
+         command_list (optional: "msh" = after sync, ask RT-Thread's `help` and FAIL the step
+         "command list" when a command the spec sends is not exported by the image - lib/msh.py)}
 
 
 Usage:
@@ -291,6 +293,23 @@ def run(cfg):
                 note(("PASS" if same else "FAIL") + f" running image reports board={args.board}")
                 results.append(("board identity", same))
                 ok = ok and same
+            if ok and cfg.get("command_list") == "msh":
+                # RT-Thread: the image lists its exported commands - every command the spec sends must be there
+                import msh
+                time.sleep(0.2)
+                lines, _ = msh.Console(s, lambda m: note(m, echo=False)).run("help", timeout=3.0)
+                rd.buf = b""
+                cmds = msh.parse_help(lines)
+                # steps that expect "command not found" send an unknown command on purpose
+                sent = [st["send"] for st in spec["steps"] if st.get("send")
+                        and not any("not found" in x for x in st.get("expect", []) + st.get("expect_re", []))]
+                sent.append(spec.get("sync", {}).get("send", "info"))
+                missing = sorted({msh.first_word(c) for c in sent if c.strip()} - set(cmds))
+                note(f"commands in the image ({len(cmds)}): {' '.join(cmds)}")
+                surface = bool(cmds) and not missing
+                note(("PASS" if surface else "FAIL") + " spec commands exported by the image"
+                     + ("" if surface else f"  missing={missing or ['(help listed nothing)']}"))
+                results.append(("command list", surface))
             if ok:
                 time.sleep(0.2)
                 for st in spec["steps"]:

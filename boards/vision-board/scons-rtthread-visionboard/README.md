@@ -32,3 +32,10 @@ range). Hardware: [../README.md](../README.md).
 - 2026-10-09 template `uart-btn-led` renamed `push-to-light` (same code apart from the app
   name) - build PASS 0 warnings; new template `blink` (LED1 every 0.5 s) - build PASS 0
   warnings. Both built only, not flashed (the earlier results above were with the old name).
+- 2026-10-31 `push-to-light` on hardware (app `pt-vb`, SDK 1.3.0, GCC 13.3.1, scons 4.10.0, pyOCD
+  0.2.9): build PASS 0 warnings, app.hex `01a50306...`; discover IDENTITY PASS; the board's previous
+  firmware was backed up first (read-only savemem of the 2 MB code flash, kept outside git); flash:
+  9 sectors erased, 519 pages, 66360 bytes read back equal - the first GCC 13.3 image on the board.
+  `msh_status.py`: 11 msh commands (`info`, `led`, `btn` + built-ins), 4 threads, memheap pools
+  `sdram` + `heap` - MSH: PASS. Test `push_to_light.json`: step "spec commands exported by the
+  image" PASS, RESULT PASS 17/17 (10 interactive steps skipped - nobody looked at the LEDs).
