@@ -35,6 +35,9 @@ verification log, not here.
   from the running image.
   Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
   hardware (GCC 13.3 image, 17/17).
+- `recipe.sh apply <app> <recipe>... [--yes]`: writes what `check` asks for (never FSP), backs up
+  replaced files, re-checks, re-syncs the Studio project; dry run without `--yes`. The drv_gpio.c fix
+  moved to the `base` recipe and `new_app.sh` (every new app). Nine recipes in one app: READY, build PASS.
 - Recipes `usb-cdc` (TinyUSB CDC on the user USB-OTG port) and `at-cdc` (RT-Thread AT server on a CDC
   rt_device + AT command layer `src/at/` on the function layer) - tested on the board (AT 12/12).
   `usb-cdc` patches the SDK's drv_gpio.c (every rt_pin_mode() re-applied the FSP pin setup and

@@ -17,6 +17,7 @@ the RT-Thread env (scons) and RT-Thread's pyOCD with the Renesas RA packs.
 1 tools ─► 2 project + IDE ─► 3 build ─► 4 connect ─► 5 flash ─► 6 test ─► 7 status ─► 16 clean
 check_tools  new_app            build.sh   discover     flash.sh   serial_test  msh_status  clean.sh
              open_ide (Studio)  (scons)    (pyOCD)      (pyOCD)    (msh)        (msh)
+             recipe.sh check/apply (2c: drivers + components)
 ```
 
 **RT-Thread's own strength:** the msh shell is always on the console, and every command the code
@@ -85,17 +86,19 @@ Studio workspace is `<apps>/.rtstudio` (per-PC metadata, git-ignored). Board pro
 ```
 apps/<app>/                 (~40 MB: a standalone copy - Studio needs real folders)
   SConstruct SConscript rtconfig.py rtconfig.h Kconfig    RT-Thread project (rtconfig.py: GCC, -DBOARD_<ID>)
-  board/ ra/ ra_gen/ ra_cfg/ script/                      the SDK project's BSP + FSP (generated - do not edit)
+  board/ ra/ ra_gen/ ra_cfg/ script/                      the SDK project's BSP + FSP from FSP_PROJECT (generated - recipes
+                                                          add board ports, Kconfig blocks, the AT linker section)
   rt-thread/                                              RT-Thread 5.0.2 (without docs/examples)
   libraries/HAL_Drivers/                                  RT-Thread drivers for RA
   src/board/board_io.*    board layer: pins (BSP_IO_PORT_xx_PIN_yy), rt_pin_* calls
   src/func/               services in C: led, button (debounce with the kernel tick)
   src/hal_entry.c         execution: hal_entry() in the main thread + msh commands
-  src/SConscript          compiles src/board + src/func (-Wextra)
+  src/at/                 layer 3b (recipe at-cdc): AT commands on the function layer, a peer of the msh commands
+  src/SConscript          compiles src/board + src/func + src/at (-Wextra)
   tests/<spec>.json       test contract (msh flavour: `led` / `btn` instead of `led?` / `btn?`)
   .project .cproject .settings/  RT-Thread Studio project (named <app>, GCC 13.3, synced with scons)
-  rtt-app.env             record: board, template, SDK, GCC
-  build/ logs/ Debug/     build outputs and logs (git-ignored; Debug/ = Studio's build)
+  rtt-app.env             record: board, template, SDK, FSP project, GCC, applied recipes (APP_RECIPES)
+  build/ logs/ Debug/     build outputs and logs (git-ignored; Debug/ = Studio's build; logs/recipe-backup-*)
 ```
 
 ## Board type vs bench instance
@@ -170,25 +173,32 @@ flash (asks first) and the tests. Run it after the user installed or updated pac
    `rtthread.hex`, which contains the FSP option-setting sections** - tell the developer; the
    script path never writes them.
 
-**HW driver recipes (before coding, read-only):** `bash "$SKILL/scripts/recipe.sh" check <app>
-<recipe>...` (`list` names them: `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6 usb-cdc` + software components
-`sdcard-fat`, `at-cdc`). A recipe is Kconfig
-level (`recipes/drivers/<name>.json`): its values are derived from the one SDK example project
-whose README is about that hardware (`recipe.sh derive`, maintainers); `check` resolves
-it on the app's Kconfig tree and lists what must exist first. **Gate:** `RECIPE: READY` | `RECIPE:
-ACTION n` (exit 10: `KCONFIG` board/Kconfig block, `FSP` instance in `ra_gen/` - FSP configurator,
-the developer's step -, `PORT` board port, `PACKAGE` source, `FILE` file to take from the SDK project or the skill, `INSERT` text
-to add, `PATCH` vendor fix, `SOURCE` source fact) | `RECIPE: FAIL` (pin or peripheral
-taken twice). It writes nothing; tell the developer the ACTION lines. See `recipes/README.md`.
-Applying a recipe is not scripted yet: with the developer's go-ahead, do what the ACTION lines say
-(board/Kconfig block, ports, packages + `packages/SConscript` from the named SDK project; recipe
-values into `.config` with kconfiglib, then `rtconfig.h` with RT-Thread's `mk_rtconfig`), re-run
-`check` until `RECIPE: READY`, then build (`recipes/README.md` "On the board"). Tested on hardware:
-`spi1` + `rw007` (msh `wifi scan`, `wifi join`, `ping`), `sdcard` + `sdcard-fat` (FAT write),
-`usb-cdc` + `at-cdc` (AT commands on the user USB port; layer 3b `src/at/`); the others are `prepared`.
-A recipe test spec runs with `serial_test.py` - on the console, or for `at-cdc` on the CDC port
-(`serial_test.py COMx <skill>/recipes/tests/at_cdc.json <log> --board <id>`; needs a data cable on the
-user USB-OTG port).
+**HW driver and software-component recipes (stage 2c, before coding):**
+`bash "$SKILL/scripts/recipe.sh" list` names them: hardware `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6
+usb-cdc`, software `sdcard-fat at-cdc` (`requires` pulls in what a recipe needs). A recipe is Kconfig
+level (`recipes/drivers/<name>.json`): its values come from the one SDK example project whose README
+is about that hardware (`recipe.sh derive`, maintainers), or from the RT-Thread component for software
+without an SDK example (`at-cdc`).
+1. `bash "$SKILL/scripts/recipe.sh" check <app> <recipe>...` (read-only) resolves them on the app's
+   Kconfig tree. **Gate:** `RECIPE: READY` | `RECIPE: ACTION n` (exit 10: `KCONFIG` board/Kconfig block,
+   `FSP` instance in `ra_gen/`, `PORT` board port, `PACKAGE` source, `FILE` file from the SDK project or
+   the skill, `INSERT` text to add, `PATCH` SDK fix, `SOURCE` source fact) | `RECIPE: FAIL` (pin or
+   peripheral taken twice, unknown recipe).
+2. `bash "$SKILL/scripts/recipe.sh" apply <app> <recipe>...` lists what it would write
+   (`ACTION: APPROVE`, exit 10) - **ask the developer**, then the same with `--yes`: it copies the SDK
+   or skill files, patches and inserts, sets the recipe values in `.config` (kconfiglib) and writes
+   `rtconfig.h` (RT-Thread's `mk_rtconfig`), records `APP_RECIPES` in `rtt-app.env`, backs up every file
+   it replaces to `<app>/logs/recipe-backup-<time>/`, re-checks and re-syncs the Studio project.
+   **Gate:** `APPLY: DONE` (then build.sh) | `APPLY: NOT DONE` (exit 10 while an FSP instance is missing -
+   the FSP configurator is the developer's step; nothing written).
+3. Build, flash, then check on the board what apply printed: `msh_status.py` (devices, commands,
+   threads) and the recipe's test spec (`serial_test.py <port> <skill>/recipes/tests/<spec>.json ...`).
+New apps already have every FSP instance of the recipes (`FSP_PROJECT`, openmv) and the base recipe's
+SDK fix (drv_gpio.c opens IOPORT once). Tested on hardware: `spi1` + `rw007` (msh `wifi scan`,
+`wifi join`, `ping`), `sdcard` + `sdcard-fat` (FAT write, kept across a reboot), `usb-cdc` + `at-cdc`
+(AT commands on the user USB port, layer 3b `src/at/`; the CDC test needs a data cable on the user
+USB-OTG port: `serial_test.py COMx <skill>/recipes/tests/at_cdc.json <log> --board <id>`); the others are
+`prepared`. All nine together build (2026-10-31). See `recipes/README.md`.
 
 **Wi-Fi (rw007) over msh:** `wifi scan` (no credentials), `wifi join <ssid> <password>`,
 `wifi status`, `ifconfig`, `ping <host>`. Credentials come from the developer only; never write

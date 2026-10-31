@@ -11,6 +11,7 @@
 #   examples), libraries/HAL_Drivers + libraries/Kconfig; src/ = templates/_common/src (board/,
 #   func/, SConscript) + the template's src (hal_entry.c); tests/; rtt-app.env (record).
 #   -DBOARD_<ID> goes into rtconfig.py (scons) and .cproject (Studio's managed build).
+#   SDK fixes from recipes/drivers/base.json "patches" (drv_gpio.c: open IOPORT once).
 #   FSP_PROJECT (profile, optional): the FSP side - configuration.xml, ra/ ra_cfg/ ra_gen/, linker
 #   scripts - comes from that SDK project instead (more peripherals generated, none integrated: the
 #   Kconfig/.config/board stay BSP_PROJECT's, so no driver is enabled). Interrupt handlers its vector
@@ -46,6 +47,21 @@ mkdir -p "$APPDIR" "$APPDIR/libraries"
   | ( cd "$APPDIR" && tar xf - ) || die "copy of rt-thread failed"
 cp -r "$BSP_DIR/libraries/HAL_Drivers" "$APPDIR/libraries/" && cp "$BSP_DIR/libraries/Kconfig" "$APPDIR/libraries/" \
   || die "copy of libraries failed"
+
+# SDK fixes every app needs (recipes/drivers/base.json "patches"; recipe.sh check reports them for
+# older apps): drv_gpio.c opens IOPORT once - re-opening re-applied the FSP pin setup on every rt_pin_mode()
+"$PYTHON" - "$(winpath "$APPDIR")" "$(winpath "$SKILL_DIR/recipes/drivers/base.json")" <<'EOF' || die "applying the base recipe's SDK patches failed"
+import json, sys
+from pathlib import Path
+app, base = Path(sys.argv[1]), json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+for pt in base.get("patches", []):
+    f = app / pt["path"]
+    txt = f.read_text(encoding="utf-8")
+    if pt["marker"] not in txt:
+        if txt.count(pt["old"]) != 1:
+            sys.exit(f"{pt['path']}: text to patch not found once")
+        f.write_text(txt.replace(pt["old"], pt["new"]), encoding="utf-8", newline="")
+EOF
 
 # FSP side from FSP_PROJECT (see the header); the RT-Thread side (Kconfig, .config, board/) stays
 if [ -n "$FSP_PROJECT" ] && [ "$FSP_PROJECT" != "$BSP_PROJECT" ]; then

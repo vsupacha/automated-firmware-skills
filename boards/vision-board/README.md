@@ -39,7 +39,7 @@ S=skills/scons-rtthread-visionboard/scripts
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `Created ...` |
 | 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - import into the RT-Thread Studio workspace + start Studio | `IDE: READY` |
-| 2 compose (read-only) | `bash $S/recipe.sh check apps/<app> <recipe>...` - HW driver recipes (`recipe.sh list`) | `RECIPE: READY` |
+| 2 compose | `bash $S/recipe.sh check apps/<app> <recipe>...` (read-only), `bash $S/recipe.sh apply apps/<app> <recipe>... [--yes]` - driver and component recipes (`recipe.sh list`) | `RECIPE: READY`, `APPLY: DONE` |
 | 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 4 connect | `bash $S/discover.sh <board> [--serial <probe-serial>]` | `IDENTITY: PASS` |
 | 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |

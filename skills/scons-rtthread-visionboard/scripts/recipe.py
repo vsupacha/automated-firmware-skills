@@ -4,6 +4,7 @@
 Usage (normally through recipe.sh, which sets the SDK paths from the board profile):
   python recipe.py list
   python recipe.py check <app-dir> <recipe> [<recipe> ...] [--show]
+  python recipe.py apply <app-dir> <recipe> [<recipe> ...] [--yes]
   python recipe.py derive <recipe> [--write]      (maintainer: values from the recipe's SDK project)
 
 A recipe (<skill>/recipes/drivers/<name>.json) is Kconfig level: the values it sets on top of the
@@ -19,7 +20,15 @@ anchors' definitions ("kconfig_defs") shows when an app's board/Kconfig defines 
 check resolves the recipes with kconfiglib on the app's Kconfig tree (selects, depends, defaults -
 as menuconfig would), then reports. Nothing is written: not .config, not rtconfig.h.
 Gate: "RECIPE: READY" (exit 0) | "RECIPE: ACTION n" (exit 10, with one "ACTION: ..." line per missing
-precondition) | "RECIPE: FAIL" (exit 1: unknown recipe or symbol, pin/peripheral clash).
+precondition: KCONFIG, FSP, PORT, PACKAGE, FILE, INSERT, PATCH, SOURCE) | "RECIPE: FAIL" (exit 1:
+unknown recipe or symbol, pin/peripheral clash).
+apply does what the ACTION lines say, except FSP (the FSP configurator is the developer's step: apply
+writes nothing while an FSP instance is missing): board/Kconfig blocks from the recipe's SDK project,
+board ports and packages from the SDK, files from the SDK or the skill, inserts, patches, the recipe
+values into .config (kconfiglib) and rtconfig.h (RT-Thread's mk_rtconfig); APP_RECIPES in rtt-app.env.
+Without --yes it only lists what it would write ("ACTION: APPROVE", exit 10); with --yes every file it
+replaces is copied to <app>/logs/recipe-backup-<time>/ first, and the run ends with a check that must
+say "RECIPE: READY" ("APPLY: DONE", exit 0). recipe.sh then re-syncs the RT-Thread Studio project.
 """
 import argparse
 import json
@@ -54,7 +63,7 @@ def cmd_list():
     for f in sorted(RECIPES.glob("*.json")):
         r = json.loads(f.read_text(encoding="utf-8"))
         req = f" (requires {', '.join(r['requires'])})" if r.get("requires") else ""
-        print(f"{r['recipe']:<10} {r.get('kind', ''):<11} {r['status']:<9} {r['summary']}{req}")
+        print(f"{r['recipe']:<11} {r.get('kind', ''):<13} {r['status']:<9} {r['summary']}{req}")
 
 
 def kconfig_tree(app):
@@ -222,7 +231,8 @@ def cmd_derive(name, write):
         print(f"  written: {f.name}")
 
 
-def cmd_check(app, names, show):
+def evaluate(app, names, show=False):
+    """(recipes, errors, actions) for the app - the work of check, without the gate"""
     app = Path(app).resolve()
     if not (app / "Kconfig").is_file() or not (app / ".config").is_file():
         print(f"RECIPE: FAIL ({app} is not an RT-Thread app: no Kconfig / .config)")
@@ -331,11 +341,22 @@ def cmd_check(app, names, show):
                 else:
                     actions.append(line)
 
+    return recipes, errors, actions
+
+
+def print_board_expectations(recipes):
     for r in recipes:
         m = r.get("msh", {})
         if m:
             parts = [f"{k2} {' '.join(v)}" for k2, v in m.items() if v]
             print(f"on the board ({r['recipe']}): msh_status.py should show {'; '.join(parts)}")
+        if r.get("test"):
+            print(f"test ({r['recipe']}): serial_test.py <port> <skill>/{r['test']} <log> --board <id>")
+
+
+def cmd_check(app, names, show):
+    recipes, errors, actions = evaluate(app, names, show)
+    print_board_expectations(recipes)
     for e in errors:
         print(f"ERROR {e}")
     for a in actions:
@@ -349,18 +370,158 @@ def cmd_check(app, names, show):
     print("RECIPE: READY")
 
 
+def kconfig_block(text, sym):
+    """(start, end, lines) of the 'config/menuconfig SYM' entry with its following 'if SYM ... endif'"""
+    lines = text.splitlines(keepends=True)
+    start = next(i for i, ln in enumerate(lines) if re.match(rf"\s*(menu)?config {sym}\s*$", ln))
+    end = start + 1
+    while end < len(lines) and not re.match(r"\s*(menu)?config |\s*if |\s*endmenu|\s*endif", lines[end]):
+        end += 1
+    if end < len(lines) and re.match(rf"\s*if {sym}\b", lines[end]):
+        depth = 0
+        while end < len(lines):
+            if re.match(r"\s*if\b", lines[end]):
+                depth += 1
+            elif re.match(r"\s*endif\b", lines[end]):
+                depth -= 1
+                if depth == 0:
+                    end += 1
+                    break
+            end += 1
+    return start, end, lines
+
+
+def cmd_apply(app_arg, names, yes):
+    """write what the recipes need into the app (see the module doc)"""
+    import shutil
+    import time
+    app = Path(app_arg).resolve()
+    recipes, errors, actions = evaluate(app, names)
+    if errors:
+        for e in errors:
+            print(f"ERROR {e}")
+        print("RECIPE: FAIL")
+        sys.exit(1)
+    fsp = [a for a in actions if a.startswith("FSP ")]
+    if fsp:
+        for a in fsp:
+            print(f"ACTION: {a}")
+        print(f"APPLY: NOT DONE - {len(fsp)} FSP instance(s) missing; nothing written")
+        sys.exit(10)
+    sdk = sdk_dir()
+    k = kconfig_tree(app)
+    plan = []                                    # (kind, relative path, function doing it)
+    for r in recipes:
+        for sym, h in r.get("kconfig_defs", {}).items():
+            if h and def_hash(k, sym) != h:
+                def do(r=r, sym=sym):
+                    s0, s1, sl = kconfig_block((sdk / "projects" / r["project"] / "board" / "Kconfig").read_text(encoding="utf-8"), sym)
+                    f = app / "board" / "Kconfig"
+                    d0, d1, dl = kconfig_block(f.read_text(encoding="utf-8"), sym)
+                    f.write_text("".join(dl[:d0] + sl[s0:s1] + dl[d1:]), encoding="utf-8", newline="")
+                plan.append((f"Kconfig block {sym} from projects/{r['project']}", "board/Kconfig", do))
+        for x in r.get("ports", []) + [q for q in r.get("packages", []) if not q.get("optional")]:
+            if not (app / x["dir"]).is_dir():
+                plan.append((f"copy folder from the SDK {x['from']}", x["dir"],
+                             lambda x=x: shutil.copytree(sdk / x["from"], app / x["dir"])))
+        if any(q["dir"].startswith("packages/") for q in r.get("packages", [])) and not (app / "packages" / "SConscript").is_file():
+            plan.append((f"copy from the SDK projects/{r['project']}/packages/SConscript", "packages/SConscript",
+                         lambda r=r: shutil.copyfile(sdk / "projects" / r["project"] / "packages" / "SConscript",
+                                                     app / "packages" / "SConscript")))
+        for fl in r.get("files", []):
+            ref = SKILL_DIR / fl["from_skill"] if fl.get("from_skill") else sdk / fl["from"]
+            mine = app / fl["path"]
+            if not mine.is_file() or mine.read_bytes().replace(b"\r\n", b"\n") != ref.read_bytes().replace(b"\r\n", b"\n"):
+                def do(ref=ref, mine=mine):
+                    mine.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(ref, mine)
+                plan.append((f"copy {'<skill>/' + fl['from_skill'] if fl.get('from_skill') else 'the SDK ' + fl['from']}", fl["path"], do))
+        for pt in r.get("patches", []):
+            f = app / pt["path"]
+            if pt["marker"] not in f.read_text(encoding="utf-8", errors="replace"):
+                txt = f.read_text(encoding="utf-8")
+                if txt.count(pt["old"]) != 1:
+                    print(f"APPLY: NOT DONE - {pt['path']}: the text to patch was not found once; nothing written")
+                    sys.exit(1)
+                plan.append(("patch: " + pt["what"].split(":")[0], pt["path"],
+                             lambda f=f, pt=pt: f.write_text(f.read_text(encoding="utf-8").replace(pt["old"], pt["new"]),
+                                                             encoding="utf-8", newline="")))
+        for ins in r.get("inserts", []):
+            f = app / ins["path"]
+            txt = f.read_text(encoding="utf-8")
+            if ins["marker"] not in txt:
+                if txt.count(ins["anchor"]) != 1:
+                    print(f"APPLY: NOT DONE - {ins['path']}: anchor '{ins['anchor']}' not found once; nothing written")
+                    sys.exit(1)
+                new = ins["text"] + ins["anchor"] if ins["where"] == "before" else ins["anchor"] + ins["text"]
+                plan.append((f"insert {ins['marker']}", ins["path"],
+                             lambda f=f, ins=ins, new=new: f.write_text(f.read_text(encoding="utf-8").replace(ins["anchor"], new),
+                                                                        encoding="utf-8", newline="")))
+    plan.append(("recipe values (kconfiglib) -> .config, then rtconfig.h (mk_rtconfig)", ".config + rtconfig.h", None))
+    plan.append(("APP_RECIPES", "rtt-app.env", None))
+    for what, rel, _ in plan:
+        print(f"{'WRITE' if yes else 'WOULD'} {rel:<36} {what}")
+    if not yes:
+        print(f"ACTION: APPROVE recipe.sh apply {app_arg} {' '.join(names)} --yes - writes the {len(plan)} item(s) above "
+              f"into the app (replaced files are backed up to <app>/logs/recipe-backup-<time>/); ask the developer first")
+        sys.exit(10)
+
+    backup = app / "logs" / f"recipe-backup-{time.strftime('%Y%m%d-%H%M%S')}"
+    for _, rel, _ in plan:
+        for part in rel.split(" + "):
+            src = app / part
+            if src.is_file():
+                (backup / part).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(src, backup / part)
+    for _, _, do in plan:
+        if do is not None:
+            do()
+    k = kconfig_tree(app)
+    for r in recipes:
+        for name, val in r.get("kconfig", {}).items():
+            k.syms[name].set_value(val)
+    cwd = os.getcwd()
+    os.chdir(app)
+    try:
+        k.write_config(".config")
+        rtt_tools = app / "rt-thread" / "tools"
+        sys.path.insert(0, str(rtt_tools))
+        from menuconfig import mk_rtconfig
+        mk_rtconfig(".config")
+    finally:
+        os.chdir(cwd)
+    env = app / "rtt-app.env"
+    lines = [ln for ln in env.read_text(encoding="utf-8").splitlines() if not ln.startswith("APP_RECIPES=")]
+    lines.append("APP_RECIPES=" + " ".join(r["recipe"] for r in recipes if r["recipe"] != "base"))
+    env.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    print(f"backup of replaced files: {backup if backup.exists() else '(none replaced)'}")
+    recipes, errors, actions = evaluate(app, names)
+    for a in actions:
+        print(f"ACTION: {a}")
+    if errors or actions:
+        print("APPLY: INCOMPLETE - the check after applying still reports the lines above")
+        sys.exit(1)
+    print_board_expectations(recipes)
+    print("RECIPE: READY")
+    print(f"APPLY: DONE ({len(plan)} item(s)) - next: build.sh {app_arg}")
+
+
 def kconfiglib_expr(sym):
     import kconfiglib
     return kconfiglib.expr_str(sym.direct_dep)
 
 
 def main():
-    ap = argparse.ArgumentParser(description="HW driver recipes (Kconfig level) - read-only check")
+    ap = argparse.ArgumentParser(description="HW driver recipes (Kconfig level): list, check, apply, derive")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list")
     d = sub.add_parser("derive")
     d.add_argument("recipe")
     d.add_argument("--write", action="store_true", help="store kconfig/expect/kconfig_defs in the recipe file")
+    a = sub.add_parser("apply")
+    a.add_argument("app")
+    a.add_argument("recipes", nargs="+")
+    a.add_argument("--yes", action="store_true", help="write (only after the developer agreed)")
     c = sub.add_parser("check")
     c.add_argument("app")
     c.add_argument("recipes", nargs="+")
@@ -370,6 +531,8 @@ def main():
         cmd_list()
     elif args.cmd == "derive":
         cmd_derive(args.recipe, args.write)
+    elif args.cmd == "apply":
+        cmd_apply(args.app, args.recipes, args.yes)
     else:
         cmd_check(args.app, args.recipes, args.show)
 

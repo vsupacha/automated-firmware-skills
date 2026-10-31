@@ -2,12 +2,13 @@
 
 A recipe names one on-chip or on-board driver of the RT-Thread Vision Board BSP and says, before any
 firmware is written, what selecting it means for an app. Level: **Kconfig** (`.config` ->
-`rtconfig.h`). A recipe never generates FSP code (`configuration.xml` -> `ra_gen/`), board ports or
-packages; it states them as preconditions, and `scripts/recipe.sh check` reports which are missing.
+`rtconfig.h`). A recipe never generates FSP code (`configuration.xml` -> `ra_gen/`): it states that as a precondition.
+`recipe.sh check` reports what is missing; `recipe.sh apply` writes everything else (see below).
 
 ```bash
 bash "$SKILL/scripts/recipe.sh" list
 bash "$SKILL/scripts/recipe.sh" check <app> rw007 sdcard [--show]
+bash "$SKILL/scripts/recipe.sh" apply <app> rw007 sdcard [--yes]   # without --yes: what it would write
 bash "$SKILL/scripts/recipe.sh" derive <recipe> [--write]      # maintainer: re-take the values from the SDK
 ```
 
@@ -18,6 +19,21 @@ depends, defaults), sets the recipe values and reports. Read-only. Gate: `RECIPE
 The apps from `new_app.sh` have no `rt-thread/examples`, which `rt-thread/Kconfig` sources, so the
 Kconfig tree of RT-Thread comes from the pinned SDK (same RT-Thread 5.0.2); the package index comes
 from RT-Thread Studio's env (`platform/env_released/env-new/packages`).
+
+## apply
+
+`recipe.sh apply <app> <recipe>...` does what `check`'s ACTION lines say, except `FSP` (nothing is
+written while an FSP instance is missing): `board/Kconfig` blocks from the recipe's SDK project,
+`ports` and `packages` from the SDK (+ `packages/SConscript`), `files` from the SDK or the skill,
+`patches`, `inserts`, then the recipe values into `.config` (kconfiglib, as menuconfig) and
+`rtconfig.h` (RT-Thread's `mk_rtconfig`), and `APP_RECIPES=...` in `rtt-app.env`. Without `--yes` it
+prints one `WOULD <path> <what>` line per item and `ACTION: APPROVE` (exit 10); with `--yes` it copies
+every file it replaces to `<app>/logs/recipe-backup-<time>/`, writes, runs `check` again (must be
+`RECIPE: READY`) and prints `APPLY: DONE` plus what to look for on the board; `recipe.sh` then
+re-syncs the RT-Thread Studio project (`scons --target=eclipse`). 2026-10-31: a new push-to-light app
+with `i2c1-soft rw007 sci3-i2c sdcard-fat pwm6 at-cdc` (nine recipes with their requirements):
+13 items written, `RECIPE: READY` with 0 symbols changed, Studio sync, build PASS (app.hex 1.2 MB as
+hex, text 436 KB) - not flashed. Earlier board tests (below) used a prototype of the same steps.
 
 ## FSP of the apps
 
@@ -90,7 +106,8 @@ RESULT PASS 12/12; console push-to-light still 17/17. Found on the way:
 - **`drv_gpio.c` re-applies the FSP pin setup.** `ra_pin_mode()` calls `R_IOPORT_Open()` on every
   `rt_pin_mode()`; with parameter checking off it re-writes all pins. TinyUSB set USB_CH_SEL (PA13)
   low (USB-FS), then the board layer's LED/KEY `rt_pin_mode()` put it back high (USB-HS path): the PC
-  saw no device at all. `usb-cdc` patches the app's copy to open IOPORT once.
+  saw no device at all. The fix (open IOPORT once) is a `base` recipe patch: `new_app.sh` applies it to
+  every new app and `check` reports it (`ACTION: PATCH`) for older apps.
 - **End mark CR, not CRLF:** with CRLF the server echoes but never answers a terminal sending CR.
 - `PKG_TINYUSB_DEVICE_PORT_SPEED` is 0x00 in the SDK project's `rtconfig.h` (older package index) and
   0x0200 here (same "Full Speed" choice); both enumerate.
@@ -120,7 +137,7 @@ board ports, packages, pin functions in its `configuration.xml`). `check` agains
 
 | Recipe | Project (README) | Kconfig (derived) | FSP instance | Pins / peripheral | msh shows |
 |---|---|---|---|---|---|
-| `base` | `vision_board_blink_led` - blue LED blinks; "the base of your own work" | (the template) | `g_uart9` | P102 P106 PA07 (LED), P907 (KEY0), P208/P209 / SCI9 | - |
+| `base` | `vision_board_blink_led` - blue LED blinks; "the base of your own work" | (the template); `PATCH` drv_gpio.c opens IOPORT once (new_app.sh applies it) | `g_uart9` | P102 P106 PA07 (LED), P907 (KEY0), P208/P209 / SCI9 | - |
 | `i2c1-soft` | `vision_board_camera` - camera picture on the LCD (camera control bus) | `BSP_USING_I2C BSP_USING_I2C1 RT_USING_I2C` | none (bit-banged) | PB03 SCL, P50E SDA | `i2c1` |
 | `spi1` | `vision_board_wifi` - RW007 over SPI | `BSP_USING_SPI BSP_USING_SPI1 RT_USING_SPI` | `g_spi1` | P410 P411 P412 / RSPI1 | `spi1` |
 | `rw007` | `vision_board_wifi` - `wifi scan`, `wifi join`, `ping` | 16 values (WLAN, SAL, netdev, lwIP, package, bus `spi1`, pins); expects SCI2 SPI off | `g_external_irq11` | P40D P40C P800 P504 / IRQ11 | `wlan0` `wlan1`; `wifi` `ifconfig` `ping`; `wlan` `tcpip` |

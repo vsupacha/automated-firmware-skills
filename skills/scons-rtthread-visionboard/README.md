@@ -46,6 +46,7 @@ every board instead - pick one of the two.
 | "Create a hello-world app called hello" | `new_app.sh vision-board hello "" hello-world` | `Created <app folder>` (first time on a PC: which workspace?) |
 | "Open it in the IDE" | `open_ide.sh <app>` (new_app does it) | `IDE: OPENED` - RT-Thread Studio |
 | "Can this app use Wi-Fi (RW007) and an SD card?" | `recipe.sh check <app> rw007 sdcard` | `RECIPE: READY`, or `ACTION:` lines: board/Kconfig block, board port, package to add first (new apps already have every FSP instance - [recipes](recipes/README.md)) |
+| "Add Wi-Fi and the SD card to my app" | `recipe.sh apply <app> rw007 sdcard-fat`, then `--yes` **after you said yes** | `APPLY: DONE` - files from the SDK/skill, `.config` + `rtconfig.h`, backup of replaced files in `<app>/logs/` |
 | "Build it" | `build.sh <app>` | `BUILD: PASS` with 0 warnings + a manifest (tool versions, image hash) |
 | "Find my board" | `discover.sh vision-board` | `IDENTITY: PASS` - read-only; saves this PC's probe / USB serial and console port |
 | "Flash it" | `flash.sh <app> --yes` **after you said yes** | `FLASH: PASS` |
