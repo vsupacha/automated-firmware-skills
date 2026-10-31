@@ -50,3 +50,6 @@ range). Hardware: [../README.md](../README.md).
   devices, msh `wifi scan` found 3 access points, push-to-light test 17/17. Then `wifi join` to the
   developer's access point (credentials not recorded): connected, DHCP address, `ping www.rt-thread.org`
   4 replies 57-127 ms.
+- 2026-10-31 recipes `sdcard` + `sdcard-fat` on a push-to-light app (openmv FSP; `board/ports/mnt.c` from the
+  msc project): build PASS, flash 170432 bytes equal, MSH: PASS (`sd0`, `sd`, `sd_mount`), FAT test 11/11 with a
+  card in the slot (write, read back, delete), a file kept across `reboot`, push-to-light 17/17.

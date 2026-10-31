@@ -3,8 +3,8 @@
   "kind": "hw-driver",
   "board": "vision-board",
   "level": "kconfig",
-  "status": "prepared",
-  "summary": "SD card on SDHI1 (1-bit, card detect P503) with the FAT file system (DFS + elm-FAT).",
+  "status": "tested",
+  "summary": "SD card on SDHI1 (1-bit, card detect P503): block device `sd`. Its Kconfig option also selects DFS + elm-FAT; mounting and writing files is the sdcard-fat recipe.",
   "pins": {
     "P810": "SD1 CLK",
     "P811": "SD1 CMD",
@@ -24,11 +24,6 @@
   "msh": {
     "devices": [
       "sd0"
-    ],
-    "commands": [
-      "ls",
-      "mount",
-      "df"
     ],
     "threads": [
       "mmcsd_detect"

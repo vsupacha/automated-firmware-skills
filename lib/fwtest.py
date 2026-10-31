@@ -30,6 +30,8 @@ spec.json keys:
     send         line to send (CR appended)
     expect       list of substrings that must all appear (any order)
     expect_re    list of regexes that must all match some line
+                 (neither = a send-only step: it passes once sent - for commands that print
+                 nothing, e.g. msh `rm`; check their effect in a later step)
     timeout      seconds to wait for expectations (default 2)
     pause        seconds to wait after the step (default 0.3)
     interactive  true = needs a human; runs only with --interactive/--only-interactive
@@ -244,6 +246,8 @@ def run(cfg):
         def wait_for(self, plain=(), regex=(), timeout=2.0, ignore=None):
             """Wait until every fragment/regex has been seen; lines equal to `ignore` (echo) skipped."""
             todo_p, todo_r = list(plain), [re.compile(r) for r in regex]
+            if not todo_p and not todo_r:   # send-only step
+                return True, []
             for text in self.lines(timeout):
                 if ignore is not None and text.strip() == ignore:
                     continue

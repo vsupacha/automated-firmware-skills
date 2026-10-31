@@ -35,6 +35,12 @@ verification log, not here.
   from the running image.
   Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
   hardware (GCC 13.3 image, 17/17).
+- Recipe `sdcard-fat` (software component on `sdcard`): FAT with write access on the SD card -
+  `check` also verifies files (`board/ports/mnt.c` from the msc project: the base's copy never mounts
+  the card) and source facts (elm-FAT read-write, mkfs, msh file commands); serial test spec writes,
+  reads back and deletes `/fwtest/a.txt` - tested on the board (11/11, file kept across a reboot).
+- `lib/fwtest.py`: a step with neither `expect` nor `expect_re` is send-only and passes once sent
+  (msh `rm` prints nothing; it used to fail).
 - Vision Board Wi-Fi: recipes `spi1` + `rw007` applied to a push-to-light app and run on the board -
   msh `wifi scan`, `wifi join`, `ping` work (status `tested`); SKILL.md describes applying a recipe by
   hand and keeps Wi-Fi credentials and network data out of files and logs.

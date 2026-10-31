@@ -54,7 +54,7 @@ def cmd_list():
     for f in sorted(RECIPES.glob("*.json")):
         r = json.loads(f.read_text(encoding="utf-8"))
         req = f" (requires {', '.join(r['requires'])})" if r.get("requires") else ""
-        print(f"{r['recipe']:<10} {r['status']:<9} {r['summary']}{req}")
+        print(f"{r['recipe']:<10} {r.get('kind', ''):<11} {r['status']:<9} {r['summary']}{req}")
 
 
 def kconfig_tree(app):
@@ -285,8 +285,23 @@ def cmd_check(app, names, show):
                 actions.append(f"FSP {r['recipe']}: instance {inst} not declared in ra_gen/*.h - add it with the "
                                f"RA FSP configurator (configuration.xml){' - ' + note if note else ''}")
 
-    # 4. source folders the recipe needs in the app: board ports (RA glue) and packages
+    # 4. source folders the recipe needs in the app: board ports (RA glue) and packages;
+    #    single files that must equal the SDK project's copy; source facts (e.g. FAT write support)
+    sdk = Path(os.environ.get("RTT_SDK_BSP_DIR", ""))
     for r in recipes:
+        for fl in r.get("files", []):
+            mine, ref = app / fl["path"], sdk / fl["from"]
+            norm = (lambda b: b.replace(b"\r\n", b"\n"))
+            if not ref.is_file():
+                errors.append(f"{r['recipe']}: reference file {fl['from']} not in the SDK")
+            elif not mine.is_file() or norm(mine.read_bytes()) != norm(ref.read_bytes()):
+                state = "missing" if not mine.is_file() else "differs from the SDK project's"
+                actions.append(f"FILE {r['recipe']}: {fl['path']} {state} ({fl['what']}) - copy {fl['from']}")
+        for sc in r.get("source_checks", []):
+            f = app / sc["path"]
+            text = f.read_text(encoding="utf-8", errors="replace") if f.is_file() else ""
+            if not re.search(sc["re"], text, re.M):
+                actions.append(f"SOURCE {r['recipe']}: {sc['path']} lacks /{sc['re']}/ - {sc['what']}")
         for p in r.get("ports", []):
             if not (app / p["dir"]).is_dir():
                 actions.append(f"PORT {r['recipe']}: {p['dir']} not in the app ({p['what']}) - copy from the SDK {p['from']}")

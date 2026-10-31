@@ -46,6 +46,29 @@ openmv 10, rgb_4.3inch_nes / rgb_4.3inch_doom 4, wifi 3 (spi1, irq11), blink 1 (
   and DNS, `ping www.rt-thread.org` 4 replies (57-127 ms). Auto-connect is off: the join is not kept
   after a reset.
 
+## Software components (`sdcard-fat`)
+
+A software component recipe (`kind: sw-component`) sits on a hardware recipe and adds two kinds of
+precondition that `check` reports:
+- `files` - a file that must equal the SDK project's copy (`ACTION: FILE`): `board/ports/mnt.c` from
+  `usb/vision_board_tinyusb_msc`. The copy in `vision_board_blink_led` (base of every app) has
+  `INIT_ENV_EXPORT(mount_init)` commented out (the card is never mounted) and polls a hard-coded card
+  detect pin `p405`; the msc copy mounts the card at `/` at boot and uses `RA_SDHI_CD_PIN`.
+- `source_checks` - facts in the app's sources (`ACTION: SOURCE`): elm-FAT built read-write
+  (`FF_FS_READONLY 0`), `FF_USE_MKFS 1`, file timestamps from `time()` (`get_fattime`), msh file
+  commands compiled, the mount exported at boot.
+`test` names a serial test spec (`recipes/tests/sdcard_fat.json`): `df /`, then write, read back,
+list and delete `/fwtest/a.txt` - only `/fwtest` on the card is touched. Cards up to 32 GB (FAT32);
+exFAT would need `RT_DFS_ELM_USE_EXFAT`.
+
+2026-10-31: applied to a push-to-light app with the openmv FSP (`sdcard` + `sdcard-fat`): `check`
+READY with 0 symbols changed, build PASS (one warning in the SDK's own `mnt.c`, an intended
+assignment in an `if`), app.hex 0x02000000..0x020299C0. On the board: flash 170432 bytes read back equal;
+`msh_status.py` MSH: PASS - 25 commands (file commands added), threads `sd_mount mmcsd_detect`,
+devices `sd0 sd`; `sdcard_fat.json` RESULT PASS 11/11 (`df /` 14.8 GB free, write, read back, list,
+delete); a file written before `reboot` read back after it (then removed); push-to-light 17/17.
+msh shows "Cannot find a RTC device!" on file writes: timestamps are not real time.
+
 ## One project per recipe, chosen by its README
 
 Each recipe names the **one** SDK example project whose README is about that hardware (`project`,
@@ -74,6 +97,7 @@ board ports, packages, pin functions in its `configuration.xml`). `check` agains
 | `rw007` | `vision_board_wifi` - `wifi scan`, `wifi join`, `ping` | 16 values (WLAN, SAL, netdev, lwIP, package, bus `spi1`, pins); expects SCI2 SPI off | `g_external_irq11` | P40D P40C P800 P504 / IRQ11 | `wlan0` `wlan1`; `wifi` `ifconfig` `ping`; `wlan` `tcpip` |
 | `sci3-i2c` | `lcd/vision_board_rgb_4.3inch` - touch points, `gt911_register` | `BSP_USING_SCI BSP_USING_SCI3 BSP_USING_SCI3_I2C RT_USING_I2C` | `g_sci3` | P408 P409 / SCI3 | `sci3i` |
 | `sdcard` | `usb/vision_board_tinyusb_msc` - SD card as a USB drive and file system | `BSP_USING_FS BSP_USING_SDCARD_FS BSP_USING_SDHI RT_USING_DFS RT_USING_SDIO` | `g_sdmmc1` | P810-P812, P500-P503 / SDHI1 | `sd0`; `ls` `mount` `df`; `mmcsd_detect` |
+| `sdcard-fat` (sw component, requires `sdcard`) | `usb/vision_board_tinyusb_msc` - SD card as file system | `RT_USING_DFS RT_USING_DFS_ELMFAT` (elm defaults = the project's: LFN 3, code page 437, 512-byte sectors, 2 drives, reentrant) | none | - | commands `ls cat echo mkdir rm df mkfs mount`, device `sd`, thread `sd_mount` |
 | `pwm6` | `lcd/vision_board_mipi_2.0inch` - `lcd_test` colours (backlight) | `BSP_USING_PWM BSP_USING_PWM6 RT_USING_PWM` | `g_timer6` | PA11 / GPT6 | `pwm6` |
 
 The exact values are in `drivers/<name>.json`. Not prepared: UART2 (only `vision_board_openmv`
@@ -112,6 +136,8 @@ and hardware (README), `.config`, `packages/`, FSP modules and pins in `configur
 | `pins`, `peripherals` | what the driver takes; `check` fails when two recipes take the same one |
 | `fsp`, `fsp_note` | FSP instances the driver binds to (searched in `ra_gen/*.h`) |
 | `ports` | board port folders the app must contain, and where they come from |
+| `files`, `source_checks` | single files that must equal the SDK project's copy; regex facts that must hold in the app's sources |
+| `test`, `notes` | serial test spec for the board (`serial_test.py`); limits worth knowing |
 | `packages` | package folders (`optional` = only a note) |
 | `msh` | `devices`, `commands`, `threads` that `msh_status.py` must show on the board afterwards |
 | `evidence` | other SDK projects (and board reads) that use the driver the same way |

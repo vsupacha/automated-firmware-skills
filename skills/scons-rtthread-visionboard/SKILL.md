@@ -171,12 +171,12 @@ flash (asks first) and the tests. Run it after the user installed or updated pac
    script path never writes them.
 
 **HW driver recipes (before coding, read-only):** `bash "$SKILL/scripts/recipe.sh" check <app>
-<recipe>...` (`list` names them: `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6`). A recipe is Kconfig
+<recipe>...` (`list` names them: `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6` + software component `sdcard-fat`). A recipe is Kconfig
 level (`recipes/drivers/<name>.json`): its values are derived from the one SDK example project
 whose README is about that hardware (`recipe.sh derive`, maintainers); `check` resolves
 it on the app's Kconfig tree and lists what must exist first. **Gate:** `RECIPE: READY` | `RECIPE:
 ACTION n` (exit 10: `KCONFIG` board/Kconfig block, `FSP` instance in `ra_gen/` - FSP configurator,
-the developer's step -, `PORT` board port, `PACKAGE` source) | `RECIPE: FAIL` (pin or peripheral
+the developer's step -, `PORT` board port, `PACKAGE` source, `FILE` file to take from the SDK project, `SOURCE` source fact) | `RECIPE: FAIL` (pin or peripheral
 taken twice). It writes nothing; tell the developer the ACTION lines. See `recipes/README.md`.
 Applying a recipe is not scripted yet: with the developer's go-ahead, do what the ACTION lines say
 (board/Kconfig block, ports, packages + `packages/SConscript` from the named SDK project; recipe

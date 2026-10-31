@@ -1,0 +1,91 @@
+{
+  "recipe": "sdcard-fat",
+  "kind": "sw-component",
+  "board": "vision-board",
+  "level": "kconfig",
+  "status": "tested",
+  "summary": "FAT file system on the SD card with write access: DFS v1 + elm-FAT, mounted at '/' at boot, msh file commands (ls cat echo mkdir rm df mkfs).",
+  "requires": [
+    "sdcard"
+  ],
+  "project": "usb/vision_board_tinyusb_msc",
+  "readme": "TinyUSB MSC example: an inserted SD card shows up on the PC as a USB drive and is used as the board's file system",
+  "anchors": [
+    "RT_USING_DFS_ELMFAT"
+  ],
+  "kconfig": {
+    "RT_USING_DFS_ELMFAT": "y",
+    "RT_USING_DFS": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "RT_USING_DFS_ELMFAT": "d75b7a3066bb"
+  },
+  "pins": {},
+  "peripherals": [],
+  "fsp": [],
+  "files": [
+    {
+      "path": "board/ports/mnt.c",
+      "from": "projects/usb/vision_board_tinyusb_msc/board/ports/mnt.c",
+      "what": "mounts the card at '/' at boot (INIT_ENV_EXPORT) and watches card detect on RA_SDHI_CD_PIN; vision_board_blink_led's copy has the export commented out and polls a hard-coded p405"
+    }
+  ],
+  "source_checks": [
+    {
+      "path": "rt-thread/components/dfs/dfs_v1/filesystems/elmfat/ffconf.h",
+      "re": "^#define FF_FS_READONLY\\s+0\\b",
+      "what": "elm-FAT built read-write (FF_FS_READONLY 0)"
+    },
+    {
+      "path": "rt-thread/components/dfs/dfs_v1/filesystems/elmfat/ffconf.h",
+      "re": "^#define FF_USE_MKFS\\s+1\\b",
+      "what": "mkfs available (FF_USE_MKFS 1) - msh `mkfs -t elm sd` formats a card"
+    },
+    {
+      "path": "rt-thread/components/dfs/dfs_v1/filesystems/elmfat/dfs_elm.c",
+      "re": "^DWORD get_fattime\\(void\\)",
+      "what": "file timestamps from time() (FF_FS_NORTC 0) - without an RTC set, files get the build-time/epoch date"
+    },
+    {
+      "path": "rt-thread/components/finsh/msh_file.c",
+      "re": "MSH_CMD_EXPORT_ALIAS\\(cmd_echo, echo",
+      "what": "msh file commands (ls, cat, echo <text> <file>, mkdir, rm, df, mkfs) compiled with DFS"
+    },
+    {
+      "path": "board/ports/mnt.c",
+      "re": "^INIT_ENV_EXPORT\\(mount_init\\);",
+      "what": "the card is mounted at boot"
+    }
+  ],
+  "ports": [],
+  "packages": [],
+  "msh": {
+    "commands": [
+      "ls",
+      "cat",
+      "echo",
+      "mkdir",
+      "rm",
+      "df",
+      "mkfs",
+      "mount"
+    ],
+    "devices": [
+      "sd"
+    ],
+    "threads": [
+      "sd_mount"
+    ]
+  },
+  "test": "recipes/tests/sdcard_fat.json",
+  "notes": [
+    "Cards up to 32 GB (FAT32); exFAT cards need RT_DFS_ELM_USE_EXFAT (not set in the SDK projects).",
+    "The test writes and deletes /fwtest on the card; nothing else on the card is touched."
+  ],
+  "evidence": [
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_openmv (same mnt.c, elm values)",
+    "SDK VISION-BOARD 1.3.0 projects/doom/vision_board_mipi_2.0inch_doom, nes/* (same elm values)",
+    "factory/OpenMV image read on 2026-10-31: devices sd0 sd, threads sd_mount mmcsd_detect"
+  ]
+}
