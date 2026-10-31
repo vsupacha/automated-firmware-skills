@@ -80,7 +80,9 @@ def kconfig_tree(app):
         sys.exit(10)
     sys.path.insert(0, str(rtt / "tools"))
     import kconfiglib  # RT-Thread's own copy (tools/kconfiglib.py)
+    # both Kconfig styles: 'option env="RTT_ROOT"' and the preprocessor's $(RTT_DIR)
     os.environ.update(BSP_ROOT=".", RTT_ROOT=str(rtt), PKGS_ROOT=str(pkgs),
+                      BSP_DIR=".", RTT_DIR=str(rtt), PKGS_DIR=str(pkgs),
                       ENV_ROOT=os.environ.get("RTT_ENV_NEW", ""))
     cwd = os.getcwd()
     os.chdir(app)
@@ -117,6 +119,12 @@ def project_tree(project, tmp):
             (base / f.relative_to(root)).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(f, base / f.relative_to(root))
     shutil.copyfile(src / ".config", dst / ".config")
+    # Kconfig preprocessor variables (RTT_DIR := rt-thread, ...) point into the project's own links
+    kc = (dst / "Kconfig").read_text(encoding="utf-8")
+    pkgs = (Path(os.environ.get("RTT_ENV_NEW", "")) / "packages").as_posix()
+    kc = re.sub(r"(?m)^RTT_DIR\s*:=.*$", "RTT_DIR := " + (sdk / "rt-thread").as_posix(), kc)
+    kc = re.sub(r"(?m)^PKGS_DIR\s*:=.*$", "PKGS_DIR := " + pkgs, kc)
+    (dst / "Kconfig").write_text(kc, encoding="utf-8")
     return kconfig_tree(dst)
 
 
@@ -421,10 +429,10 @@ def cmd_apply(app_arg, names, yes):
                     f.write_text("".join(dl[:d0] + sl[s0:s1] + dl[d1:]), encoding="utf-8", newline="")
                 plan.append((f"Kconfig block {sym} from projects/{r['project']}", "board/Kconfig", do))
         for x in r.get("ports", []) + [q for q in r.get("packages", []) if not q.get("optional")]:
-            if not (app / x["dir"]).is_dir():
+            if not (app / x["dir"]).is_dir() and x["dir"] not in [p[1] for p in plan]:   # two recipes may share one
                 plan.append((f"copy folder from the SDK {x['from']}", x["dir"],
                              lambda x=x: shutil.copytree(sdk / x["from"], app / x["dir"])))
-        if any(q["dir"].startswith("packages/") for q in r.get("packages", [])) and not (app / "packages" / "SConscript").is_file():
+        if any(q["dir"].startswith("packages/") for q in r.get("packages", [])) and not (app / "packages" / "SConscript").is_file()                 and "packages/SConscript" not in [p[1] for p in plan]:
             plan.append((f"copy from the SDK projects/{r['project']}/packages/SConscript", "packages/SConscript",
                          lambda r=r: shutil.copyfile(sdk / "projects" / r["project"] / "packages" / "SConscript",
                                                      app / "packages" / "SConscript")))

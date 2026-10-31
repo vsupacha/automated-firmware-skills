@@ -113,15 +113,19 @@ def parse_free(lines):
     return out
 
 
+# RT-Thread 5.0.x: "<tcb hex> <name> pri status 0xsp 0xstack nn% 0xtick error"
 _PS_ROW = re.compile(r"^(?:0x)?[0-9a-fA-F]+\s+(\S+)\s+(\d+)\s+(ready|suspend|init|close|running)\s+"
                      r"0x([0-9a-fA-F]+)\s+0x([0-9a-fA-F]+)\s+(\d+)%\s+0x([0-9a-fA-F]+)\s+(\S.*)$")
+# RT-Thread 5.1.x: "<name> pri status 0xsp 0xstack nn% 0xtick error 0xtcb" (the name may hold a space)
+_PS_ROW_51 = re.compile(r"^(\S.*?)\s+(\d+)\s+(ready|suspend|init|close|running)\s+"
+                        r"0x([0-9a-fA-F]+)\s+0x([0-9a-fA-F]+)\s+(\d+)%\s+0x([0-9a-fA-F]+)\s+(\S+)\s+0x[0-9a-fA-F]+$")
 
 
 def parse_ps(lines):
     """threads from `ps` / `list thread`: name, pri, status, sp, stack, max_used_pct, left_tick, error"""
     rows = []
     for t in lines:
-        m = _PS_ROW.match(t.strip())
+        m = _PS_ROW_51.match(t.strip()) or _PS_ROW.match(t.strip())
         if m:
             rows.append({"name": m.group(1), "pri": int(m.group(2)), "status": m.group(3),
                          "sp": int(m.group(4), 16), "stack": int(m.group(5), 16),

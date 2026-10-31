@@ -35,6 +35,16 @@ verification log, not here.
   from the running image.
   Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
   hardware (GCC 13.3 image, 17/17).
+- New skill `scons-rtthread-titanboard` + board `titan-board` (RT-Thread Titan Board, Renesas RA8P1,
+  RT-Thread 5.1.0, SDK Titan-Board 1.0.2 from RT-Thread Studio; base project `Titan_template`). Blink and
+  push-to-light tested on the board (17/17); the factory MRAM is backed up before the first flash. 15
+  Kconfig recipes derived from the SDK's `project/Titan_*` examples (ADC, CANFD, Ethernet, GPT/PWM,
+  HyperRAM, OSPI flash + LittleFS, I2C2, buzzer PWM, RS485, RTC, SD card, SPI0, USB PCDC, WDT, Wi-Fi);
+  applied together and built, not yet run on the board. The on-board RA4M2 CMSIS-DAP is v2 only: on
+  Windows it needs WinUSB with a device interface GUID (documented).
+- `lib/msh.py` reads RT-Thread 5.1.0's `ps` layout (name first, tcb address last).
+- recipe.py (both RT-Thread skills): `derive` handles project Kconfig preprocessor paths
+  (`RTT_DIR := ...`), `apply` copies a package shared by two recipes once.
 - `recipe.sh apply <app> <recipe>... [--yes]`: writes what `check` asks for (never FSP), backs up
   replaced files, re-checks, re-syncs the Studio project; dry run without `--yes`. The drv_gpio.c fix
   moved to the `base` recipe and `new_app.sh` (every new app). Nine recipes in one app: READY, build PASS.

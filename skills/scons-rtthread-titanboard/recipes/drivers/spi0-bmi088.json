@@ -1,0 +1,48 @@
+{
+  "recipe": "spi0-bmi088",
+  "kind": "hw-driver",
+  "board": "titan-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "SPI0 bus (on-board BMI088 IMU; its package is optional).",
+  "requires": [],
+  "project": "Titan_driver_spi_bmi088",
+  "readme": "SPI example: SPI0 reads the BMI088 IMU (package bmi088)",
+  "anchors": [
+    "BSP_USING_SPI0"
+  ],
+  "kconfig": {
+    "BSP_USING_SPI0": "y",
+    "RT_USING_SPI": "y",
+    "BSP_USING_SPI": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "BSP_USING_SPI0": "245cded99952"
+  },
+  "pins": {},
+  "peripherals": [
+    "SPI0"
+  ],
+  "fsp": [
+    "g_spi0"
+  ],
+  "ports": [],
+  "packages": [
+    {
+      "name": "bmi088",
+      "version": "latest (SDK copy)",
+      "dir": "packages/bmi088-latest",
+      "from": "project/Titan_driver_spi_bmi088/packages/bmi088-latest",
+      "optional": true
+    }
+  ],
+  "msh": {
+    "devices": [
+      "spi0"
+    ]
+  },
+  "evidence": [
+    "SDK Titan-Board 1.0.2 project/Titan_driver_spi_bmi088"
+  ]
+}

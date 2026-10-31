@@ -9,7 +9,7 @@
       "name": "automated-firmware-skills",
       "displayName": "Automated firmware skills (all boards)",
       "source": "./",
-      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), RT-Thread (Vision Board), MCUXpresso SDK (FRDM-MCXN947), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting.",
+      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), RT-Thread (Vision Board, Titan Board), MCUXpresso SDK (FRDM-MCXN947), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting.",
       "version": "0.2.0",
       "author": { "name": "Supachai Vorapojpisut" },
       "homepage": "https://github.com/vsupacha/automated-firmware-skills",
@@ -81,7 +81,7 @@
       "name": "firmware-rtthread",
       "displayName": "Firmware skills: RT-Thread",
       "source": "./",
-      "description": "RT-Thread Vision Board (Renesas RA8D1) with RT-Thread 5.0.2, scons and the RT-Thread Studio SDK (pyOCD).",
+      "description": "RT-Thread Vision Board (Renesas RA8D1, RT-Thread 5.0.2) and Titan Board (Renesas RA8P1, RT-Thread 5.1.0) with scons and the RT-Thread Studio SDK (pyOCD); Kconfig-level driver recipes.",
       "version": "0.2.0",
       "author": { "name": "Supachai Vorapojpisut" },
       "homepage": "https://github.com/vsupacha/automated-firmware-skills",
@@ -90,7 +90,7 @@
       "category": "embedded",
       "keywords": ["firmware", "embedded", "rt-thread", "scons", "renesas-ra8", "pyocd"],
       "dependencies": ["firmware-tools"],
-      "skills": ["./skills/scons-rtthread-visionboard"]
+      "skills": ["./skills/scons-rtthread-visionboard", "./skills/scons-rtthread-titanboard"]
     },
     {
       "name": "firmware-mcuxpresso",

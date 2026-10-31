@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the msh console (uart8 via the RA4M2-VCOM port), RT-Thread thread timing

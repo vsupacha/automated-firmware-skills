@@ -1,0 +1,50 @@
+{
+  "recipe": "sdcard",
+  "kind": "hw-driver",
+  "board": "titan-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "SD card on SDHI0 with FAT, mounted at boot.",
+  "requires": [],
+  "project": "Titan_driver_sdcard",
+  "readme": "SD card example: SD card in the slot as the board's FAT file system, mounted at boot",
+  "anchors": [
+    "BSP_USING_SDCARD_FATFS",
+    "BSP_USING_FS_AUTO_MOUNT"
+  ],
+  "kconfig": {
+    "BSP_USING_SDCARD_FATFS": "y",
+    "BSP_USING_FS_AUTO_MOUNT": "y",
+    "RT_USING_DFS": "y",
+    "RT_USING_SDIO": "y",
+    "RT_MMCSD_STACK_SIZE": "4096",
+    "BSP_USING_FILESYSTEM": "y",
+    "BSP_USING_SDHI": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "BSP_USING_SDCARD_FATFS": "1e37acbfc403",
+    "BSP_USING_FS_AUTO_MOUNT": "b89e10d2ced8"
+  },
+  "pins": {},
+  "peripherals": [
+    "SDHI0"
+  ],
+  "fsp": [
+    "g_sdmmc0"
+  ],
+  "ports": [],
+  "packages": [],
+  "msh": {
+    "commands": [
+      "ls",
+      "df",
+      "mkdir",
+      "echo",
+      "cat"
+    ]
+  },
+  "evidence": [
+    "SDK Titan-Board 1.0.2 project/Titan_driver_sdcard"
+  ]
+}

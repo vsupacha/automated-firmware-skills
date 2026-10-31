@@ -1,0 +1,46 @@
+{
+  "recipe": "canfd",
+  "kind": "hw-driver",
+  "board": "titan-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "CANFD channels 0 and 1 as RT-Thread CAN devices.",
+  "requires": [],
+  "project": "Titan_driver_can",
+  "readme": "CANFD example: CANFD0/CANFD1 with RT-Thread's CAN device (motor interfaces)",
+  "anchors": [
+    "BSP_USING_CAN0",
+    "BSP_USING_CAN1"
+  ],
+  "kconfig": {
+    "BSP_USING_CAN0": "y",
+    "BSP_USING_CAN1": "y",
+    "RT_USING_CAN": "y",
+    "BSP_USING_CANFD": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "BSP_USING_CAN0": "468ce1a8a9bb",
+    "BSP_USING_CAN1": "5e8a622805dc"
+  },
+  "pins": {},
+  "peripherals": [
+    "CANFD0",
+    "CANFD1"
+  ],
+  "fsp": [
+    "g_canfd0",
+    "g_canfd1"
+  ],
+  "ports": [],
+  "packages": [],
+  "msh": {
+    "devices": [
+      "canfd0",
+      "canfd1"
+    ]
+  },
+  "evidence": [
+    "SDK Titan-Board 1.0.2 project/Titan_driver_can"
+  ]
+}

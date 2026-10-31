@@ -320,6 +320,31 @@
           "date": "2026-10-30"
         }
       }
+    },
+    {
+      "id": "titan-board",
+      "name": "RT-Thread Titan Board (RA8P1)",
+      "aliases": [
+        "Titan Board",
+        "Titan-Board",
+        "RT-Thread Titan Board",
+        "TitanBoard",
+        "RA8P1 Titan Board"
+      ],
+      "mcu": "R7KA8P1KF",
+      "mcu_family": "Renesas RA8P1",
+      "profiles": {
+        "scons-rtthread-titanboard": {
+          "level": "tested",
+          "date": "2026-10-31",
+          "templates": {
+            "hello-world": "built",
+            "blink": "tested",
+            "push-to-light": "tested"
+          },
+          "log": "boards/titan-board/scons-rtthread-titanboard/README.md"
+        }
+      }
     }
   ]
 }

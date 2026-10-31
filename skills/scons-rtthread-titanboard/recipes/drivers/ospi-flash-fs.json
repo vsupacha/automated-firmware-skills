@@ -1,0 +1,60 @@
+{
+  "recipe": "ospi-flash-fs",
+  "kind": "sw-component",
+  "board": "titan-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "OSPI flash with LittleFS mounted at boot, msh file commands.",
+  "requires": [],
+  "project": "Titan_component_flash_fs",
+  "readme": "flash file system example: OSPI flash with a LittleFS file system, mounted at boot",
+  "anchors": [
+    "BSP_USING_OSPI_FLASH",
+    "BSP_USING_FLASH_FATFS",
+    "BSP_USING_FLASH_FS_AUTO_MOUNT"
+  ],
+  "kconfig": {
+    "BSP_USING_OSPI_FLASH": "y",
+    "BSP_USING_FLASH_FATFS": "y",
+    "BSP_USING_FLASH_FS_AUTO_MOUNT": "y",
+    "RT_USING_DFS": "y",
+    "RT_USING_DFS_ELMFAT": "y",
+    "RT_USING_FAL": "y",
+    "RT_USING_MTD_NOR": "y",
+    "PKG_USING_LITTLEFS": "y",
+    "PKG_USING_LITTLEFS_V250": "y",
+    "BSP_USING_FILESYSTEM": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "BSP_USING_OSPI_FLASH": "1d827109342d",
+    "BSP_USING_FLASH_FATFS": "3fd7e7b5d8c3",
+    "BSP_USING_FLASH_FS_AUTO_MOUNT": "ab31b816a710"
+  },
+  "pins": {},
+  "peripherals": [],
+  "fsp": [
+    "g_ospi_b"
+  ],
+  "ports": [],
+  "packages": [
+    {
+      "name": "littlefs",
+      "version": "v2.5.0",
+      "dir": "packages/littlefs-v2.5.0",
+      "from": "project/Titan_component_flash_fs/packages/littlefs-v2.5.0"
+    }
+  ],
+  "msh": {
+    "commands": [
+      "ls",
+      "df",
+      "mkdir",
+      "echo",
+      "cat"
+    ]
+  },
+  "evidence": [
+    "SDK Titan-Board 1.0.2 project/Titan_component_flash_fs"
+  ]
+}

@@ -133,6 +133,7 @@ Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 1
 | [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + arduino-esp32 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-arduino-esp32s3box/README.md) · [ไทย](skills/pio-arduino-esp32s3box/README_TH.md) |
 | [pio-arduino-unor4wifi](skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino UNO R4 core | Renesas RA4M1 | [UNO R4 WiFi](boards/uno-r4-wifi/README.md) | [guide](skills/pio-arduino-unor4wifi/README.md) · [ไทย](skills/pio-arduino-unor4wifi/README_TH.md) |
 | [scons-rtthread-visionboard](skills/scons-rtthread-visionboard/SKILL.md) | RT-Thread 5.0.2 + scons (RT-Thread Studio SDK) | Renesas RA8D1 | [Vision Board](boards/vision-board/README.md) | [guide](skills/scons-rtthread-visionboard/README.md) · [ไทย](skills/scons-rtthread-visionboard/README_TH.md) |
+| [scons-rtthread-titanboard](skills/scons-rtthread-titanboard/SKILL.md) | RT-Thread 5.1.0 + scons (RT-Thread Studio SDK) | Renesas RA8P1 | [Titan Board](boards/titan-board/README.md) | [guide](skills/scons-rtthread-titanboard/README.md) · [ไทย](skills/scons-rtthread-titanboard/README_TH.md) |
 | [mcux-sdk-frdmmcxn947](skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 + CMake | NXP MCX N | [FRDM-MCXN947](boards/frdm-mcxn947/README.md) | [guide](skills/mcux-sdk-frdmmcxn947/README.md) · [ไทย](skills/mcux-sdk-frdmmcxn947/README_TH.md) |
 
 **Tool skills** (shared by all board skills, no board of their own):
@@ -155,7 +156,7 @@ project and build folders as the scripts. Details: [docs/workflow.md](docs/workf
 | VS Code | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32wb55nucleo |
 | VS Code | PlatformIO IDE (`platformio.platformio-ide`) | pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box, pio-arduino-unor4wifi |
 | VS Code | MCUXpresso for VS Code (`nxpsemiconductors.mcuxpresso`) | mcux-sdk-frdmmcxn947 |
-| RT-Thread Studio | - (standalone Eclipse-based IDE) | scons-rtthread-visionboard |
+| RT-Thread Studio | - (standalone Eclipse-based IDE) | scons-rtthread-visionboard, scons-rtthread-titanboard |
 
 ## Documentation
 

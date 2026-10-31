@@ -1,0 +1,46 @@
+{
+  "recipe": "i2c2-ist8310",
+  "kind": "hw-driver",
+  "board": "titan-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "Hardware I2C2 bus (on-board IST8310 magnetometer; its package is optional).",
+  "requires": [],
+  "project": "Titan_driver_iic_ist8310",
+  "readme": "I2C example: hardware I2C2 reads the IST8310 magnetometer (package ist8310)",
+  "anchors": [
+    "BSP_USING_HW_I2C2"
+  ],
+  "kconfig": {
+    "BSP_USING_HW_I2C2": "y",
+    "RT_USING_I2C": "y",
+    "BSP_USING_HW_I2C": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "BSP_USING_HW_I2C2": "2c8e1dd68d42"
+  },
+  "pins": {},
+  "peripherals": [
+    "IIC2"
+  ],
+  "fsp": [],
+  "ports": [],
+  "packages": [
+    {
+      "name": "ist8310",
+      "version": "latest (SDK copy)",
+      "dir": "packages/ist8310-latest",
+      "from": "project/Titan_driver_iic_ist8310/packages/ist8310-latest",
+      "optional": true
+    }
+  ],
+  "msh": {
+    "devices": [
+      "i2c2"
+    ]
+  },
+  "evidence": [
+    "SDK Titan-Board 1.0.2 project/Titan_driver_iic_ist8310"
+  ]
+}
