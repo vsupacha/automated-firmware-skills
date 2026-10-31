@@ -35,6 +35,11 @@ verification log, not here.
   from the running image.
   Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
   hardware (GCC 13.3 image, 17/17).
+- HW driver recipes for `scons-rtthread-visionboard` (Kconfig level): `recipes/drivers/*.json` for
+  `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6`, each derived (`recipe.sh derive`) from the one SDK
+  example project whose README is about that hardware;
+  `recipe.sh check <app> <recipe>...` resolves them with kconfiglib and lists the FSP instances, board
+  ports, packages and board/Kconfig blocks an app needs first (read-only).
 - `update_tools.sh` for `scons-rtthread-visionboard`: compares the RT-Thread Studio SDK Manager
   packages pinned in the profile (board support package, GNU Arm toolchain, pyOCD) with the versions
   installed side by side; same gates as the STM32 skills.

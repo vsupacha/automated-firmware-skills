@@ -30,6 +30,7 @@ skill scons-rtthread-visionboard (RT-Thread Vision Board RA8D1, RT-Thread + scon
  Create and build (no board needed)
   "create a hello-world app for the Vision Board" -> new_app.sh <board> <app> "" hello-world
   "write an app: KEY0 toggles the blue LED"    -> template + code in src/board, src/func, src/hal_entry.c
+  "can this app use Wi-Fi (RW007) / an SD card?" -> recipe.sh check <app> rw007 sdcard  (read-only; recipe.sh list)
   "open it in RT-Thread Studio"                -> open_ide.sh <app>  (import + start Studio; new_app imports it)
      then choose: code + build/download/debug yourself in Studio (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                   -> build.sh <app>
@@ -51,6 +52,7 @@ skill scons-rtthread-visionboard (RT-Thread Vision Board RA8D1, RT-Thread + scon
  สร้างและ build (ไม่ต้องมีบอร์ด)
   "สร้างแอป hello-world สำหรับ Vision Board"        -> new_app.sh <board> <app> "" hello-world
   "เขียนแอป กด KEY0 แล้วไฟสีฟ้าสลับ"                  -> template + โค้ดใน src/board, src/func, src/hal_entry.c
+  "แอปนี้ใช้ Wi-Fi (RW007) / SD card ได้ไหม"         -> recipe.sh check <app> rw007 sdcard  (อ่านอย่างเดียว; recipe.sh list)
   "เปิดใน RT-Thread Studio"                        -> open_ide.sh <app>  (import + เปิด Studio; new_app import ให้เอง)
      จากนั้นเลือกได้: เขียนโค้ด + build/download/debug เองใน Studio (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                                 -> build.sh <app>

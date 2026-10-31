@@ -1,0 +1,45 @@
+{
+  "recipe": "spi1",
+  "kind": "hw-driver",
+  "board": "vision-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "Hardware SPI bus spi1 (RSPI B channel 1) - the RW007 Wi-Fi module bus.",
+  "pins": {
+    "P410": "SPI1 MISO",
+    "P411": "SPI1 MOSI",
+    "P412": "SPI1 RSPCK"
+  },
+  "peripherals": [
+    "RSPI1"
+  ],
+  "fsp": [
+    "g_spi1"
+  ],
+  "fsp_note": "FSP stack r_spi_b g_spi1 with DTC transfers g_transfer0/1 and the SPI clock (board.clock.spiclk.source = PLL1P) - as in projects/vision_board_wifi/configuration.xml.",
+  "msh": {
+    "devices": [
+      "spi1"
+    ]
+  },
+  "evidence": [
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_wifi",
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_openmv"
+  ],
+  "requires": [],
+  "project": "vision_board_wifi",
+  "readme": "Wi-Fi & RW007 example: the RW007 module talks to the MCU over SPI (up to 30 MHz) - SPI1 is that bus",
+  "anchors": [
+    "BSP_USING_SPI1"
+  ],
+  "kconfig": {
+    "BSP_USING_SPI1": "y",
+    "RT_USING_SPI": "y",
+    "BSP_USING_SPI": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "BSP_USING_SPI1": "cdadc5f0bd63"
+  },
+  "packages": []
+}

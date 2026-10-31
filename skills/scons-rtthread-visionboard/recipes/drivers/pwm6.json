@@ -1,0 +1,46 @@
+{
+  "recipe": "pwm6",
+  "kind": "hw-driver",
+  "board": "vision-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "PWM on GPT6 channel A (PA11) - LCD backlight in every LCD project.",
+  "pins": {
+    "PA11": "GPT6 GTIOC6A"
+  },
+  "peripherals": [
+    "GPT6"
+  ],
+  "fsp": [
+    "g_timer6"
+  ],
+  "msh": {
+    "devices": [
+      "pwm6"
+    ],
+    "commands": [
+      "pwm"
+    ]
+  },
+  "evidence": [
+    "SDK VISION-BOARD 1.3.0 projects/lcd/vision_board_mipi_2.0inch",
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_camera",
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_openmv"
+  ],
+  "requires": [],
+  "project": "lcd/vision_board_mipi_2.0inch",
+  "readme": "2.0 inch MIPI LCD example: `lcd_test` fills the screen red, green, blue (GPT6 PWM = backlight)",
+  "anchors": [
+    "BSP_USING_PWM6"
+  ],
+  "kconfig": {
+    "BSP_USING_PWM6": "y",
+    "RT_USING_PWM": "y",
+    "BSP_USING_PWM": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "BSP_USING_PWM6": "f574509f7dca"
+  },
+  "packages": []
+}

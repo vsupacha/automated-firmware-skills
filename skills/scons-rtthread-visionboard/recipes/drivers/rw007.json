@@ -1,0 +1,100 @@
+{
+  "recipe": "rw007",
+  "kind": "hw-driver",
+  "board": "vision-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "RW007 Wi-Fi module (SPI) with RT-Thread WLAN, lwIP, SAL and netdev (wifi / ifconfig / ping commands).",
+  "requires": [
+    "spi1"
+  ],
+  "project": "vision_board_wifi",
+  "readme": "Wi-Fi & RW007 example: `wifi scan`, `wifi join <ssid> <password>`, `ping` over the RW007 module",
+  "anchors": [
+    "BSP_USING_RW007"
+  ],
+  "kconfig": {
+    "BSP_USING_RW007": "y",
+    "RT_USING_SYSTEM_WORKQUEUE": "y",
+    "RT_USING_SPI": "y",
+    "RT_USING_WIFI": "y",
+    "RT_USING_SAL": "y",
+    "RT_USING_NETDEV": "y",
+    "RT_USING_LWIP": "y",
+    "PKG_USING_RW007": "y",
+    "RW007_NOT_USE_EXAMPLE_DRIVERS": "y",
+    "RW007_SPI_MAX_HZ": "25000000",
+    "RA_RW007_SPI_BUS_NAME": "spi1",
+    "RA_RW007_CS_PIN": "0x040D",
+    "RA_RW007_BOOT0_PIN": "0x040C",
+    "RA_RW007_BOOT1_PIN": "0x040D",
+    "RA_RW007_INT_BUSY_PIN": "0x0800",
+    "RA_RW007_RST_PIN": "0x0504"
+  },
+  "expect": {
+    "BSP_USING_SCI": "n",
+    "BSP_USING_SCIn_SPI": "n",
+    "BSP_USING_SCI2": "n",
+    "BSP_USING_SCI2_SPI": "n"
+  },
+  "kconfig_defs": {
+    "BSP_USING_RW007": "0aefd8ae8192"
+  },
+  "pins": {
+    "P40D": "RW007 CS / BOOT1",
+    "P40C": "RW007 BOOT0",
+    "P800": "RW007 INT/BUSY (IRQ11)",
+    "P504": "RW007 RESET"
+  },
+  "peripherals": [
+    "IRQ11"
+  ],
+  "fsp": [
+    "g_external_irq11"
+  ],
+  "fsp_note": "INT/BUSY = rt_pin_attach_irq on P800 -> drv_gpio.c needs the ICU instance g_external_irq11 (r_icu, as in vision_board_wifi); the bus itself is the spi1 recipe.",
+  "ports": [
+    {
+      "dir": "board/ports/wifi",
+      "from": "projects/vision_board_wifi/board/ports/wifi",
+      "what": "drv_rw007.c (RA glue: SPI attach, INT/BUSY irq, reset) + SConscript"
+    }
+  ],
+  "packages": [
+    {
+      "name": "rw007",
+      "version": "v2.1.0",
+      "dir": "packages/rw007-v2.1.0",
+      "from": "projects/vision_board_wifi/packages/rw007-v2.1.0"
+    },
+    {
+      "name": "netutils",
+      "version": "v1.3.3",
+      "dir": "packages/netutils-v1.3.3",
+      "from": "projects/vision_board_wifi/packages/netutils-v1.3.3",
+      "optional": true
+    }
+  ],
+  "msh": {
+    "devices": [
+      "wlan0",
+      "wlan1"
+    ],
+    "commands": [
+      "wifi",
+      "ifconfig",
+      "ping",
+      "netstat",
+      "dns"
+    ],
+    "threads": [
+      "wlan",
+      "tcpip"
+    ]
+  },
+  "evidence": [
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_wifi",
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_openmv",
+    "factory/OpenMV image read on 2026-10-31 by msh_status.py: devices wspi w0 w1 wlan0 wlan1, threads wlan tcpip wifi_xfer wifi_handle"
+  ]
+}

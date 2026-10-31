@@ -44,6 +44,7 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 | "เครื่องมือยังเป็นเวอร์ชันที่ pin ไว้ไหม" | `update_tools.sh vision-board` | `UPDATE: NONE` หรือคำถามก่อนแก้ pin |
 | "สร้างแอป hello-world ชื่อ hello" | `new_app.sh vision-board hello "" hello-world` | `Created <โฟลเดอร์แอป>` (ครั้งแรกบนเครื่อง: ถามที่เก็บแอป) |
 | "เปิดใน IDE" | `open_ide.sh <app>` (new_app เปิดให้เอง) | `IDE: OPENED` - RT-Thread Studio |
+| "แอปนี้ใช้ Wi-Fi (RW007) กับ SD card ได้ไหม" | `recipe.sh check <app> rw007 sdcard` | `RECIPE: READY` หรือบรรทัด `ACTION:` บอกสิ่งที่ต้องเพิ่มก่อน: บล็อกใน board/Kconfig, FSP instance, board port, package ([recipes](recipes/README.md)) |
 | "build ให้หน่อย" | `build.sh <app>` | `BUILD: PASS` ไม่มี warning + manifest (เวอร์ชันเครื่องมือ, hash ของ image) |
 | "หาบอร์ดที่ต่ออยู่" | `discover.sh vision-board` | `IDENTITY: PASS` - อ่านอย่างเดียว บันทึก probe และ console port ของเครื่องนี้ |
 | "แฟลชเลย" | `flash.sh <app> --yes` **หลังคุณตอบ yes** | `FLASH: PASS` |

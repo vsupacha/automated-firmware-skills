@@ -1,0 +1,32 @@
+{
+  "recipe": "base",
+  "kind": "base",
+  "board": "vision-board",
+  "level": "kconfig",
+  "status": "prepared",
+  "summary": "Pins the skill's templates already use (board layer + console); every recipe is checked against them.",
+  "kconfig": {},
+  "pins": {
+    "P102": "LED (blue)",
+    "P106": "LED",
+    "PA07": "LED",
+    "P907": "KEY0",
+    "P208": "UART9 RXD (console)",
+    "P209": "UART9 TXD (console)"
+  },
+  "peripherals": [
+    "SCI9"
+  ],
+  "fsp": [
+    "g_uart9"
+  ],
+  "evidence": [
+    "SDK VISION-BOARD 1.3.0 projects/vision_board_blink_led (base of every app)"
+  ],
+  "requires": [],
+  "expect": {},
+  "packages": [],
+  "msh": {},
+  "project": "vision_board_blink_led",
+  "readme": "blink example: the blue LED of the RGB LED (P102) blinks; 'can be the base project of your own work' - new_app.sh copies it for every app"
+}
