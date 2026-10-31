@@ -35,6 +35,14 @@ verification log, not here.
   from the running image.
   Reads both heap formats (small heap and memheap pools). Vision Board `push-to-light` tested on
   hardware (GCC 13.3 image, 17/17).
+- Recipes `usb-cdc` (TinyUSB CDC on the user USB-OTG port) and `at-cdc` (RT-Thread AT server on a CDC
+  rt_device + AT command layer `src/at/` on the function layer) - tested on the board (AT 12/12).
+  `usb-cdc` patches the SDK's drv_gpio.c (every rt_pin_mode() re-applied the FSP pin setup and
+  switched the USB port away). recipe.py: skill files, `inserts`, `patches`, value overrides.
+- `scons-rtthread-visionboard` build.sh: the warning gate counts only the app's `src/` (it also
+  counted RT-Thread files under `.../src/`).
+- `lib/fwtest.py`: serial write timeout (a CDC device that stops reading fails the run instead of
+  blocking it); a spec can turn the msh command-list check off (`"command_list": false`).
 - Recipe `sdcard-fat` (software component on `sdcard`): FAT with write access on the SD card -
   `check` also verifies files (`board/ports/mnt.c` from the msc project: the base's copy never mounts
   the card) and source facts (elm-FAT read-write, mkfs, msh file commands); serial test spec writes,

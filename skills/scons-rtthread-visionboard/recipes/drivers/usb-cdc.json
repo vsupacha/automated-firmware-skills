@@ -1,0 +1,93 @@
+{
+  "recipe": "usb-cdc",
+  "kind": "hw-driver",
+  "board": "vision-board",
+  "level": "kconfig",
+  "status": "tested",
+  "summary": "User USB port (USB-OTG, full speed) as a USB CDC device with TinyUSB: the PC sees a COM port (VID 0xCAFE, PID 0x4000).",
+  "requires": [],
+  "project": "usb/vision_board_tinyusb_cdc",
+  "readme": "TinyUSB CDC example: the minimal TinyUSB project; Windows shows a serial port, msh `cdc_example` echoes what the PC sends (USB_CH_SEL low = USB-FS)",
+  "anchors": [
+    "PKG_TINYUSB_DEVICE_CDC"
+  ],
+  "kconfig": {
+    "PKG_TINYUSB_DEVICE_CDC": "y",
+    "PKG_USING_TINYUSB": "y",
+    "PKG_TINYUSB_DEVICE_ENABLE": "y",
+    "PKG_TINYUSB_DEVICE_CURRENT": "250",
+    "PKG_TINYUSB_DEVICE_EXAMPLE": "y",
+    "PKG_TINYUSB_DEVICE_EXAMPLE_CDC": "y",
+    "PKG_TINYUSB_DEBUG_ERROR": "y"
+  },
+  "expect": {},
+  "kconfig_defs": {
+    "PKG_TINYUSB_DEVICE_CDC": "04a2a3819ecd"
+  },
+  "pins": {
+    "PA13": "USB_CH_SEL (low = USB-FS, high = USB-HS)"
+  },
+  "peripherals": [
+    "USBFS"
+  ],
+  "fsp": [],
+  "fsp_note": "TinyUSB drives the USB controller itself (rusb2); the FSP only has to route the USBFS interrupts to usbfs_*_handler in ra_gen/vector_data.c (the openmv FSP does; board/tinyusb/drv_tinyusb.c defines them and replaces the weak stubs).",
+  "ports": [
+    {
+      "dir": "board/tinyusb",
+      "from": "projects/usb/vision_board_tinyusb_cdc/board/tinyusb",
+      "what": "drv_tinyusb.c (USB interrupts, FS/HS select), usb_descriptors.c, cdc_example.c"
+    }
+  ],
+  "packages": [
+    {
+      "name": "TinyUSB",
+      "version": "0.14.1 (SDK copy)",
+      "dir": "libraries/components/tinyusb",
+      "from": "libraries/components/tinyusb"
+    }
+  ],
+  "inserts": [
+    {
+      "path": "SConstruct",
+      "marker": "libraries/components/tinyusb",
+      "where": "before",
+      "anchor": "# include drivers",
+      "text": "# tinyusb (recipe usb-cdc, as projects/usb/vision_board_tinyusb_cdc/SConstruct)\nobjs.extend(SConscript(os.path.join('libraries/components/tinyusb', '', 'SConscript')))\n\n",
+      "what": "builds libraries/components/tinyusb"
+    }
+  ],
+  "patches": [
+    {
+      "path": "libraries/HAL_Drivers/drv_gpio.c",
+      "marker": "g_ioport_ctrl.open != 0U",
+      "old": "    err = R_IOPORT_Open(&g_ioport_ctrl, &g_bsp_pin_cfg);\n\n    if (err != FSP_SUCCESS)\n    {\n        LOG_E(\"GPIO open failed\");",
+      "new": "    /* open once (recipe usb-cdc): re-opening re-applies g_bsp_pin_cfg and undoes pins set at run\n     * time - e.g. USB_CH_SEL (PA13), which TinyUSB drives low and the FSP pin setup starts high */\n    err = (g_ioport_ctrl.open != 0U) ? FSP_SUCCESS : R_IOPORT_Open(&g_ioport_ctrl, &g_bsp_pin_cfg);\n\n    if (err != FSP_SUCCESS)\n    {\n        LOG_E(\"GPIO open failed\");",
+      "what": "every rt_pin_mode() called R_IOPORT_Open(), which re-applies the whole FSP pin setup: after the app's board layer set its LED/KEY pins, USB_CH_SEL went back high (USB-HS path) and the PC never saw the CDC device"
+    }
+  ],
+  "source_checks": [
+    {
+      "path": "ra_gen/vector_data.c",
+      "re": "usbfs_interrupt_handler",
+      "what": "USBFS interrupts in the FSP vector table (FSP_PROJECT openmv has them)"
+    }
+  ],
+  "msh": {
+    "commands": [
+      "cdc_example"
+    ],
+    "threads": [
+      "tusb"
+    ]
+  },
+  "notes": [
+    "Two USB-C ports: ART-Link (debug + console) and the user USB-OTG port - the CDC port needs a second cable on the user port.",
+    "VID 0xCAFE / PID 0x4000 are TinyUSB's test IDs - fine on the bench, not for a product.",
+    "Found on the board 2026-10-31: without the drv_gpio.c patch the PC sees no USB device (USB_CH_SEL high again after the board layer's rt_pin_mode calls).",
+    "PKG_TINYUSB_DEVICE_PORT_SPEED: the SDK project's rtconfig.h has 0x00 (older package index); this PC's index gives 0x0200 (explicit full speed) for the same choice."
+  ],
+  "evidence": [
+    "SDK VISION-BOARD 1.3.0 projects/usb/vision_board_tinyusb_hid, _msc, _uvc (same TinyUSB port and SConstruct line)"
+  ]
+}

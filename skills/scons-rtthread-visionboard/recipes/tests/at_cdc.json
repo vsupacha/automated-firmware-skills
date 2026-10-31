@@ -1,0 +1,92 @@
+{
+  "title": "at-cdc: AT commands on the user USB CDC port",
+  "command_list": false,
+  "baud": 115200,
+  "sync": {
+    "send": "AT+INFO",
+    "expect": "OK"
+  },
+  "steps": [
+    {
+      "name": "echo off",
+      "send": "ATE0",
+      "expect": [
+        "OK"
+      ]
+    },
+    {
+      "name": "info",
+      "send": "AT+INFO",
+      "expect_re": [
+        "\\+INFO: app=[^,]+,board=vision-board,leds=[0-9]+,btns=[0-9]+"
+      ],
+      "expect": [
+        "OK"
+      ]
+    },
+    {
+      "name": "led1 on",
+      "send": "AT+LED=1,1",
+      "expect": [
+        "+LED: 1,1",
+        "OK"
+      ]
+    },
+    {
+      "name": "readback",
+      "send": "AT+LED?",
+      "expect_re": [
+        "\\+LED: 1(,[01])*"
+      ],
+      "expect": [
+        "OK"
+      ]
+    },
+    {
+      "name": "led1 toggle",
+      "send": "AT+LED=1,2",
+      "expect": [
+        "+LED: 1,0",
+        "OK"
+      ]
+    },
+    {
+      "name": "bad led",
+      "send": "AT+LED=9,1",
+      "expect": [
+        "ERR"
+      ]
+    },
+    {
+      "name": "bad args",
+      "send": "AT+LED=1",
+      "expect": [
+        "ERR"
+      ]
+    },
+    {
+      "name": "buttons",
+      "send": "AT+BTN?",
+      "expect_re": [
+        "\\+BTN: 0"
+      ],
+      "expect": [
+        "OK"
+      ]
+    },
+    {
+      "name": "unknown",
+      "send": "AT+NOPE",
+      "expect": [
+        "ERR"
+      ]
+    },
+    {
+      "name": "echo on",
+      "send": "ATE1",
+      "expect": [
+        "OK"
+      ]
+    }
+  ]
+}

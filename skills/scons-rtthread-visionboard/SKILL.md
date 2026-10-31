@@ -171,18 +171,24 @@ flash (asks first) and the tests. Run it after the user installed or updated pac
    script path never writes them.
 
 **HW driver recipes (before coding, read-only):** `bash "$SKILL/scripts/recipe.sh" check <app>
-<recipe>...` (`list` names them: `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6` + software component `sdcard-fat`). A recipe is Kconfig
+<recipe>...` (`list` names them: `i2c1-soft spi1 rw007 sci3-i2c sdcard pwm6 usb-cdc` + software components
+`sdcard-fat`, `at-cdc`). A recipe is Kconfig
 level (`recipes/drivers/<name>.json`): its values are derived from the one SDK example project
 whose README is about that hardware (`recipe.sh derive`, maintainers); `check` resolves
 it on the app's Kconfig tree and lists what must exist first. **Gate:** `RECIPE: READY` | `RECIPE:
 ACTION n` (exit 10: `KCONFIG` board/Kconfig block, `FSP` instance in `ra_gen/` - FSP configurator,
-the developer's step -, `PORT` board port, `PACKAGE` source, `FILE` file to take from the SDK project, `SOURCE` source fact) | `RECIPE: FAIL` (pin or peripheral
+the developer's step -, `PORT` board port, `PACKAGE` source, `FILE` file to take from the SDK project or the skill, `INSERT` text
+to add, `PATCH` vendor fix, `SOURCE` source fact) | `RECIPE: FAIL` (pin or peripheral
 taken twice). It writes nothing; tell the developer the ACTION lines. See `recipes/README.md`.
 Applying a recipe is not scripted yet: with the developer's go-ahead, do what the ACTION lines say
 (board/Kconfig block, ports, packages + `packages/SConscript` from the named SDK project; recipe
 values into `.config` with kconfiglib, then `rtconfig.h` with RT-Thread's `mk_rtconfig`), re-run
 `check` until `RECIPE: READY`, then build (`recipes/README.md` "On the board"). Tested on hardware:
-`spi1` + `rw007` (msh `wifi scan`, `wifi join`, `ping`); the others are `prepared`.
+`spi1` + `rw007` (msh `wifi scan`, `wifi join`, `ping`), `sdcard` + `sdcard-fat` (FAT write),
+`usb-cdc` + `at-cdc` (AT commands on the user USB port; layer 3b `src/at/`); the others are `prepared`.
+A recipe test spec runs with `serial_test.py` - on the console, or for `at-cdc` on the CDC port
+(`serial_test.py COMx <skill>/recipes/tests/at_cdc.json <log> --board <id>`; needs a data cable on the
+user USB-OTG port).
 
 **Wi-Fi (rw007) over msh:** `wifi scan` (no credentials), `wifi join <ssid> <password>`,
 `wifi status`, `ifconfig`, `ping <host>`. Credentials come from the developer only; never write

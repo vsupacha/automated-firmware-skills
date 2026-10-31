@@ -69,6 +69,35 @@ devices `sd0 sd`; `sdcard_fat.json` RESULT PASS 11/11 (`df /` 14.8 GB free, writ
 delete); a file written before `reboot` read back after it (then removed); push-to-light 17/17.
 msh shows "Cannot find a RTC device!" on file writes: timestamps are not real time.
 
+## USB CDC and the AT command layer (`usb-cdc`, `at-cdc`)
+
+`usb-cdc` builds TinyUSB (the SDK's `libraries/components/tinyusb`, an `INSERT` into `SConstruct`,
+port `board/tinyusb`) for the user USB-OTG port. `at-cdc` adds an AT command interface on it:
+- port layer `board/ports/cdc_vcom.c` (skill file): TinyUSB CDC as the RT-Thread character device
+  `cdc0` (TinyUSB has no rt_device; the AT server needs one);
+- layer 3b `src/at/at_cmds.c` (skill file), a peer of the msh commands in `hal_entry.c` that calls the
+  function layer only: `AT+INFO`, `AT+LED?`, `AT+LED=<n>,<0|1|2>` (off/on/toggle), `AT+BTN?`, plus the
+  server's own `AT`, `ATE0/1`, `AT+RST`, `AT&L`; `templates/_common/src/SConscript` compiles `src/at/`;
+- an `INSERT` of the `RtAtCmdTab` section into `script/fsp.ld` (the FSP linker script has none; the
+  AT server finds its table between `__rtatcmdtab_start/_end`).
+Recipe keys used here: `files` with `from_skill`, `inserts` (`ACTION: INSERT`), `patches`
+(`ACTION: PATCH`), and a later recipe owns a value it overrides (`cdc_example` off).
+
+On the board (2026-10-31, push-to-light app with the openmv FSP): `check` READY, build PASS,
+`msh_status.py` shows `tusb`, `at_svr`, `cdc0`; the PC sees COM port VID 0xCAFE PID 0x4000;
+`recipes/tests/at_cdc.json` on that port (`serial_test.py COMx ...`, spec has `"command_list": false`)
+RESULT PASS 12/12; console push-to-light still 17/17. Found on the way:
+- **`drv_gpio.c` re-applies the FSP pin setup.** `ra_pin_mode()` calls `R_IOPORT_Open()` on every
+  `rt_pin_mode()`; with parameter checking off it re-writes all pins. TinyUSB set USB_CH_SEL (PA13)
+  low (USB-FS), then the board layer's LED/KEY `rt_pin_mode()` put it back high (USB-HS path): the PC
+  saw no device at all. `usb-cdc` patches the app's copy to open IOPORT once.
+- **End mark CR, not CRLF:** with CRLF the server echoes but never answers a terminal sending CR.
+- `PKG_TINYUSB_DEVICE_PORT_SPEED` is 0x00 in the SDK project's `rtconfig.h` (older package index) and
+  0x0200 here (same "Full Speed" choice); both enumerate.
+- A charge-only cable on the user port looks the same from the board (pull-up on, VBUS seen) - the
+  PC shows nothing; use a data cable.
+- RT-Thread's `at_server.c` uses `strcasecmp` without `<strings.h>`: one warning in vendor code.
+
 ## One project per recipe, chosen by its README
 
 Each recipe names the **one** SDK example project whose README is about that hardware (`project`,
@@ -98,6 +127,8 @@ board ports, packages, pin functions in its `configuration.xml`). `check` agains
 | `sci3-i2c` | `lcd/vision_board_rgb_4.3inch` - touch points, `gt911_register` | `BSP_USING_SCI BSP_USING_SCI3 BSP_USING_SCI3_I2C RT_USING_I2C` | `g_sci3` | P408 P409 / SCI3 | `sci3i` |
 | `sdcard` | `usb/vision_board_tinyusb_msc` - SD card as a USB drive and file system | `BSP_USING_FS BSP_USING_SDCARD_FS BSP_USING_SDHI RT_USING_DFS RT_USING_SDIO` | `g_sdmmc1` | P810-P812, P500-P503 / SDHI1 | `sd0`; `ls` `mount` `df`; `mmcsd_detect` |
 | `sdcard-fat` (sw component, requires `sdcard`) | `usb/vision_board_tinyusb_msc` - SD card as file system | `RT_USING_DFS RT_USING_DFS_ELMFAT` (elm defaults = the project's: LFN 3, code page 437, 512-byte sectors, 2 drives, reentrant) | none | - | commands `ls cat echo mkdir rm df mkfs mount`, device `sd`, thread `sd_mount` |
+| `usb-cdc` | `usb/vision_board_tinyusb_cdc` - the PC sees a serial port on the user USB port | 7 values (TinyUSB device, CDC, full speed, cdc_example) | none (TinyUSB drives the controller; the vector table needs the USBFS interrupts) | PA13 USB_CH_SEL / USBFS | thread `tusb` |
+| `at-cdc` (sw component, requires `usb-cdc`) | none - RT-Thread's AT server (`components/net/at`) | `RT_USING_AT AT_USING_SERVER AT_SERVER_DEVICE=cdc0 AT_CMD_END_MARK_CR`, `cdc_example` off | none | - | device `cdc0`, thread `at_svr` |
 | `pwm6` | `lcd/vision_board_mipi_2.0inch` - `lcd_test` colours (backlight) | `BSP_USING_PWM BSP_USING_PWM6 RT_USING_PWM` | `g_timer6` | PA11 / GPT6 | `pwm6` |
 
 The exact values are in `drivers/<name>.json`. Not prepared: UART2 (only `vision_board_openmv`

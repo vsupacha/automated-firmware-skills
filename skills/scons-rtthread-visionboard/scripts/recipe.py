@@ -205,7 +205,7 @@ def cmd_derive(name, write):
         m = re.search(r'altId="' + pin.lower() + r'\.([a-z0-9_]+)\.', xml)
         return m.group(1) if m and not m.group(1).startswith("gpio") else "gpio"
     have = [f"{i}={'yes' if has_inst(i) else 'NO'}" for i in r.get("fsp", [])]
-    have += [f"{x['dir']}={'yes' if (proj / x['dir']).is_dir() else 'NO'}" for x in r.get("ports", []) + r.get("packages", [])]
+    have += [f"{x['dir']}={'yes' if (sdk_dir() / x['from']).is_dir() else 'NO'}" for x in r.get("ports", []) + r.get("packages", [])]
     have += [f"{pin}={pin_func(pin)}" for pin in r.get("pins", {})]
     print("  project has: " + (" ".join(have) or "-"))
     print(f"  base Kconfig defines the anchors like the project: "
@@ -251,12 +251,16 @@ def cmd_check(app, names, show):
                 errors.append(f"{r['recipe']}: Kconfig symbol {name} does not exist in this app's Kconfig tree")
                 continue
             sym.set_value(val)
+    value_owner = {}                     # a later recipe overrides a value of a recipe it requires
+    for r in recipes:
+        for name in list(r.get("kconfig", {})) + list(r.get("expect", {})):
+            value_owner[name] = r["recipe"]
     for r in recipes:
         differ = [n for n, h in r.get("kconfig_defs", {}).items() if h and def_hash(k, n) != h]
         wrong = []
         for name, val in list(r.get("kconfig", {}).items()) + list(r.get("expect", {}).items()):
             sym = k.syms.get(name)
-            if sym is None or not sym.nodes:
+            if sym is None or not sym.nodes or value_owner.get(name) != r["recipe"]:
                 continue
             got = sym.str_value or "n"
             if got.lower() != val.lower():
@@ -290,13 +294,26 @@ def cmd_check(app, names, show):
     sdk = Path(os.environ.get("RTT_SDK_BSP_DIR", ""))
     for r in recipes:
         for fl in r.get("files", []):
-            mine, ref = app / fl["path"], sdk / fl["from"]
+            mine = app / fl["path"]
+            ref = SKILL_DIR / fl["from_skill"] if fl.get("from_skill") else sdk / fl["from"]
             norm = (lambda b: b.replace(b"\r\n", b"\n"))
             if not ref.is_file():
                 errors.append(f"{r['recipe']}: reference file {fl['from']} not in the SDK")
             elif not mine.is_file() or norm(mine.read_bytes()) != norm(ref.read_bytes()):
                 state = "missing" if not mine.is_file() else "differs from the SDK project's"
-                actions.append(f"FILE {r['recipe']}: {fl['path']} {state} ({fl['what']}) - copy {fl['from']}")
+                src = f"<skill>/{fl['from_skill']}" if fl.get("from_skill") else f"the SDK {fl['from']}"
+                actions.append(f"FILE {r['recipe']}: {fl['path']} {state} ({fl['what']}) - copy {src}")
+        for pt in r.get("patches", []):
+            f = app / pt["path"]
+            text = f.read_text(encoding="utf-8", errors="replace") if f.is_file() else ""
+            if pt["marker"] not in text:
+                actions.append(f"PATCH {r['recipe']}: {pt['path']} lacks '{pt['marker']}' - {pt['what']}")
+        for ins in r.get("inserts", []):
+            f = app / ins["path"]
+            text = f.read_text(encoding="utf-8", errors="replace") if f.is_file() else ""
+            if ins["marker"] not in text:
+                actions.append(f"INSERT {r['recipe']}: {ins['path']} lacks '{ins['marker']}' ({ins['what']}) - insert the "
+                               f"recipe's text {ins['where']} '{ins['anchor']}'")
         for sc in r.get("source_checks", []):
             f = app / sc["path"]
             text = f.read_text(encoding="utf-8", errors="replace") if f.is_file() else ""

@@ -4,7 +4,8 @@ Each skill has a thin scripts/serial_test.py that calls run(cfg) with its own po
   cfg = {skill_dir, env_prefix (PSE84|PICO|CUBE), serial_key (bench variable with the USB serial of
          the console), serial_env (env override suffix), vid_key, default_vid (hex), title,
          command_list (optional: "msh" = after sync, ask RT-Thread's `help` and FAIL the step
-         "command list" when a command the spec sends is not exported by the image - lib/msh.py)}
+         "command list" when a command the spec sends is not exported by the image - lib/msh.py;
+         a spec with "command_list": false skips it, e.g. AT commands on a USB CDC port)}
 
 
 Usage:
@@ -272,7 +273,8 @@ def run(cfg):
         finish([("port", False)])
 
     try:
-        with serial.Serial(port, int(spec.get("baud", 115200)), timeout=0.05) as s:
+        # write_timeout: a USB CDC device that stops reading must fail the run, not block it forever
+        with serial.Serial(port, int(spec.get("baud", 115200)), timeout=0.05, write_timeout=5) as s:
             rd = Reader(s)
             note(f"open {port} spec={args.spec} board={args.board or '-'} interactive={interactive}")
             if args.wait_boot:
@@ -297,7 +299,7 @@ def run(cfg):
                 note(("PASS" if same else "FAIL") + f" running image reports board={args.board}")
                 results.append(("board identity", same))
                 ok = ok and same
-            if ok and cfg.get("command_list") == "msh":
+            if ok and cfg.get("command_list") == "msh" and spec.get("command_list", True):
                 # RT-Thread: the image lists its exported commands - every command the spec sends must be there
                 import msh
                 time.sleep(0.2)

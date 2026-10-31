@@ -52,6 +52,7 @@ every board instead - pick one of the two.
 | "Run the test" | `serial_test.py auto <app>/tests/hello_world.json ...` | `RESULT: PASS (n/n passed ...)` |
 | "What is running on the board?" | `msh_status.py auto --board vision-board` | `MSH: PASS` - RT-Thread version, every msh command with its description, threads with stack use, heap, devices (read-only, no probe) |
 | "Scan and join Wi-Fi" (an app with the `rw007` recipe) | msh `wifi scan`, `wifi join <ssid> <password>`, `ping <host>` | access points listed; "wifi connect success" + an address; ping replies - credentials are never written to a file or log |
+| "Test the AT commands" (an app with `usb-cdc` + `at-cdc`, data cable on the user USB-OTG port) | `serial_test.py <CDC COM port> <skill>/recipes/tests/at_cdc.json <log> --board vision-board` | `RESULT: PASS` - `AT+INFO`, `AT+LED=<n>,<0|1|2>`, `AT+LED?`, `AT+BTN?` |
 | "Run the interactive test" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (a push-to-light app) | press KEY0 when asked and watch blue LED (P102) |
 | "Clean up" | `clean.sh` (dry run first) | a list, then deletion only after your yes; `--apps` also deletes app sources |
 

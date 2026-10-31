@@ -53,3 +53,8 @@ range). Hardware: [../README.md](../README.md).
 - 2026-10-31 recipes `sdcard` + `sdcard-fat` on a push-to-light app (openmv FSP; `board/ports/mnt.c` from the
   msc project): build PASS, flash 170432 bytes equal, MSH: PASS (`sd0`, `sd`, `sd_mount`), FAT test 11/11 with a
   card in the slot (write, read back, delete), a file kept across `reboot`, push-to-light 17/17.
+- 2026-10-31 recipes `usb-cdc` + `at-cdc` on a push-to-light app (openmv FSP): first image - the PC saw no
+  device: the SDK's drv_gpio.c re-applied the FSP pin setup on each rt_pin_mode(), putting USB_CH_SEL (PA13)
+  back high (confirmed by driving it low over msh `pin` -> COM port appeared); fixed by the recipe's patch; AT end
+  mark CRLF never answered CR-only input -> CR. Final image: build PASS, flash read back equal, PC sees VID
+  0xCAFE PID 0x4000 at boot, AT test 12/12, console push-to-light 17/17.

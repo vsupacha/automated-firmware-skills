@@ -35,8 +35,9 @@ scons_run "$APPDIR" -j8 >>"$LOG" 2>&1; rc=$?
 secs=$(( $(date +%s) - start ))
 tr -d '\r' <"$LOG" >"$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 
-# warnings in our own sources (src/), errors anywhere
-srcw="$(grep -E "(^|[/\\\\])src[/\\\\][^:]*:[0-9]+:[0-9]+: warning:" "$LOG" | sort -u)"
+# warnings in our own sources (the app's src/; scons prints paths relative to the app, so only a
+# path that starts with src counts - not rt-thread/components/.../src/), errors anywhere
+srcw="$(grep -E "^src[/\\\\][^:]*:[0-9]+:[0-9]+: warning:" "$LOG" | sort -u)"
 nsrc=$(printf '%s' "$srcw" | grep -c . ); nall=$(grep -c ': warning:' "$LOG"); errs=$(grep -c ': error:' "$LOG")
 fw_warn_gate_end "$APPDIR" "$nsrc" "$rc"
 fresh=1; [ -f "$ELF" ] && [ "$(date -r "$ELF" +%s)" -ge "$start" ] || fresh=0

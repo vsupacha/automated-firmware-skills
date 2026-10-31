@@ -52,7 +52,8 @@ KEY0 toggles LED1 = the blue LED). An app is the SDK's blink project + RT-Thread
 already synced as an RT-Thread Studio project (GCC 13.3); its FSP side (configuration.xml, ra_gen/) comes
 from the SDK's openmv project, so every peripheral of the driver recipes is generated but none is enabled.
 On-board extras reached by recipes: RW007 Wi-Fi module on SPI1 (`rw007`, tested 2026-10-31: scan,
-join, ping), SD card slot (`sdcard`), camera bus (`i2c1-soft`), LCD backlight and touch (`pwm6`, `sci3-i2c`). flash.sh writes code flash only - never
+join, ping), SD card slot (`sdcard`), camera bus (`i2c1-soft`), LCD backlight and touch (`pwm6`, `sci3-i2c`), user USB-OTG port as a USB CDC
+serial port with an AT command layer (`usb-cdc`, `at-cdc`, tested 2026-10-31). flash.sh writes code flash only - never
 the FSP's option-setting memory - and reads every byte back.
 
 Example - hello-world on a Vision Board:
