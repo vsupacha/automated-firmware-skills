@@ -19,7 +19,7 @@ Please report, for example:
 ## What the scripts do on your PC and your board
 
 - They run your installed vendor tools (STM32CubeMX / STM32CubeProgrammer, ModusToolbox, PlatformIO,
-  RT-Thread Studio, OpenOCD, pyOCD, GDB) and Python with `pyserial`. Nothing is installed for you:
+  MCUXpresso SDK / LinkServer, OpenOCD, GDB) and Python with `pyserial`. Nothing is installed for you:
   a missing tool stops the script with `ACTION: SETUP`.
 - Network access only happens inside those tools (package or SDK downloads) and when a template app
   is cloned from the vendor's GitHub (ModusToolbox).

@@ -11,7 +11,9 @@ verification log, not here.
 - 2026-11-01: RT-Thread skills `scons-rtthread-visionboard` and `scons-rtthread-titanboard`, boards
   `vision-board` and `titan-board` and the `firmware-rtthread` plugin moved to the new repository
   automated-firmware-skills-rtthread (RT-Thread builds, flashes and tests differently). `lib/msh.py`
-  stays here for `fwtest.py`'s optional `command_list`.
+  stays here for `fwtest.py`'s optional `command_list`. The entries below about the Vision Board,
+  the Titan Board, recipes, `msh_status.py` and the RT-Thread `update_tools.sh` describe work that
+  now lives in that repository.
 
 ### Added
 - New board skill `mcux-sdk-frdmmcxn947` (NXP FRDM-MCXN947, MCXN947 Cortex-M33 core 0) with the

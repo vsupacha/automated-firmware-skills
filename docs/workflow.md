@@ -119,7 +119,6 @@ later. The IDE is **VS Code with the toolchain vendor's extension**:
 | ModusToolbox | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) | `<app>.code-workspace` + `.vscode/` | ModusToolbox's own `make vscode` (this PC's tool paths: git-ignored, re-made per PC) |
 | STM32CubeMX / STM32CubeMX2 | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | `<app>.code-workspace` (`mx/`, `src/`, `tests/` as folders) + `mx/.settings/*.store.json`, `mx/.vscode/{settings,launch}.json` | `lib/common.sh` `fw_vscode_cube_setup`, from the board profile's pinned bundles |
 | PlatformIO | PlatformIO IDE (`platformio.platformio-ide`) | `<app>.code-workspace` (the app folder; `platformio.ini` at its root); PlatformIO IDE adds `.vscode/` | `lib/common.sh` `fw_code_workspace` |
-| RT-Thread (scons) | none: **RT-Thread Studio**, a standalone Eclipse IDE (`IDE_APP=rt-thread-studio` in env.sh instead of `IDE_EXT`) | the app's own `.project`/`.cproject`/`.settings` (synced with `scons --target=eclipse` by new_app.sh) in the Studio workspace `<apps>/.rtstudio` | the skill's `open_ide.sh`: headless Eclipse import, then `studio.exe -data <workspace>` (skills now in automated-firmware-skills-rtthread) |
 
 Rules for `open_ide.sh <app> [--no-open]`:
 
@@ -279,11 +278,19 @@ runs `fw_workspace.sh set` with the answer and re-runs `new_app.sh`:
 Why the path length matters: Windows tools fail beyond 260 characters, and CMake (STM32 skills)
 repeats the app path inside `mx/build/.../CMakeFiles/` because `src/` sits outside `mx/`. With a
 98-character app folder the deepest object file was 248 characters. Each skill's `new_app.sh`
-therefore limits the app path (100 for the CubeMX classic, PlatformIO ESP32/UNO and RT-Thread skills, 110 for
+therefore limits the app path (100 for the CubeMX classic and PlatformIO ESP32/UNO skills, 110 for
 CubeMX2, 120 for ModusToolbox and the Pico).
 
 `.bench/` follows the workspace: after changing it, run `discover.sh <board>` again before flashing.
 `serial_test.py`, sensor-debug and web-wizard read the same setting (`lib/fwpaths.py`).
+
+**One workspace for both repositories.** automated-firmware-skills and
+automated-firmware-skills-rtthread read the same `~/.fw-skills.env`, so on one PC they use the same
+workspace and the same `.bench/`. Board id `edgi-talk` is in both (`modus-pdl-edgitalk` here,
+`scons-rtthread-edgitalk` in automated-firmware-skills-rtthread): they share `.bench/edgi-talk.env` and its lock - one session
+at a time uses the board, the last `discover.sh` writes the file (same KitProg3, same keys), and a
+`FLASH_POLICY=auto` line applies to both skills. To keep them apart, give one skill its own
+workspace with `<PREFIX>_WS`.
 
 ## Tool updates
 
@@ -296,7 +303,7 @@ Vendors update these on their own, so a proven board can break without any chang
 | VS Code extension (STM32CubeIDE for VS Code, ModusToolbox for VS Code, PlatformIO IDE) | **silently**, VS Code auto-updates extensions; only one version stays installed | the IDE path: files the skills pre-write for the extension (`mx/.settings/*.store.json`, `launch.json`, ModusToolbox `vscode_fix.py`, which copies the 1.12.0 rules) may no longer match - prompts come back, debug launch fails | **high** |
 | STM32Cube bundles (GCC, CMake, Ninja, Programmer, gdbserver, clangd) | the extension's bundle manager adds versions side by side | nothing while the pinned one stays; a removed pin fails build / flash / debug | medium |
 | STM32CubeMX / CubeMX2, firmware packages | installer / updater by the developer; one CubeMX version at a time | regen output (headless script commands, generated code), syscalls paths | medium |
-| ModusToolbox tools, PlatformIO platforms, RT-Thread Studio SDK | installer / `pio pkg update`; usually side by side | build flags, BSP layout, `make vscode` format | medium |
+| ModusToolbox tools, PlatformIO platforms, MCUXpresso SDK | installer / `pio pkg update`; usually side by side | build flags, BSP layout, `make vscode` format | medium |
 | VS Code itself, Git for Windows, Python | auto-update | rarely: CLI options, `grep`/`sed` behaviour in Git Bash | low |
 
 **Detect.** `check_tools.sh` shows a WARN when the installed extension differs from `IDE_EXT_VERSION`,
@@ -315,8 +322,7 @@ regen + build (0 warnings), flash (asks first), the bring-up tests, and for an e
 IDE path once in VS Code (open, build, debug, no "fix"/"configure" prompt). Then add the dated result
 line. The profile diff (old -> new pins) plus that line is the evidence for the upgrade.
 
-`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6, WB55) and in the RT-Thread skills
-(SDK Manager packages: BSP, GNU Arm, pyOCD - repository automated-firmware-skills-rtthread); the `IDE_EXT_VERSION` check in
+`update_tools.sh` exists in the STM32 CubeMX skills (L475, F4, N6, WB55); the `IDE_EXT_VERSION` check in
 `check_tools.sh` covers every skill whose profile sets it (STM32 and ModusToolbox).
 
 ## Common options

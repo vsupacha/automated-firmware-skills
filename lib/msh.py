@@ -15,8 +15,7 @@ running image reports its own command surface. Formats follow RT-Thread 5.0.2
 The prompt ("msh >", or "msh /dir>" with a file system) ends without a newline, so a command's
 output is complete when the prompt comes back. Typed characters are echoed after the prompt.
 
-Used by skills/scons-rtthread-visionboard/scripts/msh_status.py (stage 7 status without a probe) and
-by lib/fwtest.py when a skill sets cfg["command_list"] = "msh" (the test checks that every command
+Used by lib/fwtest.py when a skill sets cfg["command_list"] = "msh" (the test checks that every command
 its spec sends is in `help` before running the steps).
 """
 import re

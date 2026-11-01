@@ -6,9 +6,10 @@ developer (or another agent) can run every stage by hand.
 
 Other languages: [ภาษาไทย](README_TH.md) · [日本語](README_JA.md)
 
-> RT-Thread skills (Vision Board, Titan Board) live in the separate repository
-> **automated-firmware-skills-rtthread** since 2026-11-01: RT-Thread builds, flashes and tests
-> differently (board SDK project, Kconfig driver recipes, msh shell).
+> RT-Thread skills (Vision Board, Titan Board, and Edgi-Talk under RT-Thread) live in the separate
+> repository **automated-firmware-skills-rtthread** since 2026-11-01: RT-Thread builds, flashes and
+> tests differently (board SDK project, Kconfig driver recipes, msh shell). The Edgi-Talk skill here
+> (`modus-pdl-edgitalk`) is native ModusToolbox, without RT-Thread.
 
 ## Concepts
 
@@ -43,7 +44,7 @@ Other languages: [ภาษาไทย](README_TH.md) · [日本語](README_JA.
 | **Windows 10/11 + [Git for Windows](https://git-scm.com/download/win)** (Git Bash) | every script | the scripts are bash; Linux/macOS are not supported yet |
 | **Python 3** with `pyserial` (`pip install --user pyserial`) | tests, debug, tool skills | tested with Python 3.12 |
 | **[Claude Code](https://claude.com/claude-code)** | the agent path | optional: every stage also runs by hand |
-| **The vendor toolchain of your board** | setup onward | not bundled - each board's README lists the exact versions (ModusToolbox, STM32CubeMX / CubeMX2 + STM32Cube bundles, PlatformIO, RT-Thread Studio) |
+| **The vendor toolchain of your board** | setup onward | not bundled - each board's README lists the exact versions (ModusToolbox, STM32CubeMX / CubeMX2 + STM32Cube bundles, PlatformIO, MCUXpresso SDK + LinkServer) |
 | **VS Code + the vendor's extension** | the IDE path | optional |
 | **The board and its USB cable** | connect, flash, test, debug | build stages need no board |
 
