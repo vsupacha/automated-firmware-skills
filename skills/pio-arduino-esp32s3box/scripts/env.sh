@@ -125,7 +125,7 @@ print(e['application_offset'], 'firmware.bin')" "$1" "$(winpath "$2")" | tr -d '
 }
 
 # fw_pio_unit_env <env> <baud>: the unit-test environment of an app's platformio.ini (unit_test.sh).
-# pio test builds test/test_*/ with src/func/ only (test/test_func/board_fake.cpp replaces
+# pio test builds test/test_*/ with src/func/ only (test/test_func/test_stub.cpp, the test stub, replaces
 # src/board/), so the app's main.cpp and board.cpp stay out of the test image.
 fw_pio_unit_env() {
   printf '%s\n' "; unit tests of src/func on the board: scripts/unit_test.sh <app> (asks before flashing)" \

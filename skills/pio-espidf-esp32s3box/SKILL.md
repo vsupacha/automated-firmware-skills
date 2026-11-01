@@ -172,7 +172,7 @@ Read `reference/layering.md` before writing code. Rules:
 
 **Check the layers (M2 - gated, stops with `ACTION: SETUP` until enabled):**
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS`, and
-`bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` on the PC, fake board).
+`bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` on the PC, test stub of the board).
 
 ## Stage 3 - Build
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stage 6 (test: unit tests on the board, prototype): Unity tests of the app's src/func/ (led,
-# button, console) against a fake board, built by PlatformIO's test runner and run on the
+# button, console) against a test stub of the board, built by PlatformIO's test runner and run on the
 # ESP32-S3-BOX.
 # Usage: unit_test.sh <app-dir> [--yes] [--build-only | --read-only] [--filter <glob>] [--timeout <s>]
 #   --yes         flash the unit-test image (only after the user agreed - it replaces the app)
@@ -11,12 +11,15 @@
 # Steps: 1. pio test --without-uploading --without-testing (env <env>_unit: test/test_* + src/func
 #        only) and a manifest of that build (sha256 + the flash map PlatformIO would upload) ->
 #        2. flash.sh --yes --env <env>_unit (manifest + identity gates, after the approval asked
-#        here) -> 3. scripts/unity_read.py on the board's console port: the test image waits for
+#        here) -> 3. <repo>/lib/unity_read.py on the board's console port: the test image waits for
 #        a start byte (USB Serial/JTAG drops output while no host reads; pio test's reset does
-#        not restart this chip), the reader sends it and parses Unity's summary.
-# The app (test/ folder, [env:<env>_unit]) gets both from the template when they are missing.
+#        not restart this chip), the reader sends it, parses Unity's results and the test log
+#        line (TESTLOG) and checks that both agree.
+# The app (test/ folder, [env:<env>_unit]) gets both from the template when they are missing
+# (lib/common.sh fw_pio_test_dir: test_log.c/.h always refreshed, pre-rename test/ moved to logs/).
 # After the run the board keeps the unit-test image: flash.sh <app> --yes restores the app.
-# Gates: "UNIT-BUILD: PASS" (built, image sha256), "UNIT: PASS (n/n)" / "UNIT: FAIL (...)".
+# Gates: "UNIT-BUILD: PASS" (built, image sha256), "UNIT: PASS (n/n, test log agrees)" /
+# "UNIT: FAIL (...)" (also when result lines are lost or the test log disagrees with Unity).
 # Exit 0 PASS, 1 FAIL, 10 = developer action (approve the flash, connect the board).
 
 . "$(dirname "$0")/env.sh"
@@ -35,10 +38,7 @@ UENV="${APP_PIO_ENV}_unit"; OUT="$APPDIR/.pio/build/$UENV"
 mkdir -p "$APPDIR/logs"; STAMP="$(ts)"; LOG="$APPDIR/logs/unit-$STAMP.log"
 
 # 0. test sources and the unit-test environment (older apps have neither)
-if [ ! -d "$APPDIR/test" ]; then
-  cp -r "$SKILL_DIR/templates/_common/test" "$APPDIR/test" || die "cannot copy the test suite"
-  info "added test/ from the skill template (Unity tests of src/func)"
-fi
+fw_pio_test_dir "$APPDIR" "$SKILL_DIR/templates/_common/test"
 if ! grep -q "^\[env:$UENV\]" "$APPDIR/platformio.ini"; then
   { echo; fw_pio_unit_env "$APP_PIO_ENV" "${CONSOLE_BAUD:-115200}"; } >>"$APPDIR/platformio.ini"
   info "added [env:$UENV] to platformio.ini"
@@ -81,23 +81,18 @@ else
 fi
 
 # 3. read the results: the test image waits for a start byte (USB Serial/JTAG drops output while
-#    no host reads, and pio test cannot reset this chip), so scripts/unity_read.py starts it
+#    no host reads, and pio test cannot reset this chip), so <repo>/lib/unity_read.py starts it,
+#    reads Unity's results and the test log line, checks that both agree and prints the UNIT: gate
 PORT="$(wait_port "$USB_SERIAL" 15)" || need_user CONNECT "no console port of board $USB_SERIAL after flashing - replug USB, then re-run unit_test.sh $APPDIR --yes"
-info "unity_read.py on the console port (sends the start byte, reads one Unity run)"
-RES="$("$ESP_PY" "$(winpath "$SKILL_DIR/scripts/unity_read.py")" "$PORT" "$(winpath "$LOG")" --timeout "$TMO" 2>&1 | tr -d '\r')"
-rc=$?
-echo "$RES" | grep -v '^UNITY'
-sum="$(echo "$RES" | sed -n 's/^UNITY: //p')"
-read -r total fails ign <<<"$sum"
-if [ -n "$total" ] && [ "$total" -gt 0 ] 2>/dev/null && [ "$fails" = 0 ]; then
-  note=""; [ "${ign:-0}" != 0 ] && note=", $ign ignored"
-  echo "UNIT: PASS ($((total - ign))/$total$note)"
+info "unity_read.py on the console port (sends the start byte, reads one Unity run + the test log)"
+RES="$("$ESP_PY" "$(winpath "$REPO_ROOT/lib/unity_read.py")" "$PORT" "$(winpath "$LOG")" --timeout "$TMO" 2>&1 | tr -d '\r')"
+echo "$RES"
+if echo "$RES" | grep -q '^UNIT: PASS'; then
   echo "NOTE: the board now runs the unit-test image - flash.sh $APPDIR --yes puts the app back (asks first)"
   exit 0
 fi
-err="$(echo "$RES" | sed -n 's/^UNITY-ERR //p')"
-case "$err" in *"(0 lines received)"*)
+case "$RES" in *"(0 lines received)"*)
   need_user POWER_CYCLE "nothing at all came from the board: the chip is most likely still in its ROM bootloader (FLASH: PASS does not prove the image booted, and a download flag set over USB survives the RESET button). Unplug the USB cable for 5 s, plug it in again without pressing a button, then run unit_test.sh $APPDIR --read-only";;
 esac
-echo "UNIT: FAIL (${sum:+tests/failures/ignored $sum}${err} - log $(winpath "$LOG"))"
+echo "NOTE: log $(winpath "$LOG")"
 exit 1

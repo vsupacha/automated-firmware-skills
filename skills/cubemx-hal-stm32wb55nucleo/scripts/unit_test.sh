@@ -8,14 +8,17 @@
 #   --read-only   only read the results of the test image already on the board (press RESET
 #                 first: a finished run sends nothing more) - no build, no flash
 # Steps: 0. the app gets <app>/test/unity (pinned copy of <repo>/lib/unity, always refreshed) and,
-#        when missing, the runner + suites from <repo>/lib/test_func and func/ modules the suites
+#        the runner test_driver_main.c + test_driver.h + test_log.c/.h (always refreshed) and, when
+#        missing, the suites (test driver cases) from <repo>/lib/test_func and func/ modules the suites
 #        need from <repo>/lib/func or lib/func_dsp; overlay.py adds the FW_UNIT switch to mx/CMakeLists.txt ->
 #        1. CMake build of mx/ with -DFW_UNIT=ON into mx/build/Unit (test/*.c replace
 #        src/app_main.c), 0 warnings in src/ and test/ (Unity's own file is not counted), manifest ->
 #        2. flash.sh --yes --elf mx/build/Unit/mx.elf (identity gates) -> 3. <repo>/lib/unity_read.py
-#        on the bench console port: the image waits for a start byte, the reader sends it.
+#        on the bench console port: the image waits for a start byte, the reader sends it, reads
+#        Unity's results and the test log line (TESTLOG) and checks that both agree.
 # After the run the board keeps the unit-test image: flash.sh <app> --yes restores the app.
-# Gates: "UNIT-BUILD: PASS" (image sha256), "UNIT: PASS (n/n)" / "UNIT: FAIL (...)".
+# Gates: "UNIT-BUILD: PASS" (image sha256), "UNIT: PASS (n/n, test log agrees)" / "UNIT: FAIL (...)"
+# (also FAIL when result lines are lost or the test log disagrees with Unity).
 # Exit 0 PASS, 1 FAIL, 2 warnings in src/ or test/, 10 = developer action (approve, connect).
 
 . "$(dirname "$0")/env.sh"
@@ -37,22 +40,31 @@ read_results() {
   resolve_console
   [ -n "$CONSOLE" ] || need_user CONNECT "no console port for board '$BOARD_ID' - run discover.sh first"
   info "Reading Unity output on $CONSOLE (log $LOG)"
+  # the reader checks Unity's results against the test log line and prints the UNIT: gate
   out="$("$PYTHON" "$REPO_ROOT/lib/unity_read.py" "$CONSOLE" "$LOG" --timeout "$TMO")"; rc=$?
   echo "$out"
-  sum="$(echo "$out" | sed -n 's/^UNITY: \([0-9]*\) \([0-9]*\) \([0-9]*\)$/\1 \2 \3/p')"
-  if [ -z "$sum" ]; then
-    echo "UNIT: FAIL (no Unity summary within ${TMO} s - board running the test image? press RESET and use --read-only)"; exit 1
+  [ $rc -eq 0 ] && exit 0
+  if echo "$out" | grep -q '^UNITY-ERR no Unity summary'; then
+    echo "NOTE: board running the test image? press RESET and use --read-only"
   fi
-  set -- $sum
-  if [ $rc -eq 0 ] && [ "$1" -gt 0 ]; then echo "UNIT: PASS ($(( $1 - $3 ))/$1, $3 ignored)"; exit 0; fi
-  echo "UNIT: FAIL ($2 of $1 failed, $3 ignored; log $LOG)"; exit 1
+  echo "NOTE: log $LOG"; exit 1
 }
 [ $READ_ONLY = 1 ] && read_results
 
-# 0. test sources in the app
+# 0. test sources in the app: Unity, the runner (test driver main) and the test log belong to the
+#    skill and are always refreshed; the suites (test driver cases) are the app's once copied
 mkdir -p "$APPDIR/test/unity"
 cp "$REPO_ROOT"/lib/unity/unity.c "$REPO_ROOT"/lib/unity/unity.h "$REPO_ROOT"/lib/unity/unity_internals.h "$APPDIR/test/unity/"
-for f in "$REPO_ROOT"/lib/test_func/*.[ch]; do
+if [ -f "$APPDIR/test/unit_main.c" ]; then          # apps from before the test_driver / test_stub names
+  rm -f "$APPDIR/test/unit_main.c" "$APPDIR/test/unit.h"
+  sed -i -e 's/"unit\.h"/"test_driver.h"/' -e 's/\bunit_setup\b/test_driver_setup/g' \
+         -e 's/\bunit_teardown\b/test_driver_teardown/g' "$APPDIR"/test/test_*.c
+  echo "renamed test/unit_main.c -> test_driver_main.c, unit.h -> test_driver.h (suites updated)"
+fi
+for f in test_driver_main.c test_driver.h test_log.c test_log.h; do
+  cmp -s "$REPO_ROOT/lib/test_func/$f" "$APPDIR/test/$f" || { cp "$REPO_ROOT/lib/test_func/$f" "$APPDIR/test/"; echo "updated test/$f"; }
+done
+for f in "$REPO_ROOT"/lib/test_func/test_*.c; do
   [ -f "$APPDIR/test/$(basename "$f")" ] || { cp "$f" "$APPDIR/test/"; echo "added test/$(basename "$f")"; }
 done
 for m in gesture fxscale; do                    # lib/func (every new app has it) or lib/func_dsp (opt-in)

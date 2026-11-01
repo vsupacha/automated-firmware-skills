@@ -1,8 +1,8 @@
 /*******************************************************************************
-* File Name : board.h  (host fake)
+* File Name : board.h  (host test stub)
 *
-* Fake board for host tests (lib/host_test.sh): the board.h API of
-* docs/board-api.md backed by plain variables, plus fake_* controls the tests
+* Test stub of the board for host tests (lib/host_test.sh): the board.h API of
+* docs/board-api.md backed by plain variables, plus test_stub_* controls the tests
 * use to press buttons, feed console input and advance time.
 * BOARD_MAX_* are small on purpose so the tests can exceed them.
 *******************************************************************************/
@@ -36,20 +36,20 @@ bool        board_button_is_pressed(uint32_t idx);
 const char *board_button_name(uint32_t idx);
 const char *board_button_pin(uint32_t idx);
 
-/* Console: input from fake_console_input(), output = stdout */
+/* Console: input from test_stub_console_input(), output = stdout */
 bool     board_console_getc(char *c);
 void     board_console_flush(void);
 
 /* ---- test controls (host only) ---- */
-#define FAKE_MAX_IO             (8U)
+#define TEST_STUB_MAX_IO             (8U)
 
-void     fake_reset(uint32_t leds, uint32_t buttons);    /* counts up to FAKE_MAX_IO */
-void     fake_advance_ms(uint32_t ms);
-void     fake_button_set(uint32_t idx, bool pressed);    /* raw level */
-bool     fake_led_get(uint32_t idx);                     /* what the pin shows */
-void     fake_led_force(uint32_t idx, bool on);          /* change it behind func's back */
-uint32_t fake_led_writes(void);                          /* board_led_write calls since reset */
-void     fake_console_input(const char *s);
-uint32_t fake_fatal_calls(void);
+void     test_stub_reset(uint32_t leds, uint32_t buttons);    /* counts up to TEST_STUB_MAX_IO */
+void     test_stub_advance_ms(uint32_t ms);
+void     test_stub_button_set(uint32_t idx, bool pressed);    /* raw level */
+bool     test_stub_led_get(uint32_t idx);                     /* what the pin shows */
+void     test_stub_led_force(uint32_t idx, bool on);          /* change it behind func's back */
+uint32_t test_stub_led_writes(void);                          /* board_led_write calls since reset */
+void     test_stub_console_input(const char *s);
+uint32_t test_stub_fatal_calls(void);
 
 #endif /* BOARD_H */

@@ -2,7 +2,7 @@
 * File Name : test_func.c
 *
 * Host unit tests for the logic layer (lib/func or an app's func/), built by
-* lib/host_test.sh against the fake board (board.h here). Each module's tests
+* lib/host_test.sh against the test stub (board.h here). Each module's tests
 * are compiled only when host_test.sh found that module (HOST_HAS_<MODULE>).
 *
 * Usage: test_func <capture-file>
@@ -101,7 +101,7 @@ static const char *feed(const char *in)
     last_argc = 0;
     memset(last_argv, 0, sizeof(last_argv));
     cap_begin();
-    fake_console_input(in);
+    test_stub_console_input(in);
     console_poll();
     return cap_end();
 }
@@ -112,7 +112,7 @@ static void test_console(void)
     char        line[200];
 
     group = "console";
-    fake_reset(0U, 0U);
+    test_stub_reset(0U, 0U);
     console_init(cmds, (uint32_t)(sizeof(cmds) / sizeof(cmds[0])));
 
     out = feed("led 1 on\r");
@@ -189,16 +189,16 @@ static void test_console(void)
 static void test_led(void)
 {
     group = "led";
-    fake_reset(3U, 0U);
-    fake_led_force(0U, true);
-    fake_led_force(2U, true);
+    test_stub_reset(3U, 0U);
+    test_stub_led_force(0U, true);
+    test_stub_led_force(2U, true);
 
     led_init();
     CHECK(led_count() == 3U);
-    CHECK(!fake_led_get(0U) && !fake_led_get(1U) && !fake_led_get(2U));   /* init = all off */
+    CHECK(!test_stub_led_get(0U) && !test_stub_led_get(1U) && !test_stub_led_get(2U));   /* init = all off */
 
     CHECK(led_set(1U, true));
-    CHECK(fake_led_get(0U));                                    /* 1-based: LED1 = index 0 */
+    CHECK(test_stub_led_get(0U));                                    /* 1-based: LED1 = index 0 */
     CHECK(led_get(1U));
     CHECK(!led_get(2U));
 
@@ -206,22 +206,22 @@ static void test_led(void)
     CHECK(!led_set(4U, true));
     CHECK(!led_get(0U));
     CHECK(!led_get(4U));
-    CHECK(!fake_led_get(3U));
+    CHECK(!test_stub_led_get(3U));
 
     CHECK(led_toggle(2U));
-    CHECK(fake_led_get(1U));
+    CHECK(test_stub_led_get(1U));
     CHECK(led_toggle(2U));
-    CHECK(!fake_led_get(1U));
+    CHECK(!test_stub_led_get(1U));
     CHECK(!led_toggle(9U));
 
-    fake_led_force(2U, true);                                   /* get reads the board back */
+    test_stub_led_force(2U, true);                                   /* get reads the board back */
     CHECK(led_get(3U));
 
-    fake_reset(0U, 0U);                                         /* board without LEDs */
+    test_stub_reset(0U, 0U);                                         /* board without LEDs */
     led_init();
     CHECK(led_count() == 0U);
     CHECK(!led_set(1U, true));
-    CHECK(fake_led_writes() == 0U);
+    CHECK(test_stub_led_writes() == 0U);
 }
 #endif /* HOST_HAS_LED */
 
@@ -236,7 +236,7 @@ static button_evt_t poll_n(uint32_t n, uint32_t *num)
 
     for (uint32_t i = 0U; (i < n) && (e == BUTTON_EVT_NONE); i++)
     {
-        fake_advance_ms(BUTTON_POLL_MS);
+        test_stub_advance_ms(BUTTON_POLL_MS);
         e = button_poll(num);
     }
     return e;
@@ -247,7 +247,7 @@ static void test_button(void)
     uint32_t num = 0U;
 
     group = "button";
-    fake_reset(0U, 2U);
+    test_stub_reset(0U, 2U);
     button_init();
     CHECK(button_count() == 2U);
     CHECK(!button_is_pressed(1U));
@@ -255,7 +255,7 @@ static void test_button(void)
     CHECK(!button_is_pressed(3U));
     CHECK(poll_n(5U * TICKS, &num) == BUTTON_EVT_NONE);         /* idle: no events */
 
-    fake_button_set(0U, true);                                  /* press: event after debounce */
+    test_stub_button_set(0U, true);                                  /* press: event after debounce */
     CHECK(poll_n(TICKS - 1U, &num) == BUTTON_EVT_NONE);
     CHECK(!button_is_pressed(1U));
     CHECK(poll_n(1U, &num) == BUTTON_EVT_PRESSED);
@@ -263,41 +263,41 @@ static void test_button(void)
     CHECK(button_is_pressed(1U));
     CHECK(poll_n(5U * TICKS, &num) == BUTTON_EVT_NONE);         /* held: one event only */
 
-    fake_button_set(0U, false);                                 /* release */
+    test_stub_button_set(0U, false);                                 /* release */
     num = 0U;
     CHECK(poll_n(TICKS, &num) == BUTTON_EVT_RELEASED);
     CHECK(num == 1U);
     CHECK(!button_is_pressed(1U));
 
-    fake_button_set(1U, true);                                  /* bounce restarts debounce */
+    test_stub_button_set(1U, true);                                  /* bounce restarts debounce */
     CHECK(poll_n(TICKS - 2U, &num) == BUTTON_EVT_NONE);
-    fake_button_set(1U, false);
+    test_stub_button_set(1U, false);
     CHECK(poll_n(1U, &num) == BUTTON_EVT_NONE);
-    fake_button_set(1U, true);
+    test_stub_button_set(1U, true);
     CHECK(poll_n(TICKS - 1U, &num) == BUTTON_EVT_NONE);
     CHECK(poll_n(1U, &num) == BUTTON_EVT_PRESSED);
     CHECK(num == 2U);
-    fake_button_set(1U, false);
+    test_stub_button_set(1U, false);
     CHECK(poll_n(TICKS, &num) == BUTTON_EVT_RELEASED);
 
-    fake_button_set(0U, true);                                  /* both at once: two events */
-    fake_button_set(1U, true);
+    test_stub_button_set(0U, true);                                  /* both at once: two events */
+    test_stub_button_set(1U, true);
     CHECK(poll_n(TICKS, &num) == BUTTON_EVT_PRESSED);
     CHECK(num == 1U);
     CHECK(poll_n(1U, &num) == BUTTON_EVT_PRESSED);
     CHECK(num == 2U);
     CHECK(button_is_pressed(1U) && button_is_pressed(2U));
 
-    fake_reset(0U, 1U);                                         /* pressed at init: no event */
-    fake_button_set(0U, true);
+    test_stub_reset(0U, 1U);                                         /* pressed at init: no event */
+    test_stub_button_set(0U, true);
     button_init();
     CHECK(button_is_pressed(1U));
     CHECK(poll_n(3U * TICKS, &num) == BUTTON_EVT_NONE);
 
-    fake_reset(0U, BOARD_MAX_BUTTONS + 2U);                     /* more than func can track */
+    test_stub_reset(0U, BOARD_MAX_BUTTONS + 2U);                     /* more than func can track */
     button_init();
     CHECK(button_count() == BOARD_MAX_BUTTONS);
-    fake_button_set(BOARD_MAX_BUTTONS, true);                   /* the untracked one is ignored */
+    test_stub_button_set(BOARD_MAX_BUTTONS, true);                   /* the untracked one is ignored */
     CHECK(poll_n(2U * TICKS, &num) == BUTTON_EVT_NONE);
 }
 #endif /* HOST_HAS_BUTTON */

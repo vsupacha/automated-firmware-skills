@@ -64,11 +64,12 @@ silkscreen, so console commands and tests say `led 1`, `btn1`.
 | modus-pdl-edgitalk | `templates/_common/proj_cm33_ns/board/board.c` | conforms |
 | cubemx2-hal2-stm32c562nucleo | `templates/_common/src/board/board.c` | conforms |
 | pio-arduino-rpipico2w | `templates/_common/src/board/board.cpp` | **differs** - 1-based `n`, `board_button_read`, no `board_led_read` / `board_led_name` / `board_button_pin` / `board_console_flush`, `BOARD_ID_NAME`, console via `Print &board_console()`; uses a C++ copy of func. To be merged into this contract and `lib/func`. |
-| host (fake) | `lib/host/board.h`, `board_fake.c` | conforms - drives `host_test.sh` |
+| host (test stub) | `lib/host/board.h`, `test_stub.c` | conforms - drives `host_test.sh` |
 
 ## Checks
 
-- `lib/host_test.sh` (stage 10, optional) compiles `lib/func` or an app's `func/` against the fake board and
+- `lib/host_test.sh` (stage 10, optional) compiles `lib/func` or an app's `func/` against the test stub of the board
+(`lib/host`) and
   runs the unit tests: `HOST: PASS`.
 - `lib/check_layers.py` (stage 9) checks the include and `#if BOARD_*` rules above in an app:
   `LAYERS: PASS`.

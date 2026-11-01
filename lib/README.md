@@ -11,9 +11,9 @@
 | `check_layers.py` | stage 9 (M2), any skill's app | include / vendor-call / `#if BOARD_*` rules per layer: `LAYERS: PASS` |
 | `func_dsp/` | opt-in: `unit_test.sh` (WB55) copies it into `<app>/src/func/`; not copied by `new_app.sh` | func/ modules that need CMSIS-DSP (Cortex-M + a build that compiles CMSIS-DSP): fxscale (float -> q31 -> scale -> float, < 1 % error) |
 | `unity/` | `unit_test.sh` of the C skills (copied into `<app>/test/unity`) | Unity 2.6.1, pinned copy (MIT; hashes in `unity/README.md`) |
-| `test_func/` | `unit_test.sh` of the C skills (copied into `<app>/test/` when missing) | on-target test runner `unit_main.c` (start-byte handshake, owns `setUp`/`tearDown`, `unit.h`) + Unity suites of `func/` (`test_gesture.c`, `test_fxscale.c`) |
-| `unity_read.py` | `unit_test.sh` of the C skills | reads one Unity run from the board's console after sending the start byte: `UNITY: <tests> <failures> <ignored>` |
-| `host_test.sh`, `host/` | stage 10 (M2, optional) | builds `func/` (default `lib/func`) with the fake board `host/board.h` and runs `host/test_func.c` on the PC: `HOST: PASS` |
+| `test_func/` | `unit_test.sh` of the C skills (runner + test log refreshed in `<app>/test/` on every run, suites copied when missing); `test_log.c/.h` also copied unchanged into the PlatformIO skills' `templates/_common/test/test_func/` | on-target test runner `test_driver_main.c` (start-byte handshake, owns `setUp`/`tearDown`, `test_driver.h`, prints `TESTLOG:` then `UNIT-DONE`), test log `test_log.c/.h` (`fw_test_log`, magic `FWTL`), Unity suites = test driver cases of `func/` (`test_gesture.c`, `test_fxscale.c`, with their own test stubs) - terms: [docs/workflow.md](../docs/workflow.md#firmware-tests-stage-6-unit-tests-and-tdd) |
+| `unity_read.py` | `unit_test.sh` of every skill with unit tests (WB55, Pico 2 W, ESP32-S3-BOX) | reads one Unity run from the board's console after sending the start byte, checks it against the `TESTLOG:` line (counts, `running=0`, `last_fail`, no lost result lines) and prints the gate `UNIT: PASS (n/n, test log agrees)` / `UNIT: FAIL (...)` |
+| `host_test.sh`, `host/` | stage 10 (M2, optional) | builds `func/` (default `lib/func`) with the test stub `host/board.h` + `host/test_stub.c` and runs `host/test_func.c` on the PC: `HOST: PASS` |
 
 `func/` is the portable middle layer of the architecture (docs/workflow.md, M2; the `board.h`
 contract is docs/board-api.md): it may include

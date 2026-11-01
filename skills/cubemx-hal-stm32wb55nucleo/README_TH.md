@@ -49,7 +49,7 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 | "แฟลชเลย" | `flash.sh <app> --yes` **หลังคุณตอบ yes** | `FLASH: PASS` |
 | "ทดสอบ" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
 | "ทดสอบแบบกดปุ่ม" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (แอป push-to-light) | กด SW1 / SW2 เมื่อถูกบอก แล้วดู LED1 (สีน้ำเงิน) |
-| "รัน unit test บนบอร์ด" | `unit_test.sh <app> --yes` **หลังจากคุณตอบตกลง** (หรือตั้ง `FLASH_POLICY=auto`) | `UNIT: PASS (n/n)` - Unity test ของโค้ดใน `func/` บอร์ดจะรัน image ทดสอบค้างไว้จนกว่าจะ flash แอปกลับ |
+| "รัน unit test บนบอร์ด" | `unit_test.sh <app> --yes` **หลังจากคุณตอบตกลง** (หรือตั้ง `FLASH_POLICY=auto`) | `UNIT: PASS (n/n, test log agrees)` - Unity test ของโค้ดใน `func/` บอร์ดจะรัน image ทดสอบค้างไว้จนกว่าจะ flash แอปกลับ |
 | "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
 
 - **แอปแรกบนเครื่อง:** ถ้า `apps/` อยู่ใน Dropbox/OneDrive หรือ path ยาวเกิน `new_app.sh` จะหยุดด้วย

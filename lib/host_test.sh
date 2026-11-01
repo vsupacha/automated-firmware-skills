@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage 10 (M2 host test, optional): compile the logic layer against the fake board (lib/host) and run its
+# Stage 10 (M2 host test, optional): compile the logic layer against the test stub (lib/host) and run its
 # unit tests on this PC - no board, no vendor toolchain.
 # Usage: host_test.sh [<app-dir> | <func-dir>] [--keep]
 #   default: <repo>/lib/func. An app dir is searched for its func/ folder (src/func,
@@ -93,7 +93,7 @@ if [ "$CC_KIND" = gnu ]; then
     && FLAGS="$FLAGS -fsanitize=undefined -fno-sanitize-recover=all"
   # shellcheck disable=SC2086
   "$CC" $FLAGS $(for d in $DEFS; do printf -- '-D%s ' "$d"; done) -I"$HOST_DIR" -I"$FUNC" \
-    "$HOST_DIR/test_func.c" "$HOST_DIR/board_fake.c" $SRCS -o "$EXE" >"$LOG" 2>&1; rc=$?
+    "$HOST_DIR/test_func.c" "$HOST_DIR/test_stub.c" $SRCS -o "$EXE" >"$LOG" 2>&1; rc=$?
 else
   w() { cygpath -w "$1"; }
   {
@@ -105,7 +105,7 @@ else
     echo "cl 2>\"$(w "$OUT/cl_version.txt")\" >nul"
     printf 'cl /nologo /W4 /WX /TC /D_CRT_SECURE_NO_WARNINGS'
     for d in $DEFS; do printf ' /D%s' "$d"; done
-    printf ' /I"%s" /I"%s" "%s" "%s"' "$(w "$HOST_DIR")" "$(w "$FUNC")" "$(w "$HOST_DIR/test_func.c")" "$(w "$HOST_DIR/board_fake.c")"
+    printf ' /I"%s" /I"%s" "%s" "%s"' "$(w "$HOST_DIR")" "$(w "$FUNC")" "$(w "$HOST_DIR/test_func.c")" "$(w "$HOST_DIR/test_stub.c")"
     for s in $SRCS; do printf ' "%s"' "$(w "$s")"; done
     printf ' /Fe:"%s"\r\n' "$(w "$EXE.exe")"
   } >"$OUT/build.bat"
@@ -114,7 +114,7 @@ else
 fi
 info "compiler: $CC_VER"
 if [ $rc -ne 0 ]; then
-  tr -d '\r' <"$LOG" | grep -vE '^(test_func|board_fake|console|led|button)\.c$' | sed 's/^/  /' | tail -30
+  tr -d '\r' <"$LOG" | grep -vE '^(test_func|test_stub|console|led|button)\.c$' | sed 's/^/  /' | tail -30
   echo "HOST: FAIL (build - lib/func must compile warning-free on the host too)"; exit 1
 fi
 

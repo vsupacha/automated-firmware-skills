@@ -1,45 +1,52 @@
 #!/usr/bin/env bash
 # Stage 6 (test: unit tests on the board, prototype): Unity tests of the app's src/func/ (led,
-# button, console) against a fake board, built by PlatformIO's test runner and run on the Pico.
-# Usage: unit_test.sh <app-dir> [--yes] [--build-only] [--filter <glob>] [--timeout <s>]
+# button, console) against a test stub of the board, built by PlatformIO's test runner and run on
+# the Pico.
+# Usage: unit_test.sh <app-dir> [--yes] [--build-only | --read-only] [--filter <glob>] [--timeout <s>]
 #   --yes         flash the unit-test image (only after the user agreed - it replaces the app)
 #   --build-only  build the test image and stop (no board needed)
+#   --read-only   only step 3: read the results of the test image already on the board (replug
+#                 USB first: a finished run sends nothing more) - no build, no flash
 #   --filter      pio test -f <glob> (default: every test/test_* suite)
 # Steps: 1. pio test --without-uploading --without-testing (build test/test_* + src/func only,
 #        env <env>_unit of platformio.ini) -> 2. flash.sh --yes --uf2 <test image> (identity gate,
-#        after the approval asked here) -> 3. pio test --without-building --without-uploading on
-#        the board's console port (bench file): the runner reads Unity's result lines.
-# The app (test/ folder, [env:<env>_unit]) gets both from the template when they are missing.
+#        after the approval asked here) -> 3. <repo>/lib/unity_read.py on the board's console
+#        port: the test image waits for a start byte, the reader sends it, parses Unity's results
+#        and the test log line (TESTLOG) and checks that both agree.
+# The app (test/ folder, [env:<env>_unit]) gets both from the template when they are missing
+# (lib/common.sh fw_pio_test_dir: test_log.c/.h always refreshed, pre-rename test/ moved to logs/).
 # After the run the board keeps the unit-test image: flash.sh <app> --yes restores the app.
-# Gates: "UNIT-BUILD: PASS" (built, image sha256), "UNIT: PASS (n/n)" / "UNIT: FAIL (...)".
+# Gates: "UNIT-BUILD: PASS" (built, image sha256), "UNIT: PASS (n/n, test log agrees)" /
+# "UNIT: FAIL (...)" (also when result lines are lost or the test log disagrees with Unity).
 # Exit 0 PASS, 1 FAIL, 10 = developer action (approve the flash, connect the board).
 
 . "$(dirname "$0")/env.sh"
-APPDIR=""; YES=0; BUILD_ONLY=0; FILTER=""; TMO=120
+APPDIR=""; YES=0; BUILD_ONLY=0; READ_ONLY=0; FILTER=""; TMO=120
 while [ $# -gt 0 ]; do
-  case "$1" in --yes) YES=1;; --build-only) BUILD_ONLY=1;; --filter) FILTER="$2"; shift;;
+  case "$1" in --yes) YES=1;; --build-only) BUILD_ONLY=1;; --read-only) READ_ONLY=1;; --filter) FILTER="$2"; shift;;
     --timeout) TMO="$2"; shift;; --*) die "unknown option $1";; *) APPDIR="$1";; esac; shift
 done
-[ -n "$APPDIR" ] && [ -f "$APPDIR/pico-app.env" ] || die "usage: unit_test.sh <app-dir> [--yes] [--build-only] [--filter <glob>]  (an app made by new_app.sh)"
+[ -n "$APPDIR" ] && [ -f "$APPDIR/pico-app.env" ] || die "usage: unit_test.sh <app-dir> [--yes] [--build-only | --read-only] [--filter <glob>]  (an app made by new_app.sh)"
 APPDIR="$(cd "$APPDIR" && pwd)"; APP="$(basename "$APPDIR")"
 # shellcheck disable=SC1091
 . "$APPDIR/pico-app.env"
 load_board "$APP_BOARD"
 [ -n "$PIO" ] || die "PlatformIO not found - run check_tools.sh"
+# the reader needs pyserial: PlatformIO's own Python has it
+PIO_PY="$(ls "$PIO_HOME/penv/Scripts/python.exe" "$PIO_HOME/penv/bin/python" 2>/dev/null | head -1)"
+PIO_PY="${PIO_PY:-$PYTHON}"
 UENV="${APP_PIO_ENV}_unit"
 mkdir -p "$APPDIR/logs"; STAMP="$(ts)"; LOG="$APPDIR/logs/unit-$STAMP.log"
 
 # 0. test sources and the unit-test environment (older apps have neither)
-if [ ! -d "$APPDIR/test" ]; then
-  cp -r "$SKILL_DIR/templates/_common/test" "$APPDIR/test" || die "cannot copy the test suite"
-  info "added test/ from the skill template (Unity tests of src/func)"
-fi
+fw_pio_test_dir "$APPDIR" "$SKILL_DIR/templates/_common/test"
 if ! grep -q "^\[env:$UENV\]" "$APPDIR/platformio.ini"; then
   { echo; fw_pio_unit_env "$APP_PIO_ENV" "${CONSOLE_BAUD:-115200}"; } >>"$APPDIR/platformio.ini"
   info "added [env:$UENV] to platformio.ini"
 fi
 fopt=(); [ -n "$FILTER" ] && fopt=(-f "$FILTER")
 
+if [ "$READ_ONLY" = 0 ]; then
 # 1. build the unit-test image (no board)
 info "pio test -e $UENV --without-uploading --without-testing  (log $(winpath "$LOG"))"
 if ! "$PIO" test -d "$APPDIR" -e "$UENV" "${fopt[@]}" --without-uploading --without-testing >"$LOG" 2>&1; then
@@ -58,24 +65,21 @@ require_flash_approval $YES "program board '$APP_BOARD' with the UNIT-TEST image
 bench_lock "$BOARD_ID" unit_test.sh
 bash "$SKILL_DIR/scripts/flash.sh" "$APPDIR" --yes --uf2 "$UF2" | tee -a "$LOG" | grep -E "^(identity|FLASH|ERROR|ACTION|NOTE)"
 [ "${PIPESTATUS[0]}" = 0 ] || { echo "UNIT: FAIL (the unit-test image was not flashed)"; exit 1; }
+else
+  require_milestone M1 "unit_test.sh (stage 6 test on the board)"
+  bench_lock "$BOARD_ID" unit_test.sh
+fi
 
-# 3. read the results from the board's console port
+# 3. read the results: the test image waits for a start byte; <repo>/lib/unity_read.py sends it,
+#    reads Unity's results and the test log line, checks that both agree, prints the UNIT: gate
 SER="$(echo "$USB_SERIAL" | tr a-z A-Z)"
-PORT="$(find_port "$SER")"
-[ -n "$PORT" ] || need_user CONNECT "no console port of board $SER after flashing - replug USB, then re-run unit_test.sh $APPDIR --yes"
-info "pio test -e $UENV --without-building --without-uploading --test-port $PORT"
-timeout "$TMO" "$PIO" test -d "$APPDIR" -e "$UENV" "${fopt[@]}" --without-building --without-uploading \
-  --test-port "$PORT" >>"$LOG" 2>&1
-rc=$?
-grep -E "\[(PASSED|FAILED|IGNORED|SKIPPED)\]$" "$LOG" | sed 's/^.*: /  /; s/\t/  /'
-sum="$(grep -E "[0-9]+ test cases?:" "$LOG" | tail -1)"
-total="$(echo "$sum" | grep -oE '[0-9]+ test cases?' | grep -oE '^[0-9]+')"
-okn="$(echo "$sum" | grep -oE '[0-9]+ succeeded' | grep -oE '^[0-9]+')"
-[ "$rc" = 124 ] && { echo "UNIT: FAIL (no result within $TMO s on $PORT - log $(winpath "$LOG"))"; exit 1; }
-if [ "$rc" = 0 ] && [ -n "$total" ] && [ "$total" -gt 0 ] && [ "${okn:-0}" = "$total" ]; then
-  echo "UNIT: PASS ($okn/$total)"
+PORT="$(wait_port "$SER" 15)" || need_user CONNECT "no console port of board $SER - replug USB, then re-run unit_test.sh $APPDIR --read-only"
+info "unity_read.py on $PORT (sends the start byte, reads one Unity run + the test log)"
+RES="$("$PIO_PY" "$(winpath "$REPO_ROOT/lib/unity_read.py")" "$PORT" "$(winpath "$LOG")" --timeout "$TMO" 2>&1 | tr -d '\r')"
+echo "$RES"
+if echo "$RES" | grep -q '^UNIT: PASS'; then
   echo "NOTE: the board now runs the unit-test image - flash.sh $APPDIR --yes puts the app back (asks first)"
   exit 0
 fi
-echo "UNIT: FAIL (${sum:-no summary} - log $(winpath "$LOG"))"
+echo "NOTE: log $(winpath "$LOG")"
 exit 1

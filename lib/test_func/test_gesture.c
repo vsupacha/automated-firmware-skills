@@ -1,18 +1,19 @@
 /*******************************************************************************
 * File Name : test_gesture.c
 *
-* Unity tests of func/gesture with a fake clock: the test owns "now" and steps
+* Unity tests of func/gesture with a test stub clock: the test owns
+* "test_stub_now" and steps
 * it 1 ms per gesture_update() call, so every timing edge case runs in
 * milliseconds on the board, including the 32-bit tick wrap-around.
 *******************************************************************************/
 #include <string.h>
 
 #include "unity.h"
-#include "unit.h"
+#include "test_driver.h"
 #include "gesture.h"
 
 static gesture_state_t g;
-static uint32_t        now;
+static uint32_t        test_stub_now;
 static uint32_t        seen[4];         /* count per gesture_t      */
 static uint32_t        at[4];           /* time of the last of each */
 
@@ -21,13 +22,13 @@ static void hold(bool pressed, uint32_t ms)
 {
     for (uint32_t i = 0U; i < ms; i++)
     {
-        gesture_t e = gesture_update(&g, pressed, now);
+        gesture_t e = gesture_update(&g, pressed, test_stub_now);
         if (e != GESTURE_NONE)
         {
             seen[e]++;
-            at[e] = now;
+            at[e] = test_stub_now;
         }
-        now++;
+        test_stub_now++;
     }
 }
 
@@ -39,7 +40,7 @@ static void click(uint32_t down_ms, uint32_t up_ms)
 
 static void suite_setup(void)
 {
-    now = 1000U;
+    test_stub_now = 1000U;
     memset(seen, 0, sizeof(seen));
     memset(at, 0, sizeof(at));
     gesture_init(&g);
@@ -88,7 +89,7 @@ static void test_bouncy_press_is_one_click(void)
 
 static void test_long_fires_while_held(void)
 {
-    uint32_t t0 = now;
+    uint32_t t0 = test_stub_now;
     hold(true, 900U);
     TEST_ASSERT_EQUAL_UINT32(1U, seen[GESTURE_LONG]);
     /* debounce + long time, within a few ms */
@@ -136,7 +137,7 @@ static void test_two_slow_clicks_are_two_shorts(void)
 
 static void test_click_across_tick_wrap(void)
 {
-    now = 0xFFFFFF80U;                     /* the press starts 128 ms before the wrap */
+    test_stub_now = 0xFFFFFF80U;           /* the press starts 128 ms before the wrap */
     gesture_init(&g);
     click(100U, 400U);
     TEST_ASSERT_EQUAL_UINT32(1U, seen[GESTURE_SHORT]);
@@ -145,7 +146,7 @@ static void test_click_across_tick_wrap(void)
 
 static void test_long_across_tick_wrap(void)
 {
-    now = 0xFFFFFE00U;                     /* 512 ms before the wrap */
+    test_stub_now = 0xFFFFFE00U;           /* 512 ms before the wrap */
     gesture_init(&g);
     hold(true, 900U);
     TEST_ASSERT_EQUAL_UINT32(1U, seen[GESTURE_LONG]);
@@ -161,8 +162,8 @@ static void test_names(void)
 
 void test_gesture_suite(void)
 {
-    unit_setup    = suite_setup;
-    unit_teardown = NULL;
+    test_driver_setup    = suite_setup;
+    test_driver_teardown = NULL;
     UnitySetTestFile(__FILE__);           /* Unity's FAIL lines name this file */
     RUN_TEST(test_idle_gives_no_event);
     RUN_TEST(test_short_click);

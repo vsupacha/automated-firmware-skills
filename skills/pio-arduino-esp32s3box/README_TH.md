@@ -48,7 +48,7 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 | "หาบอร์ดที่ต่ออยู่" | `discover.sh esp32-s3-box` | `IDENTITY: PASS` - อ่านอย่างเดียว บันทึก probe และ console port ของเครื่องนี้ |
 | "แฟลชเลย" | `flash.sh <app> --yes` **หลังคุณตอบ yes** | `FLASH: PASS` |
 | "ทดสอบ" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
-| "รัน unit test" | `unit_test.sh <app>` - ถามก่อน แล้ว `--yes` | `UNIT: PASS (12/12)` - Unity test ของ `func/` บนบอร์ด (prototype); ถ้าไม่ได้รับอะไรเลย ให้ถอดสาย USB 5 วินาทีแล้วรันด้วย `--read-only` |
+| "รัน unit test" | `unit_test.sh <app>` - ถามก่อน แล้ว `--yes` | `UNIT: PASS (12/12, test log agrees)` - Unity test ของ `func/` บนบอร์ด (prototype); ถ้าไม่ได้รับอะไรเลย ให้ถอดสาย USB 5 วินาทีแล้วรันด้วย `--read-only` |
 | "ทดสอบแบบกดปุ่ม" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (แอป push-to-light) | กด BOOT เมื่อถูกบอก แล้วดู LCD backlight |
 | "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
 

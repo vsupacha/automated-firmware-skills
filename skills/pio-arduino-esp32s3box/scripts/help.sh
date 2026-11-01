@@ -37,7 +37,7 @@ skill pio-arduino-esp32s3box (ESP32-S3-BOX, PlatformIO + Arduino) - ask Claude i
   "back up the factory firmware"              -> backup.sh <board>
   "flash it"                                  -> flash.sh <app> --yes
   "test it" / "test with button presses"      -> serial_test.py auto <spec> <log> --board <b> [--interactive]
-  "run the unit tests"                        -> unit_test.sh <app>   (Unity tests of func/ on the board; asks before flashing the test image)
+  "run the unit tests"                        -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log, func/ on the board; asks before flashing)
  Housekeeping
   "clean the build outputs"                   -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
   "add a new board" / "add a template"        -> boards/_template/, SKILL.md "Extending"
@@ -58,7 +58,7 @@ skill pio-arduino-esp32s3box (ESP32-S3-BOX, PlatformIO + Arduino) - สั่ง
   "สำรอง firmware เดิม"                           -> backup.sh <board>
   "แฟลชเลย"                                      -> flash.sh <app> --yes
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                      -> serial_test.py auto <spec> <log> --board <b> [--interactive]
-  "รัน unit test"                                 -> unit_test.sh <app>   (Unity test ของ func/ บนบอร์ด; ถามก่อน flash image ของ test)
+  "รัน unit test"                                 -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log ของ func/ บนบอร์ด; ถามก่อน flash)
  งานอื่น
   "clean ให้หน่อย"                                -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
   "เพิ่มบอร์ดใหม่" / "เพิ่ม template"               -> boards/_template/, SKILL.md หัวข้อ Extending

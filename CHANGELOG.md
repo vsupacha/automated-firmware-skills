@@ -16,6 +16,19 @@ verification log, not here.
   now lives in that repository.
 
 ### Added
+- 2026-11-01: on-target unit tests use the standard terms test driver / test stub / test log
+  (docs/workflow.md "Firmware tests (stage 6 unit tests) and TDD"). Renamed: PlatformIO
+  `board_fake.cpp/.h` -> `test_stub.cpp/.h` (`fake_*` -> `test_stub_*`), `test_main.cpp` ->
+  `test_driver.cpp`; WB55 `lib/test_func/unit_main.c` -> `test_driver_main.c`, `unit.h` ->
+  `test_driver.h` (`unit_setup` -> `test_driver_setup`); host `lib/host/board_fake.c` ->
+  `test_stub.c`. New test log `lib/test_func/test_log.c/.h` (`fw_test_log`, magic `FWTL`, same
+  layout as the RT-Thread repository's): every case recorded in `setUp`/`tearDown`, `TESTLOG:` line
+  after Unity's summary, then `UNIT-DONE`. `lib/unity_read.py` (now used by all three skills - the
+  ESP32-S3-BOX copy is gone, the Pico reads with it instead of `pio test`) checks the test log against
+  Unity's results: gate `UNIT: PASS (n/n, test log agrees)`, FAIL on lost lines or disagreement.
+  Pico `unit_test.sh --read-only` and a start-byte handshake; older apps are migrated by
+  `unit_test.sh` (`fw_pio_test_dir`). New tool skill `firmware-test` (procedure, tools, criteria) in
+  the `firmware-tools` plugin; the validator checks the template copies of the test log.
 - New board skill `mcux-sdk-frdmmcxn947` (NXP FRDM-MCXN947, MCXN947 Cortex-M33 core 0) with the
   MCUXpresso SDK 26.09 (west), Kitware CMake and the MCUXpresso Installer tools - M1 stages 1-3
   (check_tools, new_app from `west export_app` + trim, open_ide writing the MCUXpresso for VS Code

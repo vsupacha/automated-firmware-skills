@@ -145,6 +145,7 @@ Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 1
 | [web-wizard](skills/web-wizard/SKILL.md) | answer many questions on one browser page: a new-app wizard (board, skill, template with its verified level, next step, gate check) and a generic question form |
 | [cleanroom-test](skills/cleanroom-test/SKILL.md) | before a commit: a fresh agent with no context follows only the docs to do a real task (create, change code, build) and reports every doc gap; the session triages and records it |
 | [sensor-debug](skills/sensor-debug/SKILL.md) | judge what a running app prints from the PC (no flashing): init/scan/self-test, plausibility and noise against limits, before/after stimulus tests, sweeps; on request a browser live view with a raw log |
+| [firmware-test](skills/firmware-test/SKILL.md) | unit tests of `func/` code on the board and TDD (red, green, refactor): procedure, tools and pass criteria for `unit_test.sh` (Pico 2 W, ESP32-S3-BOX, WB55); terms test driver / test stub / test log; gate `UNIT: PASS (n/n, test log agrees)` |
 | [hw-troubleshooting](skills/hw-troubleshooting/SKILL.md) | method for "is it firmware, setup or hardware?": least-invasive steps, one marked action at a time, a reference board or image, findings into the board's log |
 
 ## IDEs

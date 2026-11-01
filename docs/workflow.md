@@ -51,11 +51,11 @@ Stage numbers are shared by all skills; a skill's SKILL.md maps them to its own 
 | | 3 | build | `build.sh <app>` | `BUILD: PASS` + manifest | no |
 | | 4 | connect | `discover.sh <board>` | `IDENTITY: PASS` | yes |
 | | 5 | flash | `flash.sh <app> --yes` (**ask the developer first**) | `FLASH: PASS` | yes |
-| | 6 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]`; unit tests of `func/` on the board: `unit_test.sh <app>` (Unity via `pio test`; prototypes in pio-arduino-rpipico2w and pio-arduino-esp32s3box, `UNIT: PASS`) | `RESULT: PASS` | yes |
+| | 6 | test | `serial_test.py auto <spec> <log> --board <b> [--interactive]`; unit tests of `func/` on the board: `unit_test.sh <app> [--yes] [--build-only \| --read-only]` (Unity + test log; Pico 2 W, ESP32-S3-BOX, WB55 - see [Firmware tests](#firmware-tests-stage-6-unit-tests-and-tdd)) | `RESULT: PASS`; `UNIT: PASS (n/n, test log agrees)` | yes |
 | | 7 | debug | `debug.sh status <board>` (read-only core + fault registers) and `debug.sh run <app> <scenario.json>` (attach, scripted break / watch / step / print / read) - STM32 skills C5 + L475 so far; engine `lib/fwdebug.py` | `DEBUG: STATUS ...` / `DEBUG: PASS` | yes + probe |
 | **M2 board support** | 8 | board drivers | *(planned)*: pin/peripheral map from the board sources, `board.h` drivers, per-peripheral `tests/*.json` (run with stage 6) | `RESULT: PASS` per peripheral | yes |
 | | 9 | layer check | `python lib/check_layers.py <app>` | `LAYERS: PASS` | no |
-| | 10 | host test *(optional)* | `bash lib/host_test.sh [<app>]`: `func/` with a fake `board.h` on the PC | `HOST: PASS` | no |
+| | 10 | host test *(optional)* | `bash lib/host_test.sh [<app>]`: `func/` with a test stub `board.h` on the PC | `HOST: PASS` | no |
 | **M3 execution model** | 11 | execution + trace | *(planned)*: superloop / RTOS execution layer; trace ring buffer read over the console or the debugger, rules in `tests/*.json` | `TRACE: PASS` | yes |
 | **M4 components** | 12 | components | *(planned)*: add a middleware component with its adapter and demo test | `RESULT: PASS` | yes |
 | **M5 application + profiling** | 13 | profile | *(planned)*: cycles per function, stack high-water, RAM/flash from the map file, against budgets | `PROFILE: PASS` | yes |
@@ -187,7 +187,7 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
   (read/name/pin), console getc/flush, printf to the console - the contract is
   [board-api.md](board-api.md).
 - Checks: `check_layers.py` (includes, vendor calls, `#if BOARD_*` per layer) and the optional
-  `host_test.sh` (the func services against `lib/host`'s fake board: console line editing and dispatch, LED
+  `host_test.sh` (the func services against `lib/host`'s test stub of the board: console line editing and dispatch, LED
   numbering and read-back, button debounce and events). The host test needs a host C compiler
   (gcc, clang or Visual Studio C++ with the Windows SDK).
 - Services expose init/poll functions; the execution layer decides how they run (a superloop calls
@@ -229,6 +229,67 @@ Writing specs:
   (e.g. blink every 0.25 s) is checked through the INFO line the firmware reports, and a step
   timeout only gives a loose upper bound. Measured intervals are a planned engine feature.
 - Lines may follow a shell prompt (RT-Thread `msh />`), so specs for such consoles match without `^`.
+
+## Firmware tests (stage 6 unit tests) and TDD
+
+Unit tests run **on the board, in a separate test image** of the app: Unity test cases of `func/`
+code, built from the same project with the app's `main` / `app_main` replaced by the test runner.
+The tool skill [firmware-test](../skills/firmware-test/SKILL.md) holds the procedure, tools and
+pass criteria; this section is the contract. (The RT-Thread skills in
+automated-firmware-skills-rtthread use the same terms and test log layout with RT-Thread's utest.)
+
+**Terms** (standard test vocabulary; the names are also the file names):
+
+| Term | What it is here | Files |
+| --- | --- | --- |
+| module under test | a `func/` module (`led`, `button`, `console`, `gesture`, `fxscale` ...) | `src/func/<module>.c(pp)` |
+| **test driver** | the code ABOVE the module: Unity test cases that call it and check the results, plus the runner that starts them (`setUp` / `tearDown`, start-byte handshake) | PlatformIO: `test/test_func/test_driver.cpp`; CubeMX (WB55): `test/test_driver_main.c` + `test_driver.h` + suites `test/test_<module>.c` |
+| **test stub** | stands in for the layer BELOW the module (`board.h`): inputs set by the test (time, button level, console text, a failing LED write), outputs recorded for it (LED level, write count, console output) | PlatformIO: `test/test_func/test_stub.cpp/.h` (`test_stub_*` controls); suites with their own stub clock (`test_stub_now` in `test_gesture.c`); host: `lib/host/board.h` + `test_stub.c` |
+| **test log** | the verdicts in RAM (`fw_test_log`, magic `FWTL` = 0x4C545746, version 1: cases, passed, failed, running, current, last_fail, ring of `PASS\|FAIL <case>` lines), filled by `setUp` / `tearDown`, printed after Unity's summary as `TESTLOG: cases=.. passed=.. failed=.. running=0 last_fail=..`, then `UNIT-DONE`; a probe can read the same record without the console | `lib/test_func/test_log.c/.h` (copied unchanged into the PlatformIO templates) |
+| device driver | the real driver the board layer calls (HAL, Arduino core) - never "the driver" of a test | vendor code |
+
+**Commands** (per skill; nothing flashes without the developer's yes):
+
+| Skill | Command | Test image |
+| --- | --- | --- |
+| pio-arduino-rpipico2w | `unit_test.sh <app> [--yes] [--build-only \| --read-only] [--filter <glob>]` | `[env:<env>_unit]` (`pio test`, `src/func` + `test/` only), flashed with `flash.sh --uf2` |
+| pio-arduino-esp32s3box | `unit_test.sh <app> [--yes] [--build-only \| --read-only] [--filter <glob>]` | `[env:<env>_unit]`, manifest, flashed with `flash.sh --env <env>_unit` |
+| cubemx-hal-stm32wb55nucleo | `unit_test.sh <app> [--yes] [--build-only \| --read-only]` | the CubeMX project built again with `-DFW_UNIT=ON` into `mx/build/Unit`, flashed with `flash.sh --elf` |
+
+`--build-only` builds the test image and stops (`UNIT-BUILD: PASS`, image sha256; no board).
+Without `--yes` the script builds and stops with `ACTION: APPROVE` (the test image replaces the
+app). `--read-only` only reads a test image already on the board (reset or replug it first: a
+finished run sends nothing more). Every script reads the results with `lib/unity_read.py`: the test
+image prints `UNIT-WAIT ...` until it receives a byte, the reader sends it, collects Unity's result
+lines and summary, the `TESTLOG:` line and `UNIT-DONE`, and prints the gate.
+`fw_pio_test_dir` (PlatformIO) and the WB55 script refresh the runner / test log files in the app on
+every run; an app from before these names keeps its old `test/` under `logs/` (PlatformIO) or is
+renamed in place (WB55).
+
+**Gate:** `UNIT: PASS (n/n, test log agrees)` only when Unity's summary reports 0 failures, there
+are as many result lines as tests (no lost output), and the test log agrees: `running=0`, `cases` =
+Unity's tests, `failed` = Unity's failures, `passed + failed = cases`, `last_fail` = Unity's last
+failing case. Anything else is `UNIT: FAIL (<reason>)` - a missing summary, lost lines, no
+`TESTLOG:` line (an old test image) or a disagreeing log.
+
+**TDD loop on the board** (red - green - refactor; each turn = build + flash + read, about 20 s on
+the WB55):
+
+1. **Red** - write the test driver case first (a new `RUN_TEST` in `test_driver.cpp`, or a case in
+   `test/test_<module>.c`), with an empty or stub implementation of the new behaviour in `func/`.
+   `unit_test.sh <app>` builds, asks, flashes (`--yes`, or `FLASH_POLICY=auto` that the developer
+   wrote into the bench file for a lab board - never the agent), reads -> `UNIT: FAIL` naming the
+   new case. A test that passes before the code exists tests nothing - fix the test.
+2. **Green** - the smallest change in `func/` that passes -> `UNIT: PASS (n/n, test log agrees)`.
+3. **Refactor** with the tests green; then the template's serial spec (`serial_test.py`) on the
+   app image (`flash.sh <app> --yes` puts the app back), so the app still behaves.
+4. Keep the evidence: the log `<app>/logs/unit-<stamp>.log` of each run; report red and green
+   separately.
+
+Rules: a case must not depend on another case's order or leftovers (`setUp` resets the test stub);
+the test stub, not the real board, provides every input of a `func/` case; the test image never
+writes flash or option bytes; levels stay honest - built (`UNIT-BUILD: PASS`) != flashed != tested
+(`UNIT: PASS`).
 
 ## Hardware-dependent testing
 
@@ -359,11 +420,12 @@ line. The profile diff (old -> new pins) plus that line is the evidence for the 
 ```
 skills/<skill>/SKILL.md, scripts/, reference/, templates/   one skill per toolchain + MCU family
 lib/common.sh, lib/fwtest.py, lib/func/                      shared by all skills
+lib/unity/, lib/test_func/, lib/unity_read.py                on-target unit tests: Unity, test driver main, test log, reader
 lib/fw_workspace.sh, lib/fwpaths.py                          this PC's apps workspace (shell / Python)
 boards/<id>/README.md                                        board hardware, tool-independent
 boards/<id>/<skill>/                                         that skill's board profile + log
 boards/index.json                                            board ids, aliases, MCU, evidence level per profile
-lib/host/, host_test.sh, check_layers.py                     M2 checks: layer rules, optional fake-board unit tests
+lib/host/, host_test.sh, check_layers.py                     M2 checks: layer rules, optional host unit tests (test stub)
 tools/validate_skills.py                                     repo validator (run before every commit)
 apps/<app>/                                                  generated projects (or this PC's workspace, see Apps workspace)
 apps/.bench/<id>.env                                         per-PC instance data (git-ignored; in the workspace)

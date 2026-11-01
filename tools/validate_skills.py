@@ -19,6 +19,7 @@ Checks
             line says "planned"; README.md and the plugin manifest mention every skill
   manifests .claude-plugin/marketplace.json: all-in-one + firmware-tools + vendor plugins, each skill in one
   status    demo-level tables in boards/README.md and boards/<id>/README.md = boards/index.json
+  unit      test log copies (templates/_common/test/test_func/test_log.c/.h) = lib/test_func
   leaks     no user paths, COM ports, probe/USB serials, private IPs or e-mail addresses in files
             git would commit (a line containing "leak-ok" is exempt)
 
@@ -411,6 +412,16 @@ def check_leaks(files):
                         f"mark a deliberate example with 'leak-ok'")
 
 
+def check_unit_tests():
+    """on-target unit tests: the test log copies in the PlatformIO templates equal lib/test_func"""
+    for name in ("test_log.c", "test_log.h"):
+        src = ROOT / "lib" / "test_func" / name
+        ok(src.is_file(), f"lib/test_func/{name} missing")
+        for copy in sorted(ROOT.glob(f"skills/*/templates/_common/test/test_func/{name}")):
+            ok(src.is_file() and copy.read_bytes() == src.read_bytes(),
+               f"{copy.relative_to(ROOT).as_posix()}: differs from lib/test_func/{name} - copy it again")
+
+
 def main(argv):
     quiet = "--quiet" in argv
     files = tracked_files()
@@ -419,6 +430,7 @@ def main(argv):
     check_docs(files, skill_names, tool_names)
     check_manifests(skill_names, tool_names)
     check_board_status()
+    check_unit_tests()
     check_leaks(files)
     for e in errors:
         print(f"ERROR {e}")

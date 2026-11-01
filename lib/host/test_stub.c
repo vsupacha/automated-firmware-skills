@@ -1,7 +1,7 @@
 /*******************************************************************************
-* File Name : board_fake.c
+* File Name : test_stub.c
 *
-* Fake board for host tests: board.h backed by variables (see board.h).
+* Test stub of the board for host tests: board.h backed by variables (see board.h).
 *******************************************************************************/
 #include "board.h"
 
@@ -10,8 +10,8 @@
 
 static uint32_t n_leds;
 static uint32_t n_buttons;
-static bool     led[FAKE_MAX_IO];
-static bool     button[FAKE_MAX_IO];
+static bool     led[TEST_STUB_MAX_IO];
+static bool     button[TEST_STUB_MAX_IO];
 static uint32_t led_writes;
 static uint32_t now_ms;
 static uint32_t fatal_calls;
@@ -19,17 +19,17 @@ static char     rx[512];
 static size_t   rx_len;
 static size_t   rx_pos;
 
-static const char *const led_names[FAKE_MAX_IO] =
+static const char *const led_names[TEST_STUB_MAX_IO] =
     { "LED1", "LED2", "LED3", "LED4", "LED5", "LED6", "LED7", "LED8" };
-static const char *const button_names[FAKE_MAX_IO] =
+static const char *const button_names[TEST_STUB_MAX_IO] =
     { "SW1", "SW2", "SW3", "SW4", "SW5", "SW6", "SW7", "SW8" };
-static const char *const button_pins[FAKE_MAX_IO] =
+static const char *const button_pins[TEST_STUB_MAX_IO] =
     { "P0.0", "P0.1", "P0.2", "P0.3", "P0.4", "P0.5", "P0.6", "P0.7" };
 
-void fake_reset(uint32_t leds, uint32_t buttons)
+void test_stub_reset(uint32_t leds, uint32_t buttons)
 {
-    n_leds      = (leds > FAKE_MAX_IO) ? FAKE_MAX_IO : leds;
-    n_buttons   = (buttons > FAKE_MAX_IO) ? FAKE_MAX_IO : buttons;
+    n_leds      = (leds > TEST_STUB_MAX_IO) ? TEST_STUB_MAX_IO : leds;
+    n_buttons   = (buttons > TEST_STUB_MAX_IO) ? TEST_STUB_MAX_IO : buttons;
     memset(led, 0, sizeof(led));
     memset(button, 0, sizeof(button));
     led_writes  = 0U;
@@ -39,28 +39,28 @@ void fake_reset(uint32_t leds, uint32_t buttons)
     rx_pos      = 0U;
 }
 
-void fake_advance_ms(uint32_t ms)       { now_ms += ms; }
-bool fake_led_get(uint32_t idx)         { return (idx < FAKE_MAX_IO) && led[idx]; }
-uint32_t fake_led_writes(void)          { return led_writes; }
-uint32_t fake_fatal_calls(void)         { return fatal_calls; }
+void test_stub_advance_ms(uint32_t ms)       { now_ms += ms; }
+bool test_stub_led_get(uint32_t idx)         { return (idx < TEST_STUB_MAX_IO) && led[idx]; }
+uint32_t test_stub_led_writes(void)          { return led_writes; }
+uint32_t test_stub_fatal_calls(void)         { return fatal_calls; }
 
-void fake_button_set(uint32_t idx, bool pressed)
+void test_stub_button_set(uint32_t idx, bool pressed)
 {
-    if (idx < FAKE_MAX_IO)
+    if (idx < TEST_STUB_MAX_IO)
     {
         button[idx] = pressed;
     }
 }
 
-void fake_led_force(uint32_t idx, bool on)
+void test_stub_led_force(uint32_t idx, bool on)
 {
-    if (idx < FAKE_MAX_IO)
+    if (idx < TEST_STUB_MAX_IO)
     {
         led[idx] = on;
     }
 }
 
-void fake_console_input(const char *s)
+void test_stub_console_input(const char *s)
 {
     size_t n = strlen(s);
 

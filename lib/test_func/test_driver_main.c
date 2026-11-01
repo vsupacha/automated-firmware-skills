@@ -1,15 +1,17 @@
 /*******************************************************************************
-* File Name : unit_main.c
+* File Name : test_driver_main.c
 *
-* On-target unit test runner: replaces the app's app_main.c in the unit-test
-* image (CMake FW_UNIT=ON). Uses the real board layer only for the console;
-* the suites test func/ code with fakes of their own. Owns Unity's setUp() /
-* tearDown() and calls the running suite's hooks (unit.h).
+* On-target unit test runner (the test driver's main): replaces the app's
+* app_main.c in the unit-test image (CMake FW_UNIT=ON). Uses the real board
+* layer only for the console; the suites (test_*.c, the test driver cases)
+* test func/ code with test stubs of their own. Owns Unity's setUp() /
+* tearDown(), calls the running suite's hooks (test_driver.h) and records every
+* case in the test log (test_log.h).
 *
 * Start-byte handshake (as the ESP32-S3-BOX unit tests): prints "UNIT-WAIT ..."
 * once a second until a byte arrives on the console, so the reader never misses
 * the start of the run whenever it opens the port. Then Unity's output, then
-* "UNIT-DONE", then the image idles.
+* the test log line "TESTLOG: ...", then "UNIT-DONE", then the image idles.
 *******************************************************************************/
 #include <stddef.h>
 #include <stdio.h>
@@ -17,25 +19,28 @@
 #include "unity.h"
 #include "app_main.h"
 #include "board.h"
-#include "unit.h"
+#include "test_driver.h"
+#include "test_log.h"
 
-void (*unit_setup)(void);
-void (*unit_teardown)(void);
+void (*test_driver_setup)(void);
+void (*test_driver_teardown)(void);
 
 void setUp(void)
 {
-    if (unit_setup != NULL)
+    test_log_begin(Unity.CurrentTestName);
+    if (test_driver_setup != NULL)
     {
-        unit_setup();
+        test_driver_setup();
     }
 }
 
 void tearDown(void)
 {
-    if (unit_teardown != NULL)
+    if (test_driver_teardown != NULL)
     {
-        unit_teardown();
+        test_driver_teardown();
     }
+    test_log_end(Unity.CurrentTestName, Unity.CurrentTestFailed == 0U);
 }
 
 void app_main(void)
@@ -57,10 +62,12 @@ void app_main(void)
     {
     }
 
+    test_log_clear();
     UNITY_BEGIN();
     test_gesture_suite();
     test_fxscale_suite();
     (void)UNITY_END();
+    printf("%s\r\n", test_log_line());
     printf("UNIT-DONE\r\n");
     for (;;)
     {

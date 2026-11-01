@@ -47,7 +47,7 @@ Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) 
 | "หาบอร์ดที่ต่ออยู่" | `discover.sh rpi-pico-2w` | `IDENTITY: PASS` - อ่านอย่างเดียว บันทึก probe และ console port ของเครื่องนี้ |
 | "แฟลชเลย" | `flash.sh <app> --yes` **หลังคุณตอบ yes** | `FLASH: PASS` |
 | "ทดสอบ" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
-| "รัน unit test" | `unit_test.sh <app>` - ถามก่อน แล้ว `--yes` | `UNIT: PASS (12/12)` - Unity test ของ `func/` บนบอร์ด (prototype); หลังจากนั้นบอร์ดรัน image ของ test จนกว่าจะ flash แอปกลับ |
+| "รัน unit test" | `unit_test.sh <app>` - ถามก่อน แล้ว `--yes` | `UNIT: PASS (12/12, test log agrees)` - Unity test ของ `func/` บนบอร์ด (prototype); หลังจากนั้นบอร์ดรัน image ของ test จนกว่าจะ flash แอปกลับ |
 | "ทดสอบแบบกดปุ่ม" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (แอป push-to-light) | กด BOOTSEL เมื่อถูกบอก แล้วดู LED (on the Wi-Fi module) |
 | "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
 

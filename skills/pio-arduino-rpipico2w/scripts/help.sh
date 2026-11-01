@@ -36,7 +36,7 @@ skill pio-arduino-rpipico2w (Raspberry Pi Pico 2 W, PlatformIO + arduino-pico) -
  Run on hardware (Claude asks before every flash)
   "flash it"                                -> flash.sh <app> --yes   (reboots to BOOTSEL itself)
   "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
-  "run the unit tests"                      -> unit_test.sh <app>   (Unity tests of func/ on the board; asks before flashing the test image)
+  "run the unit tests"                      -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log, func/ on the board; asks before flashing)
  Housekeeping
   "clean the build outputs"                 -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
   "add a new board" / "add a template"      -> boards/_template/, SKILL.md "Extending"
@@ -56,7 +56,7 @@ skill pio-arduino-rpipico2w (Raspberry Pi Pico 2 W, PlatformIO + arduino-pico) -
  ใช้กับบอร์ดจริง (Claude จะถามก่อน flash ทุกครั้ง)
   "แฟลชเลย"                                    -> flash.sh <app> --yes   (สั่งบอร์ดเข้า BOOTSEL เอง)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
-  "รัน unit test"                               -> unit_test.sh <app>   (Unity test ของ func/ บนบอร์ด; ถามก่อน flash image ของ test)
+  "รัน unit test"                               -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log ของ func/ บนบอร์ด; ถามก่อน flash)
  งานอื่น
   "clean ให้หน่อย"                              -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
   "เพิ่มบอร์ดใหม่" / "เพิ่ม template"             -> boards/_template/, SKILL.md หัวข้อ Extending

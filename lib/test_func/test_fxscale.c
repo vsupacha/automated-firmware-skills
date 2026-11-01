@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 #include "unity.h"
-#include "unit.h"
+#include "test_driver.h"
 #include "fxscale.h"
 
 static double worst;            /* worst relative error of the current test */
@@ -99,8 +99,8 @@ static void test_random_pairs(void)
 
 void test_fxscale_suite(void)
 {
-    unit_setup    = suite_setup;
-    unit_teardown = NULL;
+    test_driver_setup    = suite_setup;
+    test_driver_teardown = NULL;
     UnitySetTestFile(__FILE__);           /* Unity's FAIL lines name this file */
     RUN_TEST(test_examples);
     RUN_TEST(test_corners);

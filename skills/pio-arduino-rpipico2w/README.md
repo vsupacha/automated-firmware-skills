@@ -48,7 +48,7 @@ every board instead - pick one of the two.
 | "Find my board" | `discover.sh rpi-pico-2w` | `IDENTITY: PASS` - read-only; saves this PC's probe / USB serial and console port |
 | "Flash it" | `flash.sh <app> --yes` **after you said yes** | `FLASH: PASS` |
 | "Run the test" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
-| "Run the unit tests" | `unit_test.sh <app>` - asks, then `--yes` | `UNIT: PASS (12/12)` - Unity tests of `func/` on the board (prototype); the board then runs the test image until you flash the app again |
+| "Run the unit tests" | `unit_test.sh <app>` - asks, then `--yes` | `UNIT: PASS (12/12, test log agrees)` - Unity tests of `func/` on the board (prototype); the board then runs the test image until you flash the app again |
 | "Run the interactive test" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (a push-to-light app) | press BOOTSEL when asked and watch LED (on the Wi-Fi module) |
 | "Clean up" | `clean.sh` (dry run first) | a list, then deletion only after your yes; `--apps` also deletes app sources |
 

@@ -49,7 +49,7 @@ every board instead - pick one of the two.
 | "Find my board" | `discover.sh esp32-s3-box` | `IDENTITY: PASS` - read-only; saves this PC's probe / USB serial and console port |
 | "Flash it" | `flash.sh <app> --yes` **after you said yes** | `FLASH: PASS` |
 | "Run the test" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
-| "Run the unit tests" | `unit_test.sh <app>` - asks, then `--yes` | `UNIT: PASS (12/12)` - Unity tests of `func/` on the board (prototype); if nothing arrives, unplug USB for 5 s and run it with `--read-only` |
+| "Run the unit tests" | `unit_test.sh <app>` - asks, then `--yes` | `UNIT: PASS (12/12, test log agrees)` - Unity tests of `func/` on the board (prototype); if nothing arrives, unplug USB for 5 s and run it with `--read-only` |
 | "Run the interactive test" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (a push-to-light app) | press BOOT when asked and watch LCD backlight |
 | "Clean up" | `clean.sh` (dry run first) | a list, then deletion only after your yes; `--apps` also deletes app sources |
 

@@ -9,7 +9,7 @@
       "name": "automated-firmware-skills",
       "displayName": "Automated firmware skills (all boards)",
       "source": "./",
-      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), MCUXpresso SDK (FRDM-MCXN947), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting.",
+      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), MCUXpresso SDK (FRDM-MCXN947), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting, firmware-test.",
       "version": "0.2.0",
       "author": {
         "name": "Supachai Vorapojpisut"
@@ -38,7 +38,7 @@
       "name": "firmware-tools",
       "displayName": "Firmware tool skills",
       "source": "./",
-      "description": "Board-independent tool skills used by every firmware plugin: web-wizard (browser forms), cleanroom-test (fresh-agent doc check), sensor-debug (PC-side checks and live view of a board's console), hw-troubleshooting (firmware vs setup vs hardware).",
+      "description": "Board-independent tool skills used by every firmware plugin: web-wizard (browser forms), cleanroom-test (fresh-agent doc check), sensor-debug (PC-side checks and live view of a board's console), hw-troubleshooting (firmware vs setup vs hardware), firmware-test (on-target unit tests and TDD: test driver, test stub, test log).",
       "version": "0.2.0",
       "author": {
         "name": "Supachai Vorapojpisut"
@@ -58,7 +58,8 @@
         "./skills/web-wizard",
         "./skills/cleanroom-test",
         "./skills/sensor-debug",
-        "./skills/hw-troubleshooting"
+        "./skills/hw-troubleshooting",
+        "./skills/firmware-test"
       ]
     },
     {

@@ -453,6 +453,27 @@ fw_warn_gate_end() {
   fi
 }
 
+# fw_pio_test_dir <app-dir> <template-test-dir>: the on-target unit tests of a PlatformIO app
+# (unit_test.sh, docs/workflow.md "Firmware tests"). An app without test/ gets the template's; an
+# app from before the test_stub / test_driver names (test/test_func/board_fake.cpp) keeps its old
+# test/ under logs/ and gets the template's; the test log files (test_log.c/.h) belong to the skill
+# and are always refreshed. The test driver and test stub are the app's once copied.
+fw_pio_test_dir() {
+  local app="$1" tpl="$2" t f
+  if [ -f "$app/test/test_func/board_fake.cpp" ]; then
+    t="$app/logs/test-before-rename-$(ts)"; mkdir -p "$app/logs"
+    mv "$app/test" "$t" || die "cannot move the old test/ out of the way"
+    info "old test/ (board_fake / test_main names) kept in $(winpath "$t")"
+  fi
+  if [ ! -d "$app/test" ]; then
+    cp -r "$tpl" "$app/test" || die "cannot copy the test suite"
+    info "added test/ from the skill template (Unity tests of src/func)"
+  fi
+  for f in test_log.c test_log.h; do
+    cmp -s "$tpl/test_func/$f" "$app/test/test_func/$f" || { cp "$tpl/test_func/$f" "$app/test/test_func/" && info "updated test/test_func/$f"; }
+  done
+}
+
 # fw_stlink_boards <STM32_Programmer_CLI>: "<probe serial> <board name>" per connected ST-LINK
 # (the on-board ST-LINK reports its board, e.g. NUCLEO-C562RE; an external probe reports none -> "-")
 fw_stlink_boards() {

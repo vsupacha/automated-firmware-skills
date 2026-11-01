@@ -185,7 +185,7 @@ Read `reference/layering.md` first. Rules:
 
 **Check the layers (M2 - gated, stops with `ACTION: SETUP` until enabled):**
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS`, and
-`bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` on the PC, fake board).
+`bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` on the PC, test stub of the board).
 
 ## Stage 3 - Build
 
@@ -230,19 +230,23 @@ button press must come within 30 s. **Gate:** `RESULT: PASS`. `led?` reads the G
 register back.
 
 **Unit tests on the board (prototype):** `bash "$SKILL/scripts/unit_test.sh" <app> [--yes] [--build-only | --read-only]` -
-Unity suites of `func/` code: `gesture` (13 cases, fake clock incl. tick wrap) and `fxscale`
+Unity suites (the test driver cases) of `func/` code: `gesture` (13 cases, test stub clock incl. tick wrap) and `fxscale`
 (CMSIS-DSP fixed point, error bound checked on 5000 random pairs + a grid; the worst error is printed). The
 app gets `test/unity/` (pinned copy of `<repo>/lib/unity`, Unity 2.6.1), and - when missing - the
-runner `test/unit_main.c` and suites from `<repo>/lib/test_func/`, and the `func/` modules they test.
+suites from `<repo>/lib/test_func/` and the `func/` modules they test; the runner `test/test_driver_main.c`
+(+ `test_driver.h`) and the test log `test/test_log.c` are refreshed on every run (apps with the old
+`unit_main.c` are renamed in place).
 The image is the app's own CubeMX project built a second time with `-DFW_UNIT=ON` into
 `mx/build/Unit` (`test/*.c` replace `src/app_main.c`; overlay.py adds the switch). 0 warnings in
 `src/` and `test/`. Without `--yes` it stops with `ACTION: APPROVE` (the test image replaces the
 app); `FLASH_POLICY=auto` in the bench file (the developer's setting, never yours) flashes without
 asking - for a TDD loop. Flash goes through `flash.sh --elf` (identity gates); the results are read
-by `<repo>/lib/unity_read.py` (the image waits for a start byte). The unit image links
+by `<repo>/lib/unity_read.py` (the image waits for a start byte; after Unity's summary it prints the
+test log line `TESTLOG: cases=.. passed=.. failed=.. running=0 last_fail=..`, then `UNIT-DONE`). The unit image links
 `-u _printf_float` and libm; both images compile CMSIS-DSP BasicMath + Support from
 `mx/Drivers/CMSIS/DSP` (overlay block; `--gc-sections` drops what is unused). **Gates:** `UNIT-BUILD: PASS`,
-`UNIT: PASS (n/n)` / `UNIT: FAIL`. The board keeps the test image: `flash.sh <app> --yes` restores
+`UNIT: PASS (n/n, test log agrees)` / `UNIT: FAIL` (also on lost result lines or a test log that
+disagrees with Unity). Procedure, terms and criteria: tool skill `firmware-test`. The board keeps the test image: `flash.sh <app> --yes` restores
 the app. **TDD loop:** write the test in `<app>/test/`, run (red, `UNIT: FAIL`), change
 `src/func/<module>.c`, run (green), refactor; a module meant for every skill goes into
 `<repo>/lib/func` with its suite in `<repo>/lib/test_func`.

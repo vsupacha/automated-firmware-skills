@@ -50,7 +50,7 @@ every board instead - pick one of the two.
 | "Flash it" | `flash.sh <app> --yes` **after you said yes** | `FLASH: PASS` |
 | "Run the test" | `serial_test.py auto <app>/tests/push_to_light.json ...` | `RESULT: PASS (n/n passed ...)` |
 | "Run the interactive test" | `serial_test.py auto <app>/tests/push_to_light.json ... --interactive` (a push-to-light app) | press SW1 / SW2 when asked and watch LED1 (blue) |
-| "Run the unit tests on the board" | `unit_test.sh <app> --yes` **after you said yes** (or `FLASH_POLICY=auto`) | `UNIT: PASS (n/n)` - Unity suites of `func/` code; the board keeps the test image until you flash the app again |
+| "Run the unit tests on the board" | `unit_test.sh <app> --yes` **after you said yes** (or `FLASH_POLICY=auto`) | `UNIT: PASS (n/n, test log agrees)` - Unity suites of `func/` code; the board keeps the test image until you flash the app again |
 | "Clean up" | `clean.sh` (dry run first) | a list, then deletion only after your yes; `--apps` also deletes app sources |
 
 - **First app on a PC:** if `apps/` is in Dropbox/OneDrive or its path is too long, `new_app.sh`

@@ -174,7 +174,7 @@ Read `reference/layering.md` first. Rules:
 **Check the layers (M2 - gated, stops with `ACTION: SETUP` until enabled):**
 `python <repo>/lib/check_layers.py <app-dir>` → `LAYERS: PASS` (exit 2 = warnings to fix), and
 `bash <repo>/lib/host_test.sh <app-dir>` → `HOST: PASS` (the app's `func/` unit-tested on the PC
-against a fake board, no hardware). Fix a violation in the layer the message names.
+against a test stub of the board, no hardware). Fix a violation in the layer the message names.
 
 ## Stage 3 - Build
 

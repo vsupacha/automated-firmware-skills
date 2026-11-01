@@ -1,14 +1,14 @@
 /*
- * board_fake.cpp - the board.h API for the func/ unit tests (see board_fake.h). Not linked into
+ * test_stub.cpp - the board.h API for the func/ unit tests (see test_stub.h). Not linked into
  * the app: the unit-test environment builds only src/func/ (build_src_filter = +<func/>).
  */
-#include "board_fake.h"
+#include "test_stub.h"
 #include <string.h>
 #include "../../src/board/board.h"
 
 namespace
 {
-class FakeStream : public Stream
+class StubStream : public Stream
 {
 public:
     int available() override { return (int)(in_len_ - in_pos_); }
@@ -43,18 +43,18 @@ private:
     size_t out_len_   = 0U;
 };
 
-FakeStream io;
+StubStream io;
 uint8_t    n_leds;
 uint8_t    n_buttons;
-bool       led_level[FAKE_MAX_IO + 1U];
-bool       led_fails[FAKE_MAX_IO + 1U];
-bool       button_level[FAKE_MAX_IO + 1U];
+bool       led_level[TEST_STUB_MAX_IO + 1U];
+bool       led_fails[TEST_STUB_MAX_IO + 1U];
+bool       button_level[TEST_STUB_MAX_IO + 1U];
 uint32_t   led_write_count;
 
-bool valid(uint8_t n, uint8_t count) { return (n >= 1U) && (n <= count) && (n <= FAKE_MAX_IO); }
+bool valid(uint8_t n, uint8_t count) { return (n >= 1U) && (n <= count) && (n <= TEST_STUB_MAX_IO); }
 }
 
-void fake_reset(uint8_t leds, uint8_t buttons)
+void test_stub_reset(uint8_t leds, uint8_t buttons)
 {
     n_leds = leds; n_buttons = buttons; led_write_count = 0U;
     memset(led_level, 0, sizeof(led_level));
@@ -62,12 +62,12 @@ void fake_reset(uint8_t leds, uint8_t buttons)
     memset(button_level, 0, sizeof(button_level));
     io.reset();
 }
-void        fake_set_button(uint8_t n, bool p)   { if (n <= FAKE_MAX_IO) { button_level[n] = p; } }
-void        fake_led_fail(uint8_t n, bool fail)  { if (n <= FAKE_MAX_IO) { led_fails[n] = fail; } }
-bool        fake_led_level(uint8_t n)            { return (n <= FAKE_MAX_IO) && led_level[n]; }
-uint32_t    fake_led_writes(void)                { return led_write_count; }
-void        fake_console_input(const char *s)    { io.feed(s); }
-const char *fake_console_output(void)            { return io.text(); }
+void        test_stub_set_button(uint8_t n, bool p)   { if (n <= TEST_STUB_MAX_IO) { button_level[n] = p; } }
+void        test_stub_led_fail(uint8_t n, bool fail)  { if (n <= TEST_STUB_MAX_IO) { led_fails[n] = fail; } }
+bool        test_stub_led_level(uint8_t n)            { return (n <= TEST_STUB_MAX_IO) && led_level[n]; }
+uint32_t    test_stub_led_writes(void)                { return led_write_count; }
+void        test_stub_console_input(const char *s)    { io.feed(s); }
+const char *test_stub_console_output(void)            { return io.text(); }
 
 /* ---- board.h ------------------------------------------------------------------------------ */
 void    board_init() {}

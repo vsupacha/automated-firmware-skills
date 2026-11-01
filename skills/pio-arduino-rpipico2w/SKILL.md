@@ -202,13 +202,16 @@ until `READY`, checks the image reports `board=<id>`, then runs the steps. Inter
 to do, then run. **Gate:** `RESULT: PASS`. The LED state reported by `led?` is the commanded
 state (no read-back on this board) - only a human can confirm the LED really lit.
 
-**Unit tests on the board (prototype):** `bash "$SKILL/scripts/unit_test.sh" <app> [--build-only]` -
-Unity tests of `src/func/` (led, button debounce, console parsing) in `test/test_func/`, linked
-against a fake board (`board_fake.cpp`: time, button levels and console input set by the test), built
+**Unit tests on the board (prototype):** `bash "$SKILL/scripts/unit_test.sh" <app> [--build-only | --read-only]` -
+Unity tests of `src/func/` (led, button debounce, console parsing) in `test/test_func/`
+(`test_driver.cpp`, the test driver), linked against the test stub (`test_stub.cpp`: time, button levels and
+console input set by the test) and the test log (`test_log.c`), built
 by `pio test` in `[env:<env>_unit]` (only `src/func` + `test/`). Without `--yes` it builds and stops
 with `ACTION: APPROVE` (the unit-test image replaces the app): ask the user, then re-run with
 `--yes` - it flashes through `flash.sh --uf2` (identity gate) and reads the results on the console
-port. **Gates:** `UNIT-BUILD: PASS`, `UNIT: PASS (n/n)`. Afterwards the board runs the test image:
+port with `<repo>/lib/unity_read.py` (the test image waits for a start byte, then prints Unity's
+results and the `TESTLOG:` line). **Gates:** `UNIT-BUILD: PASS`, `UNIT: PASS (n/n, test log agrees)`
+(lost lines or a disagreeing test log = FAIL; procedure: tool skill `firmware-test`). Afterwards the board runs the test image:
 offer `flash.sh <app> --yes` (asks first) to put the app back.
 
 ## Stage 16 - Clean

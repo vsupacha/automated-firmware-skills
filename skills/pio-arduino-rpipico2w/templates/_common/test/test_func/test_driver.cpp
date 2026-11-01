@@ -1,20 +1,24 @@
 /*
- * test_main.cpp - Unity unit tests of the func/ layer (led, button, console), on the target.
+ * test_driver.cpp - Unity unit tests of the func/ layer (led, button, console), on the target.
  * Run with scripts/unit_test.sh <app> (build -> flash.sh, asks first -> read the results).
- * func/ is linked against board_fake.cpp, so every input (time, button level, console text) is set
+ * Test driver = the test_* functions below; test stub = test_stub.cpp (the board below func/);
+ * test log = test_log.c (verdicts in RAM, "TESTLOG: ..." line after Unity's summary).
+ * func/ is linked against test_stub.cpp, so every input (time, button level, console text) is set
  * here and every output (LED level, console text) is checked here; nothing depends on the board's
  * real LED or button.
  */
 #include <Arduino.h>
 #include <string.h>
 #include <unity.h>
-#include "board_fake.h"
+#include "test_log.h"
+#include "test_stub.h"
 #include "../../src/func/button.h"
 #include "../../src/func/console.h"
 #include "../../src/func/led.h"
 
-void setUp(void)    { fake_reset(2U, 2U); }
-void tearDown(void) {}
+/* every case is recorded in the test log (test_log.h): printed after UNITY_END for unit_test.sh */
+void setUp(void)    { test_log_begin(Unity.CurrentTestName); test_stub_reset(2U, 2U); }
+void tearDown(void) { test_log_end(Unity.CurrentTestName, Unity.CurrentTestFailed == 0U); }
 
 /* ---- led ---------------------------------------------------------------------------------- */
 static void test_led_init_turns_all_off(void)
@@ -22,17 +26,17 @@ static void test_led_init_turns_all_off(void)
     led_init();
     TEST_ASSERT_EQUAL_UINT32(2U, led_count());
     TEST_ASSERT_FALSE(led_get(1U));
-    TEST_ASSERT_FALSE(fake_led_level(2U));
-    TEST_ASSERT_EQUAL_UINT32(2U, fake_led_writes());
+    TEST_ASSERT_FALSE(test_stub_led_level(2U));
+    TEST_ASSERT_EQUAL_UINT32(2U, test_stub_led_writes());
 }
 static void test_led_set_and_toggle(void)
 {
     led_init();
     TEST_ASSERT_TRUE(led_set(1U, true));
-    TEST_ASSERT_TRUE(fake_led_level(1U));
+    TEST_ASSERT_TRUE(test_stub_led_level(1U));
     TEST_ASSERT_TRUE(led_get(1U));
     TEST_ASSERT_TRUE(led_toggle(1U));
-    TEST_ASSERT_FALSE(fake_led_level(1U));
+    TEST_ASSERT_FALSE(test_stub_led_level(1U));
     TEST_ASSERT_FALSE(led_get(1U));
 }
 static void test_led_rejects_bad_numbers(void)
@@ -46,7 +50,7 @@ static void test_led_rejects_bad_numbers(void)
 static void test_led_keeps_state_when_the_board_write_fails(void)
 {
     led_init();
-    fake_led_fail(2U, true);
+    test_stub_led_fail(2U, true);
     TEST_ASSERT_FALSE(led_set(2U, true));
     TEST_ASSERT_FALSE(led_get(2U));
 }
@@ -54,14 +58,14 @@ static void test_led_keeps_state_when_the_board_write_fails(void)
 /* ---- button ------------------------------------------------------------------------------- */
 static button_evt_t poll_at(uint32_t ms, uint32_t *num)
 {
-    fake_set_time(ms);
+    test_stub_set_time(ms);
     return button_poll(num);
 }
 static void test_button_press_reported_after_debounce(void)
 {
     uint32_t n = 0U;
     button_init();
-    fake_set_button(1U, true);
+    test_stub_set_button(1U, true);
     TEST_ASSERT_EQUAL(BUTTON_EVT_NONE, poll_at(0U, &n));                         /* edge seen */
     TEST_ASSERT_EQUAL(BUTTON_EVT_NONE, poll_at(BUTTON_DEBOUNCE_MS - 10U, &n));   /* still bouncing */
     TEST_ASSERT_EQUAL(BUTTON_EVT_PRESSED, poll_at(BUTTON_DEBOUNCE_MS, &n));
@@ -73,9 +77,9 @@ static void test_button_bounce_shorter_than_debounce_is_ignored(void)
 {
     uint32_t n = 0U;
     button_init();
-    fake_set_button(1U, true);
+    test_stub_set_button(1U, true);
     (void)poll_at(0U, &n);
-    fake_set_button(1U, false);
+    test_stub_set_button(1U, false);
     (void)poll_at(20U, &n);
     TEST_ASSERT_EQUAL(BUTTON_EVT_NONE, poll_at(200U, &n));
     TEST_ASSERT_FALSE(button_is_pressed(1U));
@@ -84,11 +88,11 @@ static void test_button_release_and_second_button(void)
 {
     uint32_t n = 0U;
     button_init();
-    fake_set_button(2U, true);
+    test_stub_set_button(2U, true);
     (void)poll_at(0U, &n);
     TEST_ASSERT_EQUAL(BUTTON_EVT_PRESSED, poll_at(60U, &n));
     TEST_ASSERT_EQUAL_UINT32(2U, n);
-    fake_set_button(2U, false);
+    test_stub_set_button(2U, false);
     (void)poll_at(100U, &n);
     TEST_ASSERT_EQUAL(BUTTON_EVT_RELEASED, poll_at(160U, &n));
     TEST_ASSERT_EQUAL_UINT32(2U, n);
@@ -113,7 +117,7 @@ static void console_feed(const char *text)
 {
     seen_argc = -1;
     console_init(CMDS, 1U);
-    fake_console_input(text);
+    test_stub_console_input(text);
     console_poll();
 }
 static void test_console_splits_a_command_line(void)
@@ -123,19 +127,19 @@ static void test_console_splits_a_command_line(void)
     TEST_ASSERT_EQUAL_STRING("led", seen_args[0]);
     TEST_ASSERT_EQUAL_STRING("1", seen_args[1]);
     TEST_ASSERT_EQUAL_STRING("on", seen_args[2]);
-    TEST_ASSERT_NOT_NULL(strstr(fake_console_output(), "led 1  on"));     /* echoed */
+    TEST_ASSERT_NOT_NULL(strstr(test_stub_console_output(), "led 1  on"));     /* echoed */
 }
 static void test_console_help_lists_the_commands(void)
 {
     console_feed("help\n");
-    TEST_ASSERT_NOT_NULL(strstr(fake_console_output(), "OK commands:"));
-    TEST_ASSERT_NOT_NULL(strstr(fake_console_output(), "led <n> on|off|toggle"));
+    TEST_ASSERT_NOT_NULL(strstr(test_stub_console_output(), "OK commands:"));
+    TEST_ASSERT_NOT_NULL(strstr(test_stub_console_output(), "led <n> on|off|toggle"));
 }
 static void test_console_unknown_command(void)
 {
     console_feed("foo\r");
     TEST_ASSERT_EQUAL_INT(-1, seen_argc);
-    TEST_ASSERT_NOT_NULL(strstr(fake_console_output(), "ERR unknown command 'foo'"));
+    TEST_ASSERT_NOT_NULL(strstr(test_stub_console_output(), "ERR unknown command 'foo'"));
 }
 static void test_console_backspace_and_empty_lines(void)
 {
@@ -151,15 +155,22 @@ static void test_console_long_line_is_cut_not_overflowed(void)
     longline[sizeof(longline) - 2U] = '\r';
     longline[sizeof(longline) - 1U] = '\0';
     console_feed(longline);
-    TEST_ASSERT_NOT_NULL(strstr(fake_console_output(), "ERR unknown command"));
+    TEST_ASSERT_NOT_NULL(strstr(test_stub_console_output(), "ERR unknown command"));
     TEST_ASSERT_EQUAL_INT(-1, seen_argc);
 }
 
 void setup()
 {
-    /* USB CDC: wait until the test runner has opened the port, so no result line is lost */
+    /* USB CDC: wait until the reader (scripts/unit_test.sh -> lib/unity_read.py) has opened the port
+       and sent a byte, announcing ourselves once a second, so no result line is lost */
     while (!Serial) { delay(10); }
-    delay(200);
+    while (Serial.available() == 0)
+    {
+        Serial.println("UNIT-WAIT send any byte to start");
+        delay(1000);
+    }
+    while (Serial.available() > 0) { (void)Serial.read(); }
+    test_log_clear();
     UNITY_BEGIN();
     RUN_TEST(test_led_init_turns_all_off);
     RUN_TEST(test_led_set_and_toggle);
@@ -174,6 +185,8 @@ void setup()
     RUN_TEST(test_console_backspace_and_empty_lines);
     RUN_TEST(test_console_long_line_is_cut_not_overflowed);
     UNITY_END();
+    Serial.println(test_log_line());
+    Serial.println("UNIT-DONE");
 }
 
 void loop() {}
