@@ -180,7 +180,8 @@ board       board/  (board.h API)     the port boundary: one API, one implementa
 BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico core (never edit)
 ```
 
-- `lib/func` is shared unchanged by modus-pdl-edgitalk, cubemx2-hal2-stm32c562nucleo and pio-espidf-esp32s3box.
+- `lib/func` is shared unchanged by modus-pdl-edgitalk, cubemx2-hal2-stm32c562nucleo and pio-espidf-esp32s3box
+  (FreeRTOS: the same services from tasks, in [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos)).
   Arduino skills (pio-arduino-rpipico2w, pio-arduino-esp32s3box, pio-arduino-unor4wifi) keep an Arduino-style C++ func/ in their
   templates (`<Arduino.h>`, Print/Stream, millis) - same console protocol and tests. It may include only `board.h` and the C library.
 - `board.h` is the same API on every board: init, millis/delay, LEDs (write/read/name), buttons
@@ -345,13 +346,15 @@ CubeMX2, 120 for ModusToolbox and the Pico).
 `.bench/` follows the workspace: after changing it, run `discover.sh <board>` again before flashing.
 `serial_test.py`, sensor-debug and web-wizard read the same setting (`lib/fwpaths.py`).
 
-**One workspace for both repositories.** automated-firmware-skills and
-automated-firmware-skills-rtthread read the same `~/.fw-skills.env`, so on one PC they use the same
-workspace and the same `.bench/`. Board id `edgi-talk` is in both (`modus-pdl-edgitalk` here,
+**One workspace for all three repositories.** automated-firmware-skills,
+automated-firmware-skills-rtthread and automated-firmware-skills-freertos read the same
+`~/.fw-skills.env`, so on one PC they use the same workspace and the same `.bench/`. Board id `edgi-talk` is in both (`modus-pdl-edgitalk` here,
 `scons-rtthread-edgitalk` in automated-firmware-skills-rtthread): they share `.bench/edgi-talk.env` and its lock - one session
 at a time uses the board, the last `discover.sh` writes the file (same KitProg3, same keys), and a
 `FLASH_POLICY=auto` line applies to both skills. To keep them apart, give one skill its own
-workspace with `<PREFIX>_WS`.
+workspace with `<PREFIX>_WS`. The same holds for board id `nucleo-c562re`
+(`cubemx2-hal2-stm32c562nucleo` here, `cubemx2-freertos-stm32c562nucleo` in
+automated-firmware-skills-freertos; both use the prefix `CUBE`, so `CUBE_WS` moves both).
 
 ## Tool updates
 

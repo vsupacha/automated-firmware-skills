@@ -10,6 +10,11 @@ Other languages: [ภาษาไทย](README_TH.md) · [日本語](README_JA.
 > repository **automated-firmware-skills-rtthread** since 2026-11-01: RT-Thread builds, flashes and
 > tests differently (board SDK project, Kconfig driver recipes, msh shell). The Edgi-Talk skill here
 > (`modus-pdl-edgitalk`) is native ModusToolbox, without RT-Thread.
+>
+> FreeRTOS skills (NUCLEO-C562RE with STM32CubeMX2 + FreeRTOS) live in the separate repository
+> **[automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos)** since 2026-11-12: an RTOS changes the generated
+> project, the timebase, the execution layer and the tests. This repository keeps the bare-metal
+> (superloop) skills.
 
 ## Concepts
 
@@ -127,7 +132,7 @@ Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 1
 | Skill | Dev tool | MCU | Board | How to use |
 | --- | --- | --- | --- | --- |
 | [modus-pdl-edgitalk](skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox 3.9 | Infineon PSOC Edge E84 | [Edgi-Talk](boards/edgi-talk/README.md) | [guide](skills/modus-pdl-edgitalk/README.md) · [ไทย](skills/modus-pdl-edgitalk/README_TH.md) |
-| [cubemx2-hal2-stm32c562nucleo](skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 1.1.2 + CMake | ST STM32C5 | [NUCLEO-C562RE](boards/nucleo-c562re/README.md) | [guide](skills/cubemx2-hal2-stm32c562nucleo/README.md) · [ไทย](skills/cubemx2-hal2-stm32c562nucleo/README_TH.md) |
+| [cubemx2-hal2-stm32c562nucleo](skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 1.2.0 + CMake | ST STM32C5 | [NUCLEO-C562RE](boards/nucleo-c562re/README.md) | [guide](skills/cubemx2-hal2-stm32c562nucleo/README.md) · [ไทย](skills/cubemx2-hal2-stm32c562nucleo/README_TH.md) |
 | [cubemx-hal-stm32l475iot](skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 + STM32CubeL4 + CMake | ST STM32L4 | [B-L475E-IOT01A](boards/b-l475e-iot01a/README.md) | [guide](skills/cubemx-hal-stm32l475iot/README.md) · [ไทย](skills/cubemx-hal-stm32l475iot/README_TH.md) |
 | [cubemx-hal-stm32wb55nucleo](skills/cubemx-hal-stm32wb55nucleo/SKILL.md) | STM32CubeMX 6.18 + STM32CubeWB + CMake | ST STM32WB | [NUCLEO-WB55RG](boards/nucleo-wb55rg/README.md) | [guide](skills/cubemx-hal-stm32wb55nucleo/README.md) · [ไทย](skills/cubemx-hal-stm32wb55nucleo/README_TH.md) |
 | [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 + STM32CubeN6 + CMake | ST STM32N6 | [STM32N6570-DK](boards/stm32n6570-dk/README.md) | [guide](skills/cubemx-hal-stm32n6570dk/README.md) · [ไทย](skills/cubemx-hal-stm32n6570dk/README_TH.md) |

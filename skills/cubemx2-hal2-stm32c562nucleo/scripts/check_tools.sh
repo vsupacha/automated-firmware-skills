@@ -34,7 +34,7 @@ svc="$(path_synced "$WSABS")"
 bundle() {   # bundle <label> <tool-dir> <version> <file inside>
   local d="$STM32CUBE_ROOT/bundles/$2"
   if [ -e "$d/$3/$4" ]; then ok "$1" "$3  ($(fw_scope "$d"))"
-  else bad "$1" "pinned $3 missing (installed: $(ls "$d" 2>/dev/null | tr '\n' ' ')) - install it with the STM32Cube bundle manager, or update the board profile after testing"; fi
+  else bad "$1" "pinned $3 missing (installed: $(ls "$d" 2>/dev/null | tr '\n' ' ')) - install it with the STM32Cube bundle manager ('cube bundle install $2', version $3; online list: 'cube bundle list-online'), or update the board profile after testing"; fi
 }
 bundle "STM32CubeMX2" stm32cubemx-application "$MX_VERSION" "dist/bin.js"
 [ -x "$MX_NODE" ] && ok "node (bundled with MX)" "$NODE_VERSION" || bad "node (bundled with MX)" "$MX_NODE missing"

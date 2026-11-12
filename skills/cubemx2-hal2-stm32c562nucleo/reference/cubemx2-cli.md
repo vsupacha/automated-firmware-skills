@@ -41,6 +41,17 @@ Facts found while porting (2026-10-07, MX 1.1.1):
 - `utilities/syscalls/syscalls.c` defines `_write` / `_read` weak - a strong `_write` in the app
   redirects `printf`.
 
+## STM32CubeMX2 1.2.0 (re-pinned 2026-11-12)
+
+- Bundles node 24.22.1+st.1 (was 22.22.2+st.1 with 1.1.x). The commands above are unchanged;
+  `overlay.py` still finds its markers in the generated `main.c` / `CMakeLists.txt`.
+- `ide-project generate --diff overwrite` leaves unchanged files alone (old mtimes), so file times
+  do not tell whether `mx/` is current: `regen.sh` records the `.ioc2` sha256 (`APP_IOC2_SHA`) and
+  `build.sh` compares it.
+- FreeRTOS on this board: skill `cubemx2-freertos-stm32c562nucleo` in
+  [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos) (its `reference/cubemx2-cli.md` has the
+  middleware / timebase CLI facts).
+
 ## Generated tree (`mx/`)
 
 `CMakeLists.txt`, `CMakePresets.json`, `cmake/` (toolchain, flags `-O0 -g3 -Wall`, files,

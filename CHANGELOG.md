@@ -16,6 +16,8 @@ verification log, not here.
   now lives in that repository.
 
 ### Added
+- 2026-11-12: FreeRTOS skills start in the separate repository [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos)
+  (first skill `cubemx2-freertos-stm32c562nucleo`, NUCLEO-C562RE); this repository keeps the bare-metal skills.
 - 2026-11-01: on-target unit tests use the standard terms test driver / test stub / test log
   (docs/workflow.md "Firmware tests (stage 6 unit tests) and TDD"). Renamed: PlatformIO
   `board_fake.cpp/.h` -> `test_stub.cpp/.h` (`fake_*` -> `test_stub_*`), `test_main.cpp` ->
@@ -146,6 +148,10 @@ verification log, not here.
   `lib/test_func/unit.h`.
 
 ### Changed
+- 2026-11-12: `cubemx2-hal2-stm32c562nucleo` re-pinned to STM32CubeMX2 1.2.0 (node 24.22.1+st.1);
+  hello-world created and built with it (not re-tested on the board yet). `regen.sh` records the
+  `.ioc2` sha256 and `build.sh` compares it instead of file times (generation leaves unchanged files
+  alone, so the old check warned falsely). CubeMX2 1.2.0 CLI facts in `reference/cubemx2-cli.md`.
 - Layer rule: `func/` and the execution layer may include CMSIS-DSP (`arm_math.h` ...) on Cortex-M
   boards (owner's decision); `lib/check_layers.py` checks the board family from `APP_BOARD` and
   `boards/index.json` and fails such includes on other boards (ESP32-S3). docs/board-api.md, lib/README.

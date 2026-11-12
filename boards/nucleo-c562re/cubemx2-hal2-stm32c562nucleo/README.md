@@ -7,7 +7,7 @@ quirks and the verification log of the `cubemx2-hal2-stm32c562nucleo` skill. Mac
 
 | Item | Value |
 | --- | --- |
-| STM32CubeMX2 | 1.1.2, headless CLI (`node <mx>/dist/bin.js`, bundled node 22.22.2+st.1) |
+| STM32CubeMX2 | 1.2.0, headless CLI (`node <mx>/dist/bin.js`, bundled node 24.22.1+st.1) |
 | Board project | `mx project create-from-board --cpn NUCLEO-C562RE --pack-version 2.1.0`, then `peripherals enable USART2 --mode Async` |
 | Packs | stm32c5xx_dfp 2.1.0, stm32c5xx_hal_drivers 2.1.0 (HAL2), templates_no_os_stm32c5 2.1.0, nucleo-c562re_hw-board 2.1.0 |
 | Generation | `ide-project generate --format CMake --source include-packs-from-local --remove-board --build-target .debug_GCC+NUCLEO-C562RE` |
@@ -56,3 +56,10 @@ quirks and the verification log of the `cubemx2-hal2-stm32c562nucleo` skill. Mac
   1.1.2 now and 1.1.1 can no longer be installed; 1.1.2 bundles the same node 22.22.2+st.1. Other
   pins unchanged. **Not re-qualified yet** - regen, build and the bring-up tests must pass again
   with MX 1.1.2 before the levels above count for it.
+- 2026-11-12 STM32CubeMX2 re-pinned 1.1.2 -> 1.2.0 (owner; node 24.22.1+st.1, packs unchanged).
+  check_tools 0 bad; `hello-world` (app `hw12`): create + USART2 + generate 197 s, REGEN PASS
+  (overlay markers unchanged), BUILD PASS 0 warnings, ELF `85a47c98...`. Not flashed: the
+  levels above are still from MX 1.1.1 until the bring-up tests pass again with 1.2.0.
+  `regen.sh` now records the `.ioc2` sha256 and `build.sh` compares it (generation leaves
+  unchanged files alone, so the old file-time check warned falsely). FreeRTOS on this board:
+  [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos) (skill `cubemx2-freertos-stm32c562nucleo`).

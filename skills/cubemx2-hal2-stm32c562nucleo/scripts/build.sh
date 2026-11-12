@@ -20,8 +20,10 @@ require_safe_path "$APPDIR" "app" 110
 [ -f "$APPDIR/mx/CMakeLists.txt" ] || die "no generated project in $APPDIR/mx - run regen.sh"
 grep -q "cubemx2-hal2-stm32c562nucleo skill" "$APPDIR/mx/CMakeLists.txt" || die "mx/ is not hooked to src/ (regenerated outside the skill?) - run regen.sh"
 [ "$(sha256sum "$APPDIR/$APP_IOC2" | cut -d' ' -f1)" != "" ] || die "missing $APP_IOC2"
-if [ "$APPDIR/$APP_IOC2" -nt "$APPDIR/mx/CMakeLists.txt" ]; then
-  echo "WARN: $APP_IOC2 is newer than mx/ - run regen.sh if the hardware configuration changed"
+# regen.sh records the .ioc2 hash it generated from (file times do not work: generation leaves
+# unchanged files alone)
+if [ "$(sha256sum "$APPDIR/$APP_IOC2" | cut -d' ' -f1)" != "${APP_IOC2_SHA:-}" ]; then
+  echo "WARN: $APP_IOC2 changed since the last regen.sh - run regen.sh if the hardware configuration changed"
 fi
 export PATH="$GCC_BIN:$CMAKE_BIN:$NINJA_BIN:$PATH"
 mkdir -p "$APPDIR/logs"; LOG="$APPDIR/logs/build-$(ts).log"

@@ -21,11 +21,12 @@ button) < observed (a person saw the LED). \* = verified under its earlier name 
 ## Required tools
 
 - Windows with Git for Windows (Git Bash); Python 3 with pyserial.
-- STM32CubeMX2 1.1.2 and the STM32Cube bundles (installed with STM32Cube for VS Code / the bundle
+- STM32CubeMX2 1.2.0 and the STM32Cube bundles (installed with STM32Cube for VS Code / the bundle
   manager): GNU Tools for STM32 14.3.1+st.2, CMake 4.4.0+st.1, Ninja 1.13.2+st.1,
   STM32CubeProgrammer 2.23.0; packs stm32c5xx_dfp / hal_drivers / templates 2.1.0 and the
   NUCLEO-C562RE board pack 2.1.0 (`check_tools.sh` lists what is missing); for `debug.sh run`
   also the ST-LINK GDB server 7.14.0+st.2 bundle (GDB comes with GNU Tools for STM32).
+- FreeRTOS on this board: [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos) (skill `cubemx2-freertos-stm32c562nucleo`).
 - Workspace path without spaces, ≤100 characters.
 
 ## Commands

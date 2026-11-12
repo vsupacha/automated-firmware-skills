@@ -50,6 +50,6 @@ info "Hooking src/ into mx/ (main.c -> app_main(), CMakeLists.txt -> ../src, -D$
   || { tail -5 "$LOG"; die "overlay failed - the generated main.c/CMakeLists.txt markers changed (new STM32CubeMX2?)"; }
 fw_vscode_cube_setup "$APPDIR/mx"   # STM32CubeIDE for VS Code: open mx/ as a configured project
 
-sed -i '/^APP_SW_PROJECT=/d; /^APP_PRESET=/d' "$APPDIR/cubemx-app.env"
-printf 'APP_SW_PROJECT=%s\nAPP_PRESET=%s\n' "$SW" "$PRESET" >>"$APPDIR/cubemx-app.env"
+sed -i '/^APP_SW_PROJECT=/d; /^APP_PRESET=/d; /^APP_IOC2_SHA=/d' "$APPDIR/cubemx-app.env"
+printf 'APP_SW_PROJECT=%s\nAPP_PRESET=%s\nAPP_IOC2_SHA=%s\n' "$SW" "$PRESET" "$after" >>"$APPDIR/cubemx-app.env"
 echo "REGEN: PASS (software project $SW, preset $PRESET)"
