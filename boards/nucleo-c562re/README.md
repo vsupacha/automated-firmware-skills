@@ -11,7 +11,7 @@ Nucleo-64 board (MB2213) with an STM32C562RET6. Tool-independent hardware sheet.
 | Demo | Uses | `cubemx2-hal2-stm32c562nucleo` |
 | --- | --- | --- |
 | hello-world | console: ST-LINK virtual COM port | tested |
-| blink | LED1 = LD1 (green) | built |
+| blink | LED1 = LD1 (green) | tested |
 | push-to-light | BTN1 = B1 (USER) toggles LED1 | observed * |
 
 Levels: built < flashed < tested (automatic test PASS) < interactive (a person pressed a

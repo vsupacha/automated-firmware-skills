@@ -54,12 +54,13 @@
           "date": "2026-10-07",
           "templates": {
             "hello-world": "tested",
-            "blink": "built",
+            "blink": "tested",
             "push-to-light": "observed"
           },
           "renamed": {
             "push-to-light": "uart-btn-led"
           },
+          "note": "blink tested with STM32CubeMX2 1.2.0 (2026-11-12); hello-world and push-to-light levels are from MX 1.1.1 (not re-run with 1.2.0)",
           "log": "boards/nucleo-c562re/cubemx2-hal2-stm32c562nucleo/README.md"
         }
       }

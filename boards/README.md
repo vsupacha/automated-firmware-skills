@@ -34,7 +34,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | Board | Skill | hello-world | blink | push-to-light |
 | --- | --- | --- | --- | --- |
 | [RT-Thread Edgi-Talk](edgi-talk/README.md) | `modus-pdl-edgitalk` | tested | built | interactive * |
-| [ST NUCLEO-C562RE](nucleo-c562re/README.md) | `cubemx2-hal2-stm32c562nucleo` | tested | built | observed * |
+| [ST NUCLEO-C562RE](nucleo-c562re/README.md) | `cubemx2-hal2-stm32c562nucleo` | tested | tested | observed * |
 | [Raspberry Pi Pico 2 W](rpi-pico-2w/README.md) | `pio-arduino-rpipico2w` | tested | built | observed * |
 | [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-espidf-esp32s3box` | tested | built | observed * |
 | [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-arduino-esp32s3box` | tested | built | observed * |

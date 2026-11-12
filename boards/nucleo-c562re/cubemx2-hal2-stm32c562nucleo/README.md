@@ -63,3 +63,10 @@ quirks and the verification log of the `cubemx2-hal2-stm32c562nucleo` skill. Mac
   `regen.sh` now records the `.ioc2` sha256 and `build.sh` compares it (generation leaves
   unchanged files alone, so the old file-time check warned falsely). FreeRTOS on this board:
   [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos) (skill `cubemx2-freertos-stm32c562nucleo`).
+- 2026-11-12 (home) `blink` with STM32CubeMX2 **1.2.0** on the board (owner's OK): app `bl-c5`, create
+  + generate REGEN PASS, BUILD PASS 0 warnings (also 0 in the generated code), ELF `16f8a2c0...`;
+  discover IDENTITY PASS with the F3 Discovery's ST-LINK also plugged in (picked by board name
+  `NUCLEO-C562RE`; STLINK-V3 FW V3J16M9, STM32C5x, 0x44E, 3.29 V); `FLASH: PASS` (download verified +
+  reset); serial test `blink.json` **RESULT: PASS (6/6, 1 skipped)** - the interactive "LED1 blinks
+  (look)" step was not run. First blink run on this board; it re-qualifies MX 1.2.0 for blink only -
+  hello-world (tested) and push-to-light (observed) are still from MX 1.1.1.
