@@ -9,7 +9,7 @@
       "name": "automated-firmware-skills",
       "displayName": "Automated firmware skills (all boards)",
       "source": "./",
-      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), MCUXpresso SDK (FRDM-MCXN947), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting, firmware-test.",
+      "description": "All board skills and tool skills in one plugin: ModusToolbox (Edgi-Talk), STM32CubeMX / CubeMX2 (NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, STM32F3DISCOVERY, NUCLEO-WB55RG), PlatformIO (Pico 2 W, ESP32-S3-BOX x2, UNO R4 WiFi), MCUXpresso SDK (FRDM-MCXN947), plus web-wizard, cleanroom-test, sensor-debug, hw-troubleshooting, firmware-test.",
       "version": "0.2.0",
       "author": {
         "name": "Supachai Vorapojpisut"
@@ -66,7 +66,7 @@
       "name": "firmware-stm32",
       "displayName": "Firmware skills: STM32 (STM32CubeMX / CubeMX2)",
       "source": "./",
-      "description": "ST boards with STM32CubeMX 6.18 or CubeMX2, the STM32Cube HAL, CMake and STM32CubeProgrammer / ST-LINK: NUCLEO-C562RE, B-L475E-IOT01A, NUCLEO-WB55RG, STM32F407G-DISC1 (no test stage yet) and STM32N6570-DK (build stages).",
+      "description": "ST boards with STM32CubeMX 6.18 or CubeMX2, the STM32Cube HAL, CMake and STM32CubeProgrammer / ST-LINK: NUCLEO-C562RE, B-L475E-IOT01A, NUCLEO-WB55RG, STM32F407G-DISC1 and STM32F3DISCOVERY (no test stage yet) and STM32N6570-DK (build stages).",
       "version": "0.2.0",
       "author": {
         "name": "Supachai Vorapojpisut"
@@ -86,6 +86,7 @@
         "stm32c5",
         "stm32n6",
         "stm32f4",
+        "stm32f3",
         "stm32wb"
       ],
       "dependencies": [
@@ -96,6 +97,7 @@
         "./skills/cubemx-hal-stm32l475iot",
         "./skills/cubemx-hal-stm32n6570dk",
         "./skills/cubemx-hal-stm32f407disco",
+        "./skills/cubemx-hal-stm32f303disco",
         "./skills/cubemx-hal-stm32wb55nucleo"
       ]
     },

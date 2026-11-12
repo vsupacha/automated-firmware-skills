@@ -13,6 +13,7 @@ a dated verification log). Machine-readable: [index.json](index.json).
 | [ST B-L475E-IOT01A (IoT node)](b-l475e-iot01a/README.md) | ST STM32L4 (STM32L475VGT6) | `cubemx-hal-stm32l475iot` | ST-LINK virtual COM port | LED2 (green) | B1 USER (blue) |
 | [ST NUCLEO-WB55RG](nucleo-wb55rg/README.md) | ST STM32WB (STM32WB55RGV6) | `cubemx-hal-stm32wb55nucleo` | ST-LINK virtual COM port | LED1 (blue) | SW1 |
 | [ST STM32N6570-DK](stm32n6570-dk/README.md) | ST STM32N6 (STM32N657X0H3Q) | `cubemx-hal-stm32n6570dk` | ST-LINK virtual COM port | LED1 (green) | USER1 |
+| [ST STM32F3DISCOVERY](stm32f3-discovery/README.md) | ST STM32F3 (STM32F303VCT6) | `cubemx-hal-stm32f303disco` | SWO (no virtual COM port) | LD3 (red) | B1 (blue) |
 | [ST STM32F407G-DISC1](stm32f407g-disc1/README.md) | ST STM32F4 (STM32F407VGT6) | `cubemx-hal-stm32f407disco` | SWO (no virtual COM port) | LD3 (orange) | B1 (blue) |
 | [Raspberry Pi Pico 2 W](rpi-pico-2w/README.md) | Raspberry Pi RP2350 (RP2350A) | `pio-arduino-rpipico2w` | USB CDC | LED (on the Wi-Fi module) | BOOTSEL |
 | [Espressif ESP32-S3-BOX (2021)](esp32-s3-box/README.md) | Espressif ESP32-S3 (ESP32-S3) | `pio-espidf-esp32s3box` | USB Serial/JTAG | LCD backlight | BOOT |
@@ -38,6 +39,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-espidf-esp32s3box` | tested | built | observed * |
 | [Espressif ESP32-S3-BOX](esp32-s3-box/README.md) | `pio-arduino-esp32s3box` | tested | built | observed * |
 | [ST STM32N6570-DK](stm32n6570-dk/README.md) | `cubemx-hal-stm32n6570dk` | built | not built yet | built |
+| [ST STM32F3DISCOVERY](stm32f3-discovery/README.md) | `cubemx-hal-stm32f303disco` | built | observed | built |
 | [ST STM32F407G-DISC1 (STM32F4DISCOVERY)](stm32f407g-disc1/README.md) | `cubemx-hal-stm32f407disco` | built | observed | built |
 | [ST B-L475E-IOT01A (Discovery kit IoT node)](b-l475e-iot01a/README.md) | `cubemx-hal-stm32l475iot` | tested | built | observed * |
 | [ST NUCLEO-WB55RG](nucleo-wb55rg/README.md) | `cubemx-hal-stm32wb55nucleo` | tested | built | observed |

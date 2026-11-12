@@ -1,0 +1,84 @@
+# ST STM32F3DISCOVERY - วิธีใช้ `cubemx-hal-stm32f303disco`
+
+firmware สำหรับ ST STM32F3DISCOVERY - STM32F303VCT6, STM32F3 - ด้วย STM32CubeMX 6.18 + STM32CubeF3 HAL + CMake ตั้งแต่ "ติดตั้งเครื่องมือครบหรือยัง" จนถึง
+"ทดสอบบนบอร์ดผ่านแล้ว" โดยมีด่านตรวจ (gate) ทุกขั้น สั่ง Claude ด้วยภาษาของคุณเอง หรือรัน script ชุดเดียวกันเองใน
+Git Bash ก็ได้ ภาษาอังกฤษ: [README.md](README.md) คำสั่งที่ agent ทำตาม: [SKILL.md](SKILL.md)
+
+ทำได้ถึงขั้น build, connect และ flash - ขั้น test ยังอยู่ในแผน ระดับหลักฐานของแต่ละ template และเวอร์ชันเครื่องมือที่แน่นอน:
+[boards/stm32f3-discovery/README.md](../../boards/stm32f3-discovery/README.md)
+
+| บนบอร์ด | |
+| --- | --- |
+| Console | SWO (the ST-LINK/V2 has no virtual COM port) |
+| LED1 | LD3 (red) |
+| BTN1 | B1 (blue) |
+| Probe / USB | on-board ST-LINK/V2 |
+
+## 1. เตรียมเครื่อง (ทำครั้งเดียว)
+
+- Windows 10/11 พร้อม Git for Windows (Git Bash) และ Python 3 กับ `pyserial`
+- STM32CubeMX 6.18 (รุ่น classic) พร้อม package STM32Cube_FW_F3
+- STM32Cube bundles: GNU Tools for STM32, CMake, Ninja
+- ไม่บังคับ: VS Code และ STM32CubeIDE for VS Code สำหรับทาง IDE; Claude Code สำหรับทาง agent
+
+`check_tools.sh` (ข้อ 3) จะบอกสิ่งที่ขาดพร้อมเวอร์ชันที่ board profile pin ไว้
+
+## 2. ติดตั้ง plugin
+
+ใน Claude Code จากโฟลเดอร์โปรเจกต์ของคุณ:
+
+```
+/plugin marketplace add vsupacha/automated-firmware-skills
+/plugin install firmware-stm32@automated-firmware-skills
+```
+
+จะได้ `firmware-tools` มาด้วย ถ้าใช้ `automated-firmware-skills@automated-firmware-skills` จะได้ทุกบอร์ด
+เลือกอย่างใดอย่างหนึ่ง
+
+## 3. สั่ง Claude
+
+| คุณพิมพ์ | Claude รัน | สิ่งที่เห็น |
+| --- | --- | --- |
+| "ขอวิธีใช้หน่อย" | `help.sh` | เมนูคำสั่ง บอร์ด และ template |
+| "ตรวจเครื่องมือสำหรับ ST STM32F3DISCOVERY ให้หน่อย" | `check_tools.sh stm32f3-discovery` | `missing/bad=0`; แถว BAD บอกว่าต้องติดตั้งอะไร |
+| "เครื่องมือยังเป็นเวอร์ชันที่ pin ไว้ไหม" | `update_tools.sh stm32f3-discovery` | `UPDATE: NONE` หรือคำถามก่อนแก้ pin |
+| "สร้างแอป hello-world ชื่อ hello-f3" | `new_app.sh stm32f3-discovery hello-f3 "" hello-world` | `Created <โฟลเดอร์แอป>` (ครั้งแรกบนเครื่อง: ถามที่เก็บแอป) |
+| "เปิดใน IDE" | `open_ide.sh <app>` (new_app เปิดให้เอง) | `IDE: OPENED` - STM32CubeIDE for VS Code |
+| "build ให้หน่อย" | `build.sh <app>` | `BUILD: PASS` ไม่มี warning + manifest (เวอร์ชันเครื่องมือ, hash ของ image) |
+| "หาบอร์ด" | `discover.sh stm32f3-discovery` | `IDENTITY: PASS` - อ่านอย่างเดียว บันทึก serial ของ probe ของเครื่องนี้ (ST-LINK ตัวนี้ไม่มี COM port) |
+| "แฟลช" | `flash.sh <app> --yes` **หลังจากคุณตอบตกลง** | `FLASH: PASS` - แล้วดูไฟ LED (ยังไม่มี test อัตโนมัติ) |
+| "clean ให้หน่อย" | `clean.sh` (dry run ก่อน) | แสดงรายการ แล้วลบเมื่อคุณตอบ yes; `--apps` ลบซอร์สของแอปด้วย |
+
+- **แอปแรกบนเครื่อง:** ถ้า `apps/` อยู่ใน Dropbox/OneDrive หรือ path ยาวเกิน `new_app.sh` จะหยุดด้วย
+  `ACTION: CHOOSE` แล้ว Claude จะถามว่าจะเก็บแอปที่ไหน (แนะนำโฟลเดอร์ path สั้นนอกโฟลเดอร์ที่ sync เช่น
+  `C:/fw-ws`) แล้วบันทึกด้วย `lib/fw_workspace.sh set <dir>` เครื่องนั้นจะไม่ถามอีก
+- **สองทาง:** หลังสร้างแอปแล้ว คุณเขียนโค้ด, build และ debug เองใน STM32CubeIDE for VS Code ได้
+  (ทาง IDE) หรือให้ Claude รันขั้นที่มี gate ให้ (ทาง script) ใช้โฟลเดอร์แอปเดียวกัน สลับได้ทุกเมื่อ
+- **โค้ดของคุณ** อยู่ใน `src/` แบ่งเป็น layer: `board/` (ขาและ peripheral), `func/` (logic ที่ย้ายบอร์ดได้),
+  `app_main` (ตัวเชื่อม) - ดู [docs/board-api.md](../../docs/board-api.md)
+
+## 4. ใช้แบบไม่มี Claude (Git Bash จาก root ของ repo)
+
+```bash
+S=skills/cubemx-hal-stm32f303disco/scripts
+bash $S/check_tools.sh stm32f3-discovery
+bash $S/new_app.sh stm32f3-discovery hello-f3 "" hello-world   # พิมพ์: Created <โฟลเดอร์แอป>
+bash $S/build.sh <โฟลเดอร์แอป>
+bash $S/discover.sh stm32f3-discovery
+bash $S/flash.sh <โฟลเดอร์แอป> --yes          # เมื่อคุณตัดสินใจแฟลชแล้วเท่านั้น
+```
+
+`<โฟลเดอร์แอป>` คือที่ `new_app.sh` พิมพ์ออกมา - `apps/hello-f3` หรือเช่น `C:/fw-ws/hello-f3` ถ้าเครื่องตั้ง
+workspace ไว้ exit code: 0 ผ่าน, 1 ล้มเหลว, 2 มี warning ที่กั้น gate, **10 = ทำตามบรรทัด `ACTION:` แล้วรันซ้ำ**
+(SETUP, CONNECT, APPROVE, CHOOSE)
+
+## 5. หมายเหตุของบอร์ดนี้
+
+- ขั้น connect (`discover.sh`) และ flash (`flash.sh` Claude ถามก่อนทุกครั้ง) ใช้ ST-LINK/V2 บนบอร์ดได้แล้ว ส่วนขั้น test ยัง**อยู่ในแผน** เพราะ console เป็น SWO อย่างเดียว ต้องอ่านผ่านหน้า SWV ของ debugger serial test จึงต้องมีตัวอ่าน SWO ก่อน ระหว่างนี้ให้ดูไฟ LED ด้วยตา (blink: LD3 สีส้มสลับทุก 0.5 วินาที)
+- ไฟล์ `<app>.ioc` ของทุกแอปเริ่มจาก board configuration ของ CubeMX (`loadboard STM32F3DISCOVERY`) บวก SWO ห้ามแก้ `mx/` ด้วยมือ
+
+## อ่านต่อ (ภาษาอังกฤษ)
+
+- [README.md](../../README.md) - แนวคิด บอร์ดทั้งหมด plugin
+- [docs/workflow.md](../../docs/workflow.md) - ขั้นตอน gate exit code apps workspace การอัปเดตเครื่องมือ
+- [boards/stm32f3-discovery/README.md](../../boards/stm32f3-discovery/README.md) - hardware เวอร์ชันเครื่องมือ verification log

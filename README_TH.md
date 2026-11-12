@@ -41,6 +41,7 @@
 | ST NUCLEO-WB55RG | [skills/cubemx-hal-stm32wb55nucleo/README_TH.md](skills/cubemx-hal-stm32wb55nucleo/README_TH.md) |
 | ST STM32N6570-DK (build เท่านั้น) | [skills/cubemx-hal-stm32n6570dk/README_TH.md](skills/cubemx-hal-stm32n6570dk/README_TH.md) |
 | ST STM32F407G-DISC1 (build และ flash; ยังไม่มี test) | [skills/cubemx-hal-stm32f407disco/README_TH.md](skills/cubemx-hal-stm32f407disco/README_TH.md) |
+| ST STM32F3DISCOVERY (build และ flash; ยังไม่มี test) | [skills/cubemx-hal-stm32f303disco/README_TH.md](skills/cubemx-hal-stm32f303disco/README_TH.md) |
 | RT-Thread Edgi-Talk | [skills/modus-pdl-edgitalk/README_TH.md](skills/modus-pdl-edgitalk/README_TH.md) |
 | Raspberry Pi Pico 2 W | [skills/pio-arduino-rpipico2w/README_TH.md](skills/pio-arduino-rpipico2w/README_TH.md) |
 | ESP32-S3-BOX (ESP-IDF) | [skills/pio-espidf-esp32s3box/README_TH.md](skills/pio-espidf-esp32s3box/README_TH.md) |

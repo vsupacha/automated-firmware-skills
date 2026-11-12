@@ -16,6 +16,11 @@ verification log, not here.
   now lives in that repository.
 
 ### Added
+- 2026-11-12: board skill `cubemx-hal-stm32f303disco` (ST STM32F3DISCOVERY, STM32F303VC) with classic STM32CubeMX
+  6.18.1 + STM32CubeF3 1.11.6, from the F4 Discovery skill: create, build, connect, flash (asks
+  first); console SWO only (ST-LINK/V2 without VCP), so the test stage is planned. Board layer for
+  the eight LEDs LD3-LD10 (PE8-PE15) and B1 (PA0). blink observed on the board. In `firmware-stm32`.
+  Its FreeRTOS twin `cubemx-freertos-stm32f303disco` is in [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos).
 - 2026-11-12: FreeRTOS skills start in the separate repository [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos)
   (first skill `cubemx2-freertos-stm32c562nucleo`, NUCLEO-C562RE); this repository keeps the bare-metal skills.
 - 2026-11-01: on-target unit tests use the standard terms test driver / test stub / test log

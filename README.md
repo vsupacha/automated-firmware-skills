@@ -69,7 +69,7 @@ pulls in `firmware-tools`):
 
 | Plugin | Boards / skills | Install |
 | --- | --- | --- |
-| `firmware-stm32` | NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, NUCLEO-WB55RG | `/plugin install firmware-stm32 --marketplace vsupacha/automated-firmware-skills` |
+| `firmware-stm32` | NUCLEO-C562RE, B-L475E-IOT01A, STM32N6570-DK, STM32F407G-DISC1, STM32F3DISCOVERY, NUCLEO-WB55RG | `/plugin install firmware-stm32 --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-platformio` | Pico 2 W, ESP32-S3-BOX (ESP-IDF, Arduino), UNO R4 WiFi | `/plugin install firmware-platformio --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-modustoolbox` | Edgi-Talk (PSOC Edge E84) | `/plugin install firmware-modustoolbox --marketplace vsupacha/automated-firmware-skills` |
 | `firmware-mcuxpresso` | FRDM-MCXN947 (MCX N) | `/plugin install firmware-mcuxpresso --marketplace vsupacha/automated-firmware-skills` |
@@ -125,7 +125,7 @@ Common options and overrides: [docs/workflow.md](docs/workflow.md#common-options
 
 ## Status
 
-Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 10 boards. M2 board support
+Milestone **M1 bring-up** is active: 13 board skills, board stages verified on 10 boards. M2 board support
 (layer checks) is implemented but gated; M3-M5 are planned. Plan and per-skill state:
 [docs/milestones.md](docs/milestones.md).
 
@@ -137,6 +137,7 @@ Milestone **M1 bring-up** is active: 12 board skills, board stages verified on 1
 | [cubemx-hal-stm32wb55nucleo](skills/cubemx-hal-stm32wb55nucleo/SKILL.md) | STM32CubeMX 6.18 + STM32CubeWB + CMake | ST STM32WB | [NUCLEO-WB55RG](boards/nucleo-wb55rg/README.md) | [guide](skills/cubemx-hal-stm32wb55nucleo/README.md) · [ไทย](skills/cubemx-hal-stm32wb55nucleo/README_TH.md) |
 | [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 + STM32CubeN6 + CMake | ST STM32N6 | [STM32N6570-DK](boards/stm32n6570-dk/README.md) | [guide](skills/cubemx-hal-stm32n6570dk/README.md) · [ไทย](skills/cubemx-hal-stm32n6570dk/README_TH.md) |
 | [cubemx-hal-stm32f407disco](skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 + STM32CubeF4 + CMake | ST STM32F4 | [STM32F407G-DISC1](boards/stm32f407g-disc1/README.md) | [guide](skills/cubemx-hal-stm32f407disco/README.md) · [ไทย](skills/cubemx-hal-stm32f407disco/README_TH.md) |
+| [cubemx-hal-stm32f303disco](skills/cubemx-hal-stm32f303disco/SKILL.md) | STM32CubeMX 6.18 + STM32CubeF3 + CMake | ST STM32F3 | [STM32F3DISCOVERY](boards/stm32f3-discovery/README.md) | [guide](skills/cubemx-hal-stm32f303disco/README.md) · [ไทย](skills/cubemx-hal-stm32f303disco/README_TH.md) |
 | [pio-arduino-rpipico2w](skills/pio-arduino-rpipico2w/SKILL.md) | PlatformIO + arduino-pico | Raspberry Pi RP2350 | [Pico 2 W](boards/rpi-pico-2w/README.md) | [guide](skills/pio-arduino-rpipico2w/README.md) · [ไทย](skills/pio-arduino-rpipico2w/README_TH.md) |
 | [pio-espidf-esp32s3box](skills/pio-espidf-esp32s3box/SKILL.md) | PlatformIO + ESP-IDF 5.5 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-espidf-esp32s3box/README.md) · [ไทย](skills/pio-espidf-esp32s3box/README_TH.md) |
 | [pio-arduino-esp32s3box](skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + arduino-esp32 | Espressif ESP32-S3 | [ESP32-S3-BOX](boards/esp32-s3-box/README.md) | [guide](skills/pio-arduino-esp32s3box/README.md) · [ไทย](skills/pio-arduino-esp32s3box/README_TH.md) |
@@ -161,7 +162,7 @@ project and build folders as the scripts. Details: [docs/workflow.md](docs/workf
 | IDE | Extension | Skills |
 | --- | --- | --- |
 | VS Code | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) | modus-pdl-edgitalk |
-| VS Code | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32wb55nucleo |
+| VS Code | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32f303disco, cubemx-hal-stm32wb55nucleo |
 | VS Code | PlatformIO IDE (`platformio.platformio-ide`) | pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box, pio-arduino-unor4wifi |
 | VS Code | MCUXpresso for VS Code (`nxpsemiconductors.mcuxpresso`) | mcux-sdk-frdmmcxn947 |
 

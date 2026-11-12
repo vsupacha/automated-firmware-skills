@@ -39,7 +39,7 @@ it there (or for one shell: `export FW_ACTIVE_MILESTONES="M1 M2"`).
 
 | Milestone | State |
 | --- | --- |
-| **M1 bring-up** | active - 12 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 10 boards; `debug.sh` (status + scripted break / watch / step) in the STM32 C5 and L475 skills; bring-up certificate planned |
+| **M1 bring-up** | active - 13 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 10 boards; `debug.sh` (status + scripted break / watch / step) in the STM32 C5 and L475 skills; bring-up certificate planned |
 | **M2 board support** | layer check (`check_layers.py`) and host test (`host_test.sh`) implemented, gated; `parts.json` + board-driver stage planned |
 | **M3 execution model** | planned (design: [trace](#m3-trace-planned-design) below) |
 | **M4 components** | planned |
@@ -65,6 +65,7 @@ M1 per skill - the bring-up demos are `hello-world` (UART), `blink` (LED) and `p
 | pio-arduino-unor4wifi | yes | verified on hardware |
 | cubemx-hal-stm32n6570dk | yes | planned (dev boot mode, connect under reset) |
 | cubemx-hal-stm32f407disco | yes | connect + flash scripts; test planned (SWO console) |
+| cubemx-hal-stm32f303disco | yes | connect + flash scripts, blink observed; test planned (SWO console) |
 | mcux-sdk-frdmmcxn947 | yes | hello-world + push-to-light tested on hardware; debug planned |
 
 Next: finish M1 (the M1 items of the roadmap below, then the bring-up certificate), then start M2

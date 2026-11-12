@@ -159,6 +159,32 @@
       }
     },
     {
+      "id": "stm32f3-discovery",
+      "name": "ST STM32F3DISCOVERY",
+      "aliases": [
+        "STM32F3DISCOVERY",
+        "STM32F3 Discovery",
+        "F3 Discovery",
+        "F303 Discovery",
+        "MB1035"
+      ],
+      "mcu": "STM32F303VCT6",
+      "mcu_family": "ST STM32F3",
+      "profiles": {
+        "cubemx-hal-stm32f303disco": {
+          "level": "observed",
+          "date": "2026-11-12",
+          "templates": {
+            "hello-world": "built",
+            "blink": "observed",
+            "push-to-light": "built"
+          },
+          "note": "M1 create, build, connect, flash; blink flashed and LD3 seen blinking (2026-11-12); console is SWO output only, so the test stage is planned",
+          "log": "boards/stm32f3-discovery/cubemx-hal-stm32f303disco/README.md"
+        }
+      }
+    },
+    {
       "id": "stm32f407g-disc1",
       "name": "ST STM32F407G-DISC1 (STM32F4DISCOVERY)",
       "aliases": [
