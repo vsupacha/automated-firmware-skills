@@ -16,6 +16,12 @@ verification log, not here.
   now lives in that repository.
 
 ### Added
+- 2026-11-12: board skill `cubemx-hal-stm32l476disco` (ST STM32L476G-DISCO / 32L476GDISCOVERY, STM32L476VG) with classic
+  STM32CubeMX 6.18.1 + STM32CubeL4 1.18.2, from the L475 skill: create, build, connect, flash (asks
+  first), serial tests, `debug.sh`. Console USART2 PD5/PD6 on the ST-LINK/V2-1 VCP; LD4 (PB2) /
+  LD5 (PE8); the 5-way joystick as BTN1..BTN5 (PA0/1/2/3/5, pressed high). push-to-light tested on
+  the board. In `firmware-stm32`. Its FreeRTOS twin `cubemx-freertos-stm32l476disco` is in
+  [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos).
 - 2026-11-12: board skill `cubemx-hal-stm32f303disco` (ST STM32F3DISCOVERY, STM32F303VC) with classic STM32CubeMX
   6.18.1 + STM32CubeF3 1.11.6, from the F4 Discovery skill: create, build, connect, flash (asks
   first); console SWO only (ST-LINK/V2 without VCP), so the test stage is planned. Board layer for
@@ -186,6 +192,12 @@ verification log, not here.
 First public state (commit `207f8b7`). Milestone M1 bring-up active.
 
 ### Added
+- 2026-11-12: board skill `cubemx-hal-stm32l476disco` (ST STM32L476G-DISCO / 32L476GDISCOVERY, STM32L476VG) with classic
+  STM32CubeMX 6.18.1 + STM32CubeL4 1.18.2, from the L475 skill: create, build, connect, flash (asks
+  first), serial tests, `debug.sh`. Console USART2 PD5/PD6 on the ST-LINK/V2-1 VCP; LD4 (PB2) /
+  LD5 (PE8); the 5-way joystick as BTN1..BTN5 (PA0/1/2/3/5, pressed high). push-to-light tested on
+  the board. In `firmware-stm32`. Its FreeRTOS twin `cubemx-freertos-stm32l476disco` is in
+  [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos).
 - Ten board skills `<toolchain>-<framework>-<board>`: modus-pdl-edgitalk,
   cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk and
   cubemx-hal-stm32f407disco (build stages only), pio-arduino-rpipico2w, pio-espidf-esp32s3box,

@@ -1,0 +1,1 @@
+UART console (led/btn commands) + joystick center toggles LD4 (left: LD5) - full I/O demo

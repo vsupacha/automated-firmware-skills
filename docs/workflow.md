@@ -21,6 +21,7 @@ Reference implementations:
 | [cubemx-hal-stm32n6570dk](../skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeN6 HAL, CMake | STM32N6570-DK | M1 build stages only; FSBL in internal SRAM; shares `lib/func` |
 | [cubemx-hal-stm32f407disco](../skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeF4 HAL, CMake | STM32F407G-DISC1 | M1 build, connect, flash (test planned); console SWO output (ST-LINK/V2, no VCP); shares `lib/func` |
 | [cubemx-hal-stm32f303disco](../skills/cubemx-hal-stm32f303disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeF3 HAL, CMake | STM32F3DISCOVERY | M1 build, connect, flash (test planned); console SWO output (ST-LINK/V2, no VCP); FreeRTOS: [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos) |
+| [cubemx-hal-stm32l476disco](../skills/cubemx-hal-stm32l476disco/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | STM32L476G-DISCO | M1 incl. board stages and `debug.sh` (from the L475 skill); console USART2 on the ST-LINK VCP, joystick as 5 buttons; FreeRTOS twin in automated-firmware-skills-freertos |
 | [cubemx-hal-stm32l475iot](../skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | B-L475E-IOT01A | M1 incl. board stages; ST-LINK/V2-1 VCP console (RX by interrupt: no USART FIFO); shares `lib/func` |
 | [cubemx-hal-stm32wb55nucleo](../skills/cubemx-hal-stm32wb55nucleo/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeWB HAL, CMake, STM32CubeProgrammer | NUCLEO-WB55RG | M1 incl. board stages (debug planned); CM4 application only, wireless stack untouched; `.ioc` from `loadboard` + `clearpinout`; shares `lib/func` |
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
@@ -413,6 +414,7 @@ line. The profile diff (old -> new pins) plus that line is the evidence for the 
   | cubemx-hal-stm32l475iot | `L4_WS` | `L4_BOARDS_DIR` | `L4_PROBE_SERIAL` | `L4_CONSOLE` |
   | cubemx-hal-stm32wb55nucleo | `WB_WS` | `WB_BOARDS_DIR` | `WB_PROBE_SERIAL` | `WB_CONSOLE` |
   | cubemx-hal-stm32f303disco | `F3_WS` | `F3_BOARDS_DIR` | `F3_PROBE_SERIAL` | - |
+  | cubemx-hal-stm32l476disco | `L476_WS` | `L476_BOARDS_DIR` | `L476_PROBE_SERIAL` | `L476_CONSOLE` |
   | pio-arduino-unor4wifi | `UNO_WS` | `UNO_BOARDS_DIR` | `UNO_USB_SERIAL` | `UNO_CONSOLE` |
   | mcux-sdk-frdmmcxn947 | `MCX_WS` | `MCX_BOARDS_DIR` | `MCX_PROBE_SERIAL` | `MCX_CONSOLE` |
 - **Your own board**: put its profile in `<project>/boards/<id>/<skill>/board.env` (copy

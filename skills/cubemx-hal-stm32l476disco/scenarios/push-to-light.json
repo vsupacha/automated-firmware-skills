@@ -1,0 +1,12 @@
+{
+  "_doc": "debug.sh run <app made from push-to-light> scenarios/push-to-light.json - halts the core while attached; the app must be flashed first. Ends with LED1 on (the 'led 1 on' command completes after the detach).",
+  "steps": [
+    {"name": "console command reaches cmd_led", "break": "cmd_led", "send": "led 1 on", "timeout": 5},
+    {"name": "three arguments", "print": "argc", "expect": "3"},
+    {"name": "action is on", "print": "argv[2]", "expect_re": "\"on\""},
+    {"name": "step over two lines", "step": 2},
+    {"name": "HAL tick runs (watchpoint)", "watch": "uwTick", "expect_change": true, "timeout": 5},
+    {"name": "no configurable fault", "read": "CFSR", "expect": "0x00000000"},
+    {"name": "no hard fault", "read": "HFSR", "expect": "0x00000000"}
+  ]
+}

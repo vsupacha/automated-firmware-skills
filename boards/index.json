@@ -244,6 +244,33 @@
       }
     },
     {
+      "id": "stm32l476g-disco",
+      "name": "ST STM32L476G-DISCO (32L476GDISCOVERY)",
+      "aliases": [
+        "STM32L476G-DISCO",
+        "32L476GDISCOVERY",
+        "STM32L476G-DK",
+        "STM32L476 Discovery",
+        "L476 Discovery",
+        "MB1184"
+      ],
+      "mcu": "STM32L476VGT6",
+      "mcu_family": "ST STM32L4",
+      "profiles": {
+        "cubemx-hal-stm32l476disco": {
+          "level": "tested",
+          "date": "2026-11-12",
+          "templates": {
+            "hello-world": "built",
+            "blink": "built",
+            "push-to-light": "tested"
+          },
+          "note": "M1 incl. board stages; push-to-light flashed, tests 16/16 (joystick steps not run); debug.sh status running, no fault (2026-11-12)",
+          "log": "boards/stm32l476g-disco/cubemx-hal-stm32l476disco/README.md"
+        }
+      }
+    },
+    {
       "id": "nucleo-wb55rg",
       "name": "ST NUCLEO-WB55RG",
       "aliases": [

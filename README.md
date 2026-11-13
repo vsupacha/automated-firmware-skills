@@ -125,7 +125,7 @@ Common options and overrides: [docs/workflow.md](docs/workflow.md#common-options
 
 ## Status
 
-Milestone **M1 bring-up** is active: 13 board skills, board stages verified on 10 boards. M2 board support
+Milestone **M1 bring-up** is active: 13 board skills, board stages verified on 11 boards. M2 board support
 (layer checks) is implemented but gated; M3-M5 are planned. Plan and per-skill state:
 [docs/milestones.md](docs/milestones.md).
 
@@ -134,6 +134,7 @@ Milestone **M1 bring-up** is active: 13 board skills, board stages verified on 1
 | [modus-pdl-edgitalk](skills/modus-pdl-edgitalk/SKILL.md) | ModusToolbox 3.9 | Infineon PSOC Edge E84 | [Edgi-Talk](boards/edgi-talk/README.md) | [guide](skills/modus-pdl-edgitalk/README.md) · [ไทย](skills/modus-pdl-edgitalk/README_TH.md) |
 | [cubemx2-hal2-stm32c562nucleo](skills/cubemx2-hal2-stm32c562nucleo/SKILL.md) | STM32CubeMX2 1.2.0 + CMake | ST STM32C5 | [NUCLEO-C562RE](boards/nucleo-c562re/README.md) | [guide](skills/cubemx2-hal2-stm32c562nucleo/README.md) · [ไทย](skills/cubemx2-hal2-stm32c562nucleo/README_TH.md) |
 | [cubemx-hal-stm32l475iot](skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 + STM32CubeL4 + CMake | ST STM32L4 | [B-L475E-IOT01A](boards/b-l475e-iot01a/README.md) | [guide](skills/cubemx-hal-stm32l475iot/README.md) · [ไทย](skills/cubemx-hal-stm32l475iot/README_TH.md) |
+| [cubemx-hal-stm32l476disco](skills/cubemx-hal-stm32l476disco/SKILL.md) | STM32CubeMX 6.18 + STM32CubeL4 + CMake | ST STM32L4 | [STM32L476G-DISCO](boards/stm32l476g-disco/README.md) | [guide](skills/cubemx-hal-stm32l476disco/README.md) · [ไทย](skills/cubemx-hal-stm32l476disco/README_TH.md) |
 | [cubemx-hal-stm32wb55nucleo](skills/cubemx-hal-stm32wb55nucleo/SKILL.md) | STM32CubeMX 6.18 + STM32CubeWB + CMake | ST STM32WB | [NUCLEO-WB55RG](boards/nucleo-wb55rg/README.md) | [guide](skills/cubemx-hal-stm32wb55nucleo/README.md) · [ไทย](skills/cubemx-hal-stm32wb55nucleo/README_TH.md) |
 | [cubemx-hal-stm32n6570dk](skills/cubemx-hal-stm32n6570dk/SKILL.md) | STM32CubeMX 6.18 + STM32CubeN6 + CMake | ST STM32N6 | [STM32N6570-DK](boards/stm32n6570-dk/README.md) | [guide](skills/cubemx-hal-stm32n6570dk/README.md) · [ไทย](skills/cubemx-hal-stm32n6570dk/README_TH.md) |
 | [cubemx-hal-stm32f407disco](skills/cubemx-hal-stm32f407disco/SKILL.md) | STM32CubeMX 6.18 + STM32CubeF4 + CMake | ST STM32F4 | [STM32F407G-DISC1](boards/stm32f407g-disc1/README.md) | [guide](skills/cubemx-hal-stm32f407disco/README.md) · [ไทย](skills/cubemx-hal-stm32f407disco/README_TH.md) |
@@ -162,7 +163,7 @@ project and build folders as the scripts. Details: [docs/workflow.md](docs/workf
 | IDE | Extension | Skills |
 | --- | --- | --- |
 | VS Code | Infineon ModusToolbox for VS Code (`infineonag.modustoolbox-for-vscode`) | modus-pdl-edgitalk |
-| VS Code | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32f303disco, cubemx-hal-stm32wb55nucleo |
+| VS Code | STM32CubeIDE for Visual Studio Code (`stmicroelectronics.stm32-vscode-extension`) | cubemx2-hal2-stm32c562nucleo, cubemx-hal-stm32l475iot, cubemx-hal-stm32n6570dk, cubemx-hal-stm32f407disco, cubemx-hal-stm32f303disco, cubemx-hal-stm32l476disco, cubemx-hal-stm32wb55nucleo |
 | VS Code | PlatformIO IDE (`platformio.platformio-ide`) | pio-arduino-rpipico2w, pio-espidf-esp32s3box, pio-arduino-esp32s3box, pio-arduino-unor4wifi |
 | VS Code | MCUXpresso for VS Code (`nxpsemiconductors.mcuxpresso`) | mcux-sdk-frdmmcxn947 |
 
