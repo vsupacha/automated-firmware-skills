@@ -1,0 +1,1 @@
+PubSubClient (MQTT) is added to lib_deps for this template (PIO_LIB_DEPS_NET in the board profile).

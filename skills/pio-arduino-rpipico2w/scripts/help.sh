@@ -34,7 +34,7 @@ skill pio-arduino-rpipico2w (Raspberry Pi Pico 2 W, PlatformIO + arduino-pico) -
      then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                -> build.sh <app>
  Run on hardware (Claude asks before every flash)
-  "flash it"                                -> flash.sh <app> --yes   (reboots to BOOTSEL itself)
+  "flash it"                                -> flash.sh <app> [--yes]   (reboots to BOOTSEL itself)
   "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
   "run the unit tests"                      -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log, func/ on the board; asks before flashing)
  Housekeeping
@@ -54,7 +54,7 @@ skill pio-arduino-rpipico2w (Raspberry Pi Pico 2 W, PlatformIO + arduino-pico) -
      จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                              -> build.sh <app>
  ใช้กับบอร์ดจริง (Claude จะถามก่อน flash ทุกครั้ง)
-  "แฟลชเลย"                                    -> flash.sh <app> --yes   (สั่งบอร์ดเข้า BOOTSEL เอง)
+  "แฟลชเลย"                                    -> flash.sh <app> [--yes]   (สั่งบอร์ดเข้า BOOTSEL เอง)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
   "รัน unit test"                               -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log ของ func/ บนบอร์ด; ถามก่อน flash)
  งานอื่น

@@ -29,6 +29,28 @@ not clear. On the IDE path, stop after stage 2d and run scripts only when asked 
 it"); never overwrite files the developer is editing. Both paths share the app folder and build
 outputs, so switching is always possible: on the script path re-run the gates from Stage 3.
 
+## Main path (script path)
+
+<!-- main-path -->
+The whole automated flow, in order, from the repository root. Board id `stm32f3-discovery`; `<app>` is the
+folder `new_app.sh` prints (in this PC's apps workspace). Other templates: replace `blink`.
+
+```bash
+S=skills/cubemx-hal-stm32f303disco/scripts
+bash $S/check_tools.sh stm32f3-discovery                         # 1 tools:   line with missing/bad=0
+bash $S/new_app.sh stm32f3-discovery my-app "" blink --no-open   # 2 create:  "Created <app>" (prints the app folder)
+bash $S/build.sh <app>                                           # 3 build:   BUILD: PASS
+bash $S/discover.sh stm32f3-discovery                            # 4 connect: IDENTITY: PASS (read-only, needs the board)
+bash $S/flash.sh <app>                                           # 5 flash:   stops with ACTION: APPROVE; after the developer's yes add --yes -> FLASH: PASS
+```
+
+Stage 6 (test) has no script in this skill yet (the console is SWO, no reader): after the flash, the developer checks the LED by eye.
+
+A stage passed only when its gate line is printed. Exit code 10 with an `ACTION:` line means: stop,
+relay it to the developer, and re-run the same command after they acted - never add `--yes` on
+your own. The sections below explain these stages; IDE handoff, debug, unit tests, tool updates
+and clean are optional.
+
 ## Milestones, stage numbers and developer actions
 
 This skill implements the shared contract in `docs/workflow.md` (repo root):
@@ -65,10 +87,13 @@ Repo layout this skill needs:
 <repo>/lib/func/                                shared C logic layer, copied into every app's src/func
 <repo>/boards/<id>/README.md                    board hardware (tool-independent)
 <repo>/boards/<id>/cubemx-hal-stm32f303disco/   board profile: board.env, README (verification log)
-<repo>/apps/                                    apps workspace when working inside the repo
+<repo>/apps/                                    apps workspace only when this PC has none chosen
 ```
 
-Workspace `$F3_WS`: `<repo>/apps` inside the repo checkout, otherwise `./apps`. Board profiles:
+Workspace `$F3_WS` (set it to override): this PC's apps workspace, chosen once with `lib/fw_workspace.sh` and saved in `~/.fw-skills.env`
+(for example `C:/fw-ws`); `<repo>/apps` is used only when none is chosen. In every later command use
+the app path that `new_app.sh` prints (`<workspace>/<app>`).
+Board profiles:
 `<project>/boards/<id>/cubemx-hal-stm32f303disco/` first, then `<repo>/boards` (override
 `F3_BOARDS_DIR`). STM32CubeMX: `C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeMX`
 (override `CUBEMX_HOME`); its firmware repository comes from CubeMX's own settings.
@@ -132,7 +157,9 @@ an `IDE: extension` WARN or a tool update is announced.
 
 ## Stage 2 - Create the project
 
-1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app> [<workspace>] [template]`
+1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app> [<workspace>|""] [template] [--no-open]`
+   - Example with a template and no IDE window (the empty `""` keeps this PC's workspace):
+     `bash "$SKILL/scripts/new_app.sh" <board-id> my-app "" blink --no-open`
    - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
      and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
      e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,

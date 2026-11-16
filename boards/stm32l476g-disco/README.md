@@ -31,6 +31,8 @@ button) < observed (a person saw the LED). Dated evidence: the profile README of
 
 ## Commands
 
+`<app folder>` = the folder `new_app.sh` prints (this PC's apps workspace; `apps/<name>` in the repository only when no workspace is chosen).
+
 ```bash
 S=skills/cubemx-hal-stm32l476disco/scripts
 ```
@@ -41,11 +43,11 @@ S=skills/cubemx-hal-stm32l476disco/scripts
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 4 connect | `bash $S/discover.sh <board> [--serial <stlink-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template] [--no-open]` | `REGEN: PASS`, `Created ...` |
-| 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
-| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` | `IDE: READY` |
-| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
-| 5 flash | `bash $S/flash.sh apps/<app> --yes [--elf <file.elf>]` | `FLASH: PASS` |
-| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 2 regenerate (after a .ioc change) | `bash $S/regen.sh <app folder>` | `REGEN: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh <app folder> [--no-open]` | `IDE: READY` |
+| 3 build | `bash $S/build.sh <app folder> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 5 flash | `bash $S/flash.sh <app folder> --yes [--elf <file.elf>]` | `FLASH: PASS` |
+| 6 test | `python $S/serial_test.py auto <app folder>/tests/<spec>.json <app folder>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
 | 7 debug (read-only status) | `bash $S/debug.sh status <board>` - no reset, no halt | `DEBUG: STATUS running fault=none` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 

@@ -12,11 +12,14 @@ do not start a stage until the previous gate passed. Each stage has a script in 
 details in `reference/`. Bash: Git Bash on Windows (Claude's Bash tool), or Linux/macOS.
 
 ```
-1 tools ─► 2 discover + project ─► 3 code ─► 4 build ─► 5 flash ─► 6 test ─► 7 clean
-check_tools  discover (esptool)    src/board  build.sh   flash.sh   serial_test  clean.sh
-             new_app               src/func
-                                   app_main.c
+1 tools   ─► 2 project ─► 2e code  ─► 3 build ─► 4 connect        ─► 5 flash ─► 6 test    ─► 16 clean
+check_tools  new_app      src/board   build.sh   discover (esptool)  flash.sh   serial_test  clean.sh
+                          src/func
+                          app_main.c
 ```
+
+Stage numbers are the shared ones of `docs/workflow.md`; the section headings below use the same numbers.
+Stage 4 (`discover.sh`, read-only) is needed before flash and test, not before create or build.
 
 **Two paths after Stage 2** (`docs/workflow.md`): the developer may code in VS Code at any
 time - the **IDE path** (`new_app.sh` already opened the app; `open_ide.sh <app>` reopens it; they
@@ -25,6 +28,27 @@ build, flash and debug with the vendor extension's buttons) - or let you run the
 not clear. On the IDE path, stop after stage 2d and run scripts only when asked ("build it", "test
 it"); never overwrite files the developer is editing. Both paths share the app folder and build
 outputs, so switching is always possible: on the script path re-run the gates from Stage 3.
+
+## Main path (script path)
+
+<!-- main-path -->
+The whole automated flow, in order, from the repository root. Board id `esp32-s3-box`; `<app>` is the
+folder `new_app.sh` prints (in this PC's apps workspace). Other templates: replace `blink`.
+
+```bash
+S=skills/pio-espidf-esp32s3box/scripts
+bash $S/check_tools.sh esp32-s3-box                         # 1 tools:   line with missing/bad=0
+bash $S/new_app.sh esp32-s3-box my-app "" blink --no-open   # 2 create:  "Created <app>" (prints the app folder)
+bash $S/build.sh <app>                                      # 3 build:   BUILD: PASS
+bash $S/discover.sh esp32-s3-box                            # 4 connect: IDENTITY: PASS (read-only, needs the board)
+bash $S/flash.sh <app>                                      # 5 flash:   stops with ACTION: APPROVE; after the developer's yes add --yes -> FLASH: PASS
+python $S/serial_test.py auto <app>/tests/blink.json <app>/logs/test.log --board esp32-s3-box   # 6 test:    RESULT: PASS
+```
+
+A stage passed only when its gate line is printed. Exit code 10 with an `ACTION:` line means: stop,
+relay it to the developer, and re-run the same command after they acted - never add `--yes` on
+your own. The sections below explain these stages; IDE handoff, debug, unit tests, tool updates
+and clean are optional.
 
 ## Milestones, stage numbers and developer actions
 
@@ -66,10 +90,13 @@ This skill is part of the automated-firmware-skills repo and needs the repo layo
 <repo>/lib/func/                            shared C logic layer, copied into every app's src/func
 <repo>/boards/<id>/README.md                board hardware (tool-independent)
 <repo>/boards/<id>/pio-espidf-esp32s3box/   board profile: board.env, sdkconfig.board, README (log)
-<repo>/apps/                                apps workspace when working inside the repo
+<repo>/apps/                                apps workspace only when this PC has none chosen
 ```
 
-The apps workspace `$ESP_WS`: `<repo>/apps` inside the repo checkout, otherwise `./apps`. Board
+Workspace `$ESP_WS` (set it to override): this PC's apps workspace, chosen once with `lib/fw_workspace.sh` and saved in `~/.fw-skills.env`
+(for example `C:/fw-ws`); `<repo>/apps` is used only when none is chosen. In every later command use
+the app path that `new_app.sh` prints (`<workspace>/<app>`).
+Board
 profiles: `<project>/boards/<id>/pio-espidf-esp32s3box/` first, then `<repo>/boards` (override
 `ESP_BOARDS_DIR`). `new_app.sh` adds its lines to `<workspace>/.gitignore`.
 
@@ -133,6 +160,8 @@ to install it - don't install it yourself. Changing git config is the user's cal
    - **Gate:** `IDENTITY: PASS` (chip ESP32-S3, MAC = USB serial, flash = profile, secure boot and
      flash encryption disabled) + `Saved ...` (bench file). Several boards: `--serial`.
 2. **Create the app:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app-name> [<workspace>|""] [template] [--no-open]`
+   - Example with a template and no IDE window (the empty `""` keeps this PC's workspace):
+     `bash "$SKILL/scripts/new_app.sh" <board-id> my-app "" blink --no-open`
    - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
      and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
      e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,

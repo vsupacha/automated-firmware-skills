@@ -34,7 +34,7 @@ skill pio-arduino-unor4wifi (Arduino UNO R4 WiFi, PlatformIO + Arduino) - ask Cl
   "build it"                                  -> build.sh <app>
  Run on hardware (milestone M1; Claude asks before every flash)
   "find my board"                             -> discover.sh <board>   (bossac info, writes nothing, the sketch restarts)
-  "flash it"                                  -> flash.sh <app> --yes
+  "flash it"                                  -> flash.sh <app> [--yes]
   "test it" / "test and let me look at LED L" -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  Housekeeping
   "clean the build outputs"                   -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
@@ -53,7 +53,7 @@ skill pio-arduino-unor4wifi (Arduino UNO R4 WiFi, PlatformIO + Arduino) - สั
   "build ให้หน่อย"                                -> build.sh <app>
  ใช้กับบอร์ดจริง (milestone M1; Claude จะถามก่อน flash ทุกครั้ง)
   "หาบอร์ดที่ต่ออยู่"                               -> discover.sh <board>   (bossac อ่านอย่างเดียว แต่ sketch จะเริ่มใหม่)
-  "แฟลชเลย"                                      -> flash.sh <app> --yes
+  "แฟลชเลย"                                      -> flash.sh <app> [--yes]
   "ทดสอบ" / "ทดสอบแล้วให้ฉันดูไฟ L"                 -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  งานอื่น
   "clean ให้หน่อย"                                -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)

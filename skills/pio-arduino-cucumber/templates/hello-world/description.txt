@@ -1,0 +1,1 @@
+prints "hello, world" every 1 s on the UART console (USB-UART bridge, millis() time base)

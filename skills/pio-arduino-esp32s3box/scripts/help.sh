@@ -35,7 +35,7 @@ skill pio-arduino-esp32s3box (ESP32-S3-BOX, PlatformIO + Arduino) - ask Claude i
  Run on hardware (milestone M1; Claude asks before every flash)
   "find my board"                             -> discover.sh <board>   (esptool, writes nothing, resets the chip)
   "back up the factory firmware"              -> backup.sh <board>
-  "flash it"                                  -> flash.sh <app> --yes
+  "flash it"                                  -> flash.sh <app> [--yes]
   "test it" / "test with button presses"      -> serial_test.py auto <spec> <log> --board <b> [--interactive]
   "run the unit tests"                        -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log, func/ on the board; asks before flashing)
  Housekeeping
@@ -56,7 +56,7 @@ skill pio-arduino-esp32s3box (ESP32-S3-BOX, PlatformIO + Arduino) - สั่ง
  ใช้กับบอร์ดจริง (milestone M1; Claude จะถามก่อน flash ทุกครั้ง)
   "หาบอร์ดที่ต่ออยู่"                               -> discover.sh <board>   (esptool อ่านอย่างเดียว แต่ chip จะรีเซ็ต)
   "สำรอง firmware เดิม"                           -> backup.sh <board>
-  "แฟลชเลย"                                      -> flash.sh <app> --yes
+  "แฟลชเลย"                                      -> flash.sh <app> [--yes]
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                      -> serial_test.py auto <spec> <log> --board <b> [--interactive]
   "รัน unit test"                                 -> unit_test.sh <app> [--yes] [--build-only | --read-only]  (Unity + test log ของ func/ บนบอร์ด; ถามก่อน flash)
  งานอื่น

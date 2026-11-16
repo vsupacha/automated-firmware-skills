@@ -39,7 +39,7 @@ it there (or for one shell: `export FW_ACTIVE_MILESTONES="M1 M2"`).
 
 | Milestone | State |
 | --- | --- |
-| **M1 bring-up** | active - 13 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 11 boards; `debug.sh` (status + scripted break / watch / step) in the STM32 C5, L475 and L476 skills; bring-up certificate planned |
+| **M1 bring-up** | active - 14 board skills; build stages work in all of them, board stages (connect, flash, test) verified on 11 boards; `debug.sh` (status + scripted break / watch / step) in the STM32 C5, L475 and L476 skills; bring-up certificate planned |
 | **M2 board support** | layer check (`check_layers.py`) and host test (`host_test.sh`) implemented, gated; `parts.json` + board-driver stage planned |
 | **M3 execution model** | planned (design: [trace](#m3-trace-planned-design) below) |
 | **M4 components** | planned |
@@ -60,6 +60,7 @@ M1 per skill - the bring-up demos are `hello-world` (UART), `blink` (LED) and `p
 | pio-arduino-rpipico2w | yes | verified on hardware |
 | pio-espidf-esp32s3box | yes | verified on hardware |
 | pio-arduino-esp32s3box | yes | verified on hardware |
+| pio-arduino-cucumber | yes | built only (board stages written, not run on a board yet) |
 | cubemx-hal-stm32l475iot | yes | verified on hardware |
 | cubemx-hal-stm32wb55nucleo | yes | hello-world tested on hardware |
 | pio-arduino-unor4wifi | yes | verified on hardware |

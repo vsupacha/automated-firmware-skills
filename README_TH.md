@@ -47,6 +47,7 @@
 | Raspberry Pi Pico 2 W | [skills/pio-arduino-rpipico2w/README_TH.md](skills/pio-arduino-rpipico2w/README_TH.md) |
 | ESP32-S3-BOX (ESP-IDF) | [skills/pio-espidf-esp32s3box/README_TH.md](skills/pio-espidf-esp32s3box/README_TH.md) |
 | ESP32-S3-BOX (Arduino) | [skills/pio-arduino-esp32s3box/README_TH.md](skills/pio-arduino-esp32s3box/README_TH.md) |
+| Gravitech Cucumber S (Arduino, เซนเซอร์บนบอร์ด + IoT) | [skills/pio-arduino-cucumber/README_TH.md](skills/pio-arduino-cucumber/README_TH.md) |
 | Arduino UNO R4 WiFi | [skills/pio-arduino-unor4wifi/README_TH.md](skills/pio-arduino-unor4wifi/README_TH.md) |
 | NXP FRDM-MCXN947 (ยังไม่มี debug) | [skills/mcux-sdk-frdmmcxn947/README_TH.md](skills/mcux-sdk-frdmmcxn947/README_TH.md) |
 

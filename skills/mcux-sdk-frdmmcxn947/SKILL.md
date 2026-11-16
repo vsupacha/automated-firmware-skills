@@ -27,6 +27,27 @@ path** (build behind its gate). Ask which one when it is not clear. On the IDE p
 stage 2d and run scripts only when asked; never overwrite files the developer is editing. Both
 paths use the same CMake preset `debug` and the same `debug/` folder, so switching is always possible.
 
+## Main path (script path)
+
+<!-- main-path -->
+The whole automated flow, in order, from the repository root. Board id `frdm-mcxn947`; `<app>` is the
+folder `new_app.sh` prints (in this PC's apps workspace). Other templates: replace `blink`.
+
+```bash
+S=skills/mcux-sdk-frdmmcxn947/scripts
+bash $S/check_tools.sh frdm-mcxn947                         # 1 tools:   line with missing/bad=0
+bash $S/new_app.sh frdm-mcxn947 my-app "" blink --no-open   # 2 create:  "Created <app>" (prints the app folder)
+bash $S/build.sh <app>                                      # 3 build:   BUILD: PASS
+bash $S/discover.sh frdm-mcxn947                            # 4 connect: IDENTITY: PASS (read-only, needs the board)
+bash $S/flash.sh <app>                                      # 5 flash:   stops with ACTION: APPROVE; after the developer's yes add --yes -> FLASH: PASS
+python $S/serial_test.py auto <app>/tests/blink.json <app>/logs/test.log --board frdm-mcxn947   # 6 test:    RESULT: PASS
+```
+
+A stage passed only when its gate line is printed. Exit code 10 with an `ACTION:` line means: stop,
+relay it to the developer, and re-run the same command after they acted - never add `--yes` on
+your own. The sections below explain these stages; IDE handoff, debug, unit tests, tool updates
+and clean are optional.
+
 ## Milestones, stage numbers and developer actions
 
 This skill implements the shared contract in `docs/workflow.md` (repo root):

@@ -349,6 +349,35 @@
           "date": "2026-10-30"
         }
       }
+    },
+    {
+      "id": "cucumber-s",
+      "name": "Gravitech Cucumber S",
+      "aliases": [
+        "Cucumber",
+        "Cucumber S",
+        "Cucumber RS",
+        "Cucumber RIS",
+        "Cucumber MS",
+        "Cucumber MIS",
+        "Gravitech Cucumber"
+      ],
+      "mcu": "ESP32-S2",
+      "mcu_family": "Espressif ESP32-S2",
+      "profiles": {
+        "pio-arduino-cucumber": {
+          "level": "built",
+          "date": "2026-11-14",
+          "templates": {
+            "hello-world": "built",
+            "blink": "built",
+            "push-to-light": "built",
+            "iot-sensor": "built"
+          },
+          "note": "sensor variants only (RS/RIS/MS/MIS); board stages not run yet",
+          "log": "boards/cucumber-s/pio-arduino-cucumber/README.md"
+        }
+      }
     }
   ]
 }

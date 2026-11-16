@@ -1,0 +1,1 @@
+IoT sensor node: MPU6050 + BMP280 + HTS221 readings on the console (SENS/JSON lines, per-sensor commands, RGB LED) + optional Wi-Fi/MQTT publish (defaults in app_config.h: broker.emqx.io, topic tu/tse/le380/iot_sensor/<id>; Wi-Fi in the git-ignored src/secrets.h or typed at run time into NVS)

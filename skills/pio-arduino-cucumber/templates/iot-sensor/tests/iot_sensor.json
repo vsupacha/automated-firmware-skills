@@ -1,0 +1,26 @@
+{
+  "baud": 115200,
+  "boot": {"expect": "READY", "timeout": 30},
+  "sync": {"send": "info", "expect": "READY"},
+  "steps": [
+    {"name": "info",             "send": "info", "expect_re": ["^INFO app=iot-sensor v=\\S+ board=\\S+ leds=1 btns=1 imu=\\d baro=\\d hum=\\d period_ms=\\d+"]},
+    {"name": "help",             "send": "help", "expect": ["wifi set <ssid> <pw>", "mqtt set <host> [port]"]},
+    {"name": "period 1 s",       "send": "period 1000", "expect": ["OK period_ms=1000"]},
+    {"name": "stream line 1",    "expect_re": ["^SENS seq=\\d+ t=\\S+ rh=\\S+ p=\\S+ ax=\\S+ ay=\\S+ az=\\S+ gx=\\S+ gy=\\S+ gz=\\S+$"], "timeout": 2.5, "pause": 0},
+    {"name": "stream line 2",    "expect_re": ["^SENS seq=\\d+ "], "timeout": 2.5, "pause": 0},
+    {"name": "stream off",       "send": "stream off", "expect": ["OK stream=off"]},
+    {"name": "read now",         "send": "read", "expect_re": ["^SENS seq=\\d+ t="]},
+    {"name": "json payload",     "send": "json", "expect_re": ["^JSON \\{\"type\":\"cucumber\",\"board\":\"[a-z0-9-]+\",\"seq\":\\d+,\"temperature\":-?[\\d.]+,\"humidity\":[\\d.]+,\"pressure\":[\\d.]+,\"acceleration_x\":-?[\\d.]+,\"acceleration_y\":-?[\\d.]+,\"acceleration_z\":-?[\\d.]+,\"gyro_x\":-?[\\d.]+,\"gyro_y\":-?[\\d.]+,\"gyro_z\":-?[\\d.]+\\}$"]},
+    {"name": "bad period",       "send": "period 10", "expect": ["ERR usage: period"]},
+    {"name": "led1 on",          "send": "led 1 on", "expect": ["OK led1=1"]},
+    {"name": "led1 off",         "send": "led 1 off", "expect": ["OK led1=0"]},
+    {"name": "wifi state",       "send": "wifi?", "expect_re": ["^WIFI state=(off|connecting|connected) saved=[01] ip=[\\d.]+ rssi=-?\\d+ mac=[0-9a-f]{12}$"]},
+    {"name": "mqtt state",       "send": "mqtt?", "expect_re": ["^MQTT state=(off|waiting|connected) host=\\S+ topic=\\S+ published=\\d+$"]},
+    {"name": "publish offline",  "send": "publish", "requires_re": "^MQTT state=(off|waiting) ", "expect": ["ERR mqtt not connected"]},
+    {"name": "publish online",   "send": "publish", "requires_re": "^MQTT state=connected ", "expect_re": ["^EVT mqtt=published seq=\\d+ bytes=\\d+$"], "timeout": 5},
+    {"name": "unknown cmd",      "send": "foo", "expect": ["ERR unknown command"]},
+    {"name": "period back 5 s",  "send": "period 5000", "expect": ["OK period_ms=5000"]},
+    {"name": "stream on",        "send": "stream on", "expect": ["OK stream=on"]},
+    {"name": "BTN1 press",       "interactive": true, "prompt": "Press and release {btn1} once", "expect": ["EVT btn1=pressed", "EVT btn1=released"], "timeout": 30}
+  ]
+}

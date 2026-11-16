@@ -36,8 +36,9 @@ skill cubemx2-hal2-stm32c562nucleo (STM32C5 / NUCLEO-C562RE, STM32CubeMX2 + CMak
      then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                -> build.sh <app>
  Run on hardware (Claude asks before every flash)
-  "flash it"                                -> flash.sh <app> --yes   (ST-LINK, verify after write)
+  "flash it"                                -> flash.sh <app> [--yes]   (ST-LINK, verify after write)
   "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
+  "is it running? any fault?"               -> debug.sh status <board>  (read-only) | debug.sh run <app> <scenario.json>
  Housekeeping
   "clean the build outputs"                 -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
   "add a new board" / "add a template"      -> boards/_template/, SKILL.md "Extending"
@@ -57,8 +58,9 @@ skill cubemx2-hal2-stm32c562nucleo (STM32C5 / NUCLEO-C562RE, STM32CubeMX2 + CMak
      จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                              -> build.sh <app>
  ใช้กับบอร์ดจริง (Claude จะถามก่อน flash ทุกครั้ง)
-  "แฟลชเลย"                                    -> flash.sh <app> --yes   (ผ่าน ST-LINK, verify หลังเขียน)
+  "แฟลชเลย"                                    -> flash.sh <app> [--yes]   (ผ่าน ST-LINK, verify หลังเขียน)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
+  "บอร์ดทำงานอยู่ไหม มี fault ไหม"              -> debug.sh status <board>  (อ่านอย่างเดียว) | debug.sh run <app> <scenario.json>
  งานอื่น
   "clean ให้หน่อย"                              -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
   "เพิ่มบอร์ดใหม่" / "เพิ่ม template"             -> boards/_template/, SKILL.md หัวข้อ Extending

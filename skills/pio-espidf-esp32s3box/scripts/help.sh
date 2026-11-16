@@ -35,7 +35,7 @@ skill pio-espidf-esp32s3box (ESP32-S3-BOX, PlatformIO + ESP-IDF) - ask Claude in
  Run on hardware (milestone M1; Claude asks before every flash)
   "find my board"                             -> discover.sh <board>   (esptool, writes nothing, resets the chip)
   "back up the factory firmware"              -> backup.sh <board>
-  "flash it"                                  -> flash.sh <app> --yes
+  "flash it"                                  -> flash.sh <app> [--yes]
   "test it" / "test with button presses"      -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  Housekeeping
   "clean the build outputs"                   -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
@@ -55,7 +55,7 @@ skill pio-espidf-esp32s3box (ESP32-S3-BOX, PlatformIO + ESP-IDF) - สั่ง 
  ใช้กับบอร์ดจริง (milestone M1; Claude จะถามก่อน flash ทุกครั้ง)
   "หาบอร์ดที่ต่ออยู่"                               -> discover.sh <board>   (esptool อ่านอย่างเดียว แต่ chip จะรีเซ็ต)
   "สำรอง firmware เดิม"                           -> backup.sh <board>
-  "แฟลชเลย"                                      -> flash.sh <app> --yes
+  "แฟลชเลย"                                      -> flash.sh <app> [--yes]
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                      -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  งานอื่น
   "clean ให้หน่อย"                                -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)

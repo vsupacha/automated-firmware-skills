@@ -16,6 +16,16 @@ verification log, not here.
   now lives in that repository.
 
 ### Added
+- 2026-11-14: board skill `pio-arduino-cucumber` (Gravitech Cucumber S: ESP32-S2-WROVER with onboard
+  MPU6050, BMP280, HTS221 and an RGB LED) with PlatformIO espressif32 6.12.0 + arduino-esp32 2.0.17,
+  from the ESP32-S3-BOX Arduino skill. Board layer with one driver per device (`board_i2c`,
+  `board_imu`, `board_baro`, `board_hum`, `board_rgb`; Adafruit libraries pinned in the board
+  profile, headers without library types); new template `iot-sensor` (sensor commands, SENS/JSON
+  lines, Wi-Fi + MQTT publish with credentials typed at run time into NVS) with one test spec per
+  peripheral. Console UART0 through a USB-UART bridge: discover records the chip's MAC and flash.sh
+  gates on it. All four templates build with 0 warnings; not run on a board yet. In
+  `firmware-platformio`. Facts from the owner's LE380 proof of concept and Gravitech's
+  cucumber-library.
 - 2026-11-12: board skill `cubemx-hal-stm32l476disco` (ST STM32L476G-DISCO / 32L476GDISCOVERY, STM32L476VG) with classic
   STM32CubeMX 6.18.1 + STM32CubeL4 1.18.2, from the L475 skill: create, build, connect, flash (asks
   first), serial tests, `debug.sh`. Console USART2 PD5/PD6 on the ST-LINK/V2-1 VCP; LD4 (PB2) /
@@ -180,6 +190,10 @@ verification log, not here.
   portable logic-layer modules wired from `app_main.c`.
 
 ### Fixed
+- 2026-11-14: `pio-arduino-esp32s3box` and `pio-arduino-rpipico2w` (as `pio-arduino-cucumber`): the
+  generated `platformio.ini` starts with `[platformio]` `default_envs = <env>`. PlatformIO IDE's Build
+  button built every env, and `[env:<env>_unit]` (src/func only) fails to link outside `pio test`
+  (no `setup()`/`loop()`). Apps made before keep the old file: add the two lines by hand.
 - push-to-light specs: the last interactive step expected `^LED led1=1$`, which fails on boards
   with more than one LED (`LED led1=1 led2=1 ...`); now `^LED led1=1( |$)` in every skill.
 - `serial_test.py`: a missing or invalid test spec prints an `ERROR` line with the specs that

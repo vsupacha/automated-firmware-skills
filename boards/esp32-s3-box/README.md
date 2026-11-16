@@ -39,6 +39,8 @@ button) < observed (a person saw the LED). \* = verified under its earlier name 
 
 ## Commands
 
+`<app folder>` = the folder `new_app.sh` prints (this PC's apps workspace; `apps/<name>` in the repository only when no workspace is chosen).
+
 ### pio-espidf-esp32s3box
 
 ```bash
@@ -51,11 +53,11 @@ S=skills/pio-espidf-esp32s3box/scripts
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
-| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
-| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh <app folder> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh <app folder> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 5 backup (optional, factory firmware) | `bash $S/backup.sh <board>` | `BACKUP: PASS` |
-| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
-| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 5 flash | `bash $S/flash.sh <app folder> --yes` | `FLASH: PASS` |
+| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto <app folder>/tests/<spec>.json <app folder>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `esp32-s3-box`. Templates: `hello-world`, `blink`, `push-to-light` (LED1 = LCD backlight, BTN1 = BOOT).
@@ -73,11 +75,11 @@ S=skills/pio-arduino-esp32s3box/scripts
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 4 connect | `bash $S/discover.sh <board> [--serial <usb-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
-| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
-| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh <app folder> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh <app folder> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 5 backup (optional, factory firmware) | `bash $S/backup.sh <board>` | `BACKUP: PASS` |
-| 5 flash | `bash $S/flash.sh apps/<app> --yes` | `FLASH: PASS` |
-| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 5 flash | `bash $S/flash.sh <app folder> --yes` | `FLASH: PASS` |
+| 6 test | `~/.platformio/penv/Scripts/python $S/serial_test.py auto <app folder>/tests/<spec>.json <app folder>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `esp32-s3-box`. Templates: `hello-world`, `blink`, `push-to-light` (LED1 = LCD backlight, BTN1 = BOOT).

@@ -43,7 +43,7 @@ PSOC Edge E84 firmware skill - what you can ask (say it in your own words)
   "build it"                               -> build.sh <app>
  Run on hardware (Claude asks before every flash)
   "back up the board first"                -> backup.sh <board>
-  "flash it" / "restore the backup"        -> flash.sh <app> --yes [--hex <file>]
+  "flash it" / "restore the backup"        -> flash.sh <app> [--yes] [--hex <file>]
   "test it" / "test with button presses"   -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  Housekeeping
   "clean the build outputs"                -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
@@ -69,7 +69,7 @@ skill modus-pdl-edgitalk (PSOC Edge E84) - สั่ง Claude ได้ด้�
   "build ให้หน่อย"                           -> build.sh <app>
  ใช้กับบอร์ดจริง (Claude จะขออนุญาตก่อน flash ทุกครั้ง)
   "สำรอง firmware เดิมก่อน"                   -> backup.sh <board>
-  "flash เลย" / "คืน firmware เดิม"           -> flash.sh <app> --yes [--hex <file>]
+  "flash เลย" / "คืน firmware เดิม"           -> flash.sh <app> [--yes] [--hex <file>]
   "ทดสอบ" / "ทดสอบแบบกดปุ่มด้วย"             -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  ดูแลโฟลเดอร์
   "clean ให้หน่อย"                            -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)

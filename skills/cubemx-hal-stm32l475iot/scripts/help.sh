@@ -35,8 +35,9 @@ skill cubemx-hal-stm32l475iot (B-L475E-IOT01A, STM32CubeMX + STM32CubeL4 HAL + C
      then choose: code + build/flash/debug yourself in VS Code (IDE path), or let Claude run build/flash/test (script path) - switch any time
   "build it"                                -> build.sh <app>
  Run on hardware (milestone M1; Claude asks before every flash)
-  "flash it"                                -> flash.sh <app> --yes   (identity gates: ST-LINK board, device ID)
+  "flash it"                                -> flash.sh <app> [--yes]   (identity gates: ST-LINK board, device ID)
   "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
+  "is it running? any fault?"               -> debug.sh status <board>  (read-only) | debug.sh run <app> <scenario.json>
  Housekeeping
   "clean the build outputs"                 -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
 EOF
@@ -54,8 +55,9 @@ skill cubemx-hal-stm32l475iot (B-L475E-IOT01A, STM32CubeMX + STM32CubeL4 HAL + C
      จากนั้นเลือกได้: เขียนโค้ด + build/แฟลช/debug เองใน VS Code (ทาง IDE) หรือให้ Claude รัน build/flash/test (ทางสคริปต์) - สลับได้ทุกเมื่อ
   "build ให้หน่อย"                              -> build.sh <app>
  ใช้กับบอร์ดจริง (milestone M1; Claude ถามก่อนแฟลชทุกครั้ง)
-  "แฟลชให้หน่อย"                               -> flash.sh <app> --yes   (ตรวจตัวตนบอร์ด: ST-LINK, device ID)
+  "แฟลชให้หน่อย"                               -> flash.sh <app> [--yes]   (ตรวจตัวตนบอร์ด: ST-LINK, device ID)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                   -> serial_test.py auto <spec> <log> --board <b> [--interactive]
+  "บอร์ดทำงานอยู่ไหม มี fault ไหม"              -> debug.sh status <board>  (อ่านอย่างเดียว) | debug.sh run <app> <scenario.json>
  งานอื่น
   "clean ให้หน่อย"                              -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)
 EOF

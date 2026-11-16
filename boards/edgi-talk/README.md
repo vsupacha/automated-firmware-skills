@@ -29,6 +29,8 @@ button) < observed (a person saw the LED). \* = verified under its earlier name 
 
 ## Commands
 
+`<app folder>` = the folder `new_app.sh` prints (this PC's apps workspace; `apps/<name>` in the repository only when no workspace is chosen).
+
 ```bash
 S=skills/modus-pdl-edgitalk/scripts
 ```
@@ -40,11 +42,11 @@ S=skills/modus-pdl-edgitalk/scripts
 | 4 connect | `bash $S/discover.sh <board> [--serial <probe-serial>]` | `IDENTITY: PASS` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `Created ...` |
 | 2 create from example | `bash $S/examples.sh <board> [words] [--detail <id>]`, then `bash $S/new_app.sh <board> <app> "" --example <id>` | `Created ...` |
-| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
-| 3 build | `bash $S/build.sh apps/<app> [--clean] [--getlibs] [--allow-warnings]` | `BUILD: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh <app folder> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh <app folder> [--clean] [--getlibs] [--allow-warnings]` | `BUILD: PASS` |
 | 5 backup (before the first flash) | `bash $S/backup.sh <board>` | backup files written |
-| 5 flash | `bash $S/flash.sh apps/<app> --yes [--hex <file.hex>]` | `FLASH: PASS` (exit 10 `ACTION: POWER_CYCLE` = replug USB) |
-| 6 test | `python $S/serial_test.py auto apps/<app>/tests/<spec>.json apps/<app>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
+| 5 flash | `bash $S/flash.sh <app folder> --yes [--hex <file.hex>]` | `FLASH: PASS` (exit 10 `ACTION: POWER_CYCLE` = replug USB) |
+| 6 test | `python $S/serial_test.py auto <app folder>/tests/<spec>.json <app folder>/logs/test.log --board <board> [--interactive]` | `RESULT: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `edgi-talk`. Templates: `hello-world`, `blink`, `push-to-light`, plus `button-led` and

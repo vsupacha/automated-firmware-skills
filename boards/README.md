@@ -20,6 +20,7 @@ a dated verification log). Machine-readable: [index.json](index.json).
 | [Espressif ESP32-S3-BOX (2021)](esp32-s3-box/README.md) | Espressif ESP32-S3 (ESP32-S3) | `pio-espidf-esp32s3box` | USB Serial/JTAG | LCD backlight | BOOT |
 | [Espressif ESP32-S3-BOX (2021)](esp32-s3-box/README.md) | Espressif ESP32-S3 (ESP32-S3) | `pio-arduino-esp32s3box` | USB Serial/JTAG | LCD backlight | BOOT |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | Renesas RA4M1 (R7FA4M1AB3CFM) | `pio-arduino-unor4wifi` | UART via the USB bridge | L (yellow) | none |
+| [Gravitech Cucumber S](cucumber-s/README.md) | Espressif ESP32-S2 (ESP32-S2-WROVER) | `pio-arduino-cucumber` | UART via the USB-UART bridge | LED (blue, GPIO2) | BOOT |
 
 ## Bring-up demos
 
@@ -47,6 +48,7 @@ The same three templates in every skill, checked with the same test specs (`test
 | [ST NUCLEO-WB55RG](nucleo-wb55rg/README.md) | `cubemx-hal-stm32wb55nucleo` | tested | built | observed |
 | [Arduino UNO R4 WiFi](uno-r4-wifi/README.md) | `pio-arduino-unor4wifi` | tested | built | observed * |
 | [NXP FRDM-MCXN947](frdm-mcxn947/README.md) | `mcux-sdk-frdmmcxn947` | tested | built | tested |
+| [Gravitech Cucumber S](cucumber-s/README.md) | `pio-arduino-cucumber` | built | built | built |
 <!-- board-status:end -->
 
 Levels: unverified < built < flashed < tested (automatic test PASS) < interactive (a person pressed

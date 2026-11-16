@@ -34,7 +34,7 @@ skill mcux-sdk-frdmmcxn947 (NXP FRDM-MCXN947, MCUXpresso SDK + CMake) - ask Clau
   "build it"                                -> build.sh <app>   (NXP / Kitware tools only, never ST's)
  Run on hardware (milestone M1; Claude asks before every flash)
   "find my board"                           -> discover.sh <board>   (read-only; saves MCU-Link serial + COM port)
-  "flash it"                                -> flash.sh <app> --yes   (identity + internal-flash gates, LinkServer -u none)
+  "flash it"                                -> flash.sh <app> [--yes]   (identity + internal-flash gates, LinkServer -u none)
   "test it" / "test with button presses"    -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  Housekeeping
   "clean the build outputs"                 -> clean.sh [--apps]  (dry run, then --yes; --apps deletes apps)
@@ -52,7 +52,7 @@ skill mcux-sdk-frdmmcxn947 (NXP FRDM-MCXN947, MCUXpresso SDK + CMake) - สั�
   "build ให้หน่อย"                              -> build.sh <app>   (ใช้เครื่องมือ NXP / Kitware เท่านั้น ไม่ใช้ของ ST)
  ใช้กับบอร์ดจริง (milestone M1; Claude ถามก่อนแฟลชทุกครั้ง)
   "หาบอร์ดที่เสียบอยู่"                           -> discover.sh <board>   (อ่านอย่างเดียว; บันทึก serial ของ MCU-Link + COM port)
-  "แฟลชให้หน่อย"                               -> flash.sh <app> --yes   (ตรวจตัวตนบอร์ด + เขียนเฉพาะ internal flash, LinkServer -u none)
+  "แฟลชให้หน่อย"                               -> flash.sh <app> [--yes]   (ตรวจตัวตนบอร์ด + เขียนเฉพาะ internal flash, LinkServer -u none)
   "ทดสอบ" / "ทดสอบแบบกดปุ่ม"                   -> serial_test.py auto <spec> <log> --board <b> [--interactive]
  งานอื่น
   "clean ให้หน่อย"                              -> clean.sh [--apps]  (ลบผล build; --apps ลบแอปด้วย, แสดงรายการก่อน)

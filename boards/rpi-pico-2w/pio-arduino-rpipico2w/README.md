@@ -48,3 +48,7 @@ quirks and the verification log of the `pio-arduino-rpipico2w` skill. Machine-re
   `pio test` env `rpi_pico_2w_unit` builds only `src/func` + `test/test_func` + Unity 2.6.1 (0
   warnings); `flash.sh --uf2` identity gate RP2350 / 4096K, `FLASH: PASS`; results read on the CDC
   port: **UNIT: PASS (12/12)** (led 4, button debounce 3, console 5; fake board, no human step).
+- 2026-11-14 `new_app.sh` writes `[platformio]` `default_envs = <env>` so PlatformIO IDE's Build
+  builds the app env only (the `_unit` env links only under `pio test`). Check on the portable PC,
+  app `dv-pico` (push-to-light): `pio project config` shows `default_envs = rpi_pico_2w`; NOT built
+  (raspberrypi platform not installed on this PC - not downloaded on purpose); app deleted.

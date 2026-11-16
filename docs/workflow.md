@@ -25,6 +25,7 @@ Reference implementations:
 | [cubemx-hal-stm32l475iot](../skills/cubemx-hal-stm32l475iot/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeL4 HAL, CMake, STM32CubeProgrammer | B-L475E-IOT01A | M1 incl. board stages; ST-LINK/V2-1 VCP console (RX by interrupt: no USART FIFO); shares `lib/func` |
 | [cubemx-hal-stm32wb55nucleo](../skills/cubemx-hal-stm32wb55nucleo/SKILL.md) | STM32CubeMX 6.18 (headless), STM32CubeWB HAL, CMake, STM32CubeProgrammer | NUCLEO-WB55RG | M1 incl. board stages (debug planned); CM4 application only, wireless stack untouched; `.ioc` from `loadboard` + `clearpinout`; shares `lib/func` |
 | [pio-arduino-esp32s3box](../skills/pio-arduino-esp32s3box/SKILL.md) | PlatformIO + Arduino, esptool | ESP32-S3-BOX | same board, Arduino style: `<Arduino.h>` API in every layer, own Arduino func/ |
+| [pio-arduino-cucumber](../skills/pio-arduino-cucumber/SKILL.md) | PlatformIO + Arduino, esptool | Gravitech Cucumber S (ESP32-S2) | UART0 via a USB-UART bridge (flash gate on the chip's MAC); one board-layer driver per onboard sensor (MPU6050, BMP280, HTS221, RGB LED) + iot-sensor template (Wi-Fi/MQTT, credentials in NVS) |
 | [pio-arduino-unor4wifi](../skills/pio-arduino-unor4wifi/SKILL.md) | PlatformIO + Arduino (renesas-ra), bossac | UNO R4 WiFi | RA4M1 through the ESP32-S3 USB bridge (1200 baud touch, no read-back); Arduino style like the BOX skill, `console_printf()` |
 | [mcux-sdk-frdmmcxn947](../skills/mcux-sdk-frdmmcxn947/SKILL.md) | MCUXpresso SDK 26.09 (west), Arm GNU 14.2 + Ninja (MCUXpresso Installer), Kitware CMake, LinkServer 26.5 | FRDM-MCXN947 | M1 incl. board stages (debug planned); LinkServer `-u none`, internal flash only; app = `west export_app` of hello_world, trimmed; VS Code project files written directly; never ST tools |
 
@@ -184,7 +185,7 @@ BSP/driver  generated / vendor        ModusToolbox BSP, CubeMX mx/, arduino-pico
 
 - `lib/func` is shared unchanged by modus-pdl-edgitalk, cubemx2-hal2-stm32c562nucleo and pio-espidf-esp32s3box
   (FreeRTOS: the same services from tasks, in [automated-firmware-skills-freertos](https://github.com/vsupacha/automated-firmware-skills-freertos)).
-  Arduino skills (pio-arduino-rpipico2w, pio-arduino-esp32s3box, pio-arduino-unor4wifi) keep an Arduino-style C++ func/ in their
+  Arduino skills (pio-arduino-rpipico2w, pio-arduino-esp32s3box, pio-arduino-unor4wifi, pio-arduino-cucumber) keep an Arduino-style C++ func/ in their
   templates (`<Arduino.h>`, Print/Stream, millis) - same console protocol and tests. It may include only `board.h` and the C library.
 - `board.h` is the same API on every board: init, millis/delay, LEDs (write/read/name), buttons
   (read/name/pin), console getc/flush, printf to the console - the contract is
@@ -257,6 +258,7 @@ automated-firmware-skills-rtthread use the same terms and test log layout with R
 | --- | --- | --- |
 | pio-arduino-rpipico2w | `unit_test.sh <app> [--yes] [--build-only \| --read-only] [--filter <glob>]` | `[env:<env>_unit]` (`pio test`, `src/func` + `test/` only), flashed with `flash.sh --uf2` |
 | pio-arduino-esp32s3box | `unit_test.sh <app> [--yes] [--build-only \| --read-only] [--filter <glob>]` | `[env:<env>_unit]`, manifest, flashed with `flash.sh --env <env>_unit` |
+| pio-arduino-cucumber | same as pio-arduino-esp32s3box (test stub also covers the sensor drivers) | same; not run on a board yet |
 | cubemx-hal-stm32wb55nucleo | `unit_test.sh <app> [--yes] [--build-only \| --read-only]` | the CubeMX project built again with `-DFW_UNIT=ON` into `mx/build/Unit`, flashed with `flash.sh --elf` |
 
 `--build-only` builds the test image and stops (`UNIT-BUILD: PASS`, image sha256; no board).

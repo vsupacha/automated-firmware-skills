@@ -30,6 +30,8 @@ button) < observed (a person saw the LED). \* = verified under its earlier name 
 
 ## Commands
 
+`<app folder>` = the folder `new_app.sh` prints (this PC's apps workspace; `apps/<name>` in the repository only when no workspace is chosen).
+
 ```bash
 S=skills/cubemx-hal-stm32n6570dk/scripts
 ```
@@ -39,9 +41,9 @@ S=skills/cubemx-hal-stm32n6570dk/scripts
 | 0 help | `bash $S/help.sh [--en]` | - |
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `REGEN: PASS`, `Created ...` |
-| 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
-| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
-| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 2 regenerate (after a .ioc change) | `bash $S/regen.sh <app folder>` | `REGEN: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh <app folder> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh <app folder> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `stm32n6570-dk`. Templates: `hello-world`, `blink`, `push-to-light`. Each app's `<app>.ioc` starts

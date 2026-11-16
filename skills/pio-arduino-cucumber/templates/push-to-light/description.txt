@@ -1,0 +1,1 @@
+UART console over USB (led/btn commands) + BOOT toggles the blue LED on GPIO2 (LED1) - full I/O demo

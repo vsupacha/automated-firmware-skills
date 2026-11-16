@@ -46,3 +46,7 @@ define, labels, expected identity). Hardware: [../README.md](../README.md). Same
   USB during a manual DTR/RTS reset experiment); after unplugging USB for 5 s: **UNIT: PASS (12/12)**,
   twice (`--read-only` again). `FLASH: PASS` does not prove the image booted (BOOT: gate on the roadmap).
   Before the session the board ran a TinyUSB firmware (PID 4001, not ours, not backed up - owner's call).
+- 2026-11-14 `new_app.sh` writes `[platformio]` `default_envs = <env>` so PlatformIO IDE's Build
+  builds the app env only (the `_unit` env links only under `pio test`). Check on the portable PC,
+  app `dv-esa` (push-to-light): `pio run` without `-e` built only `esp32_s3_box` (1 succeeded),
+  `unit_test.sh --build-only` UNIT-BUILD: PASS; app deleted. Not flashed.

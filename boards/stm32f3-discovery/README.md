@@ -32,6 +32,8 @@ button) < observed (a person saw the LED). Dated evidence: the profile README of
 
 ## Commands
 
+`<app folder>` = the folder `new_app.sh` prints (this PC's apps workspace; `apps/<name>` in the repository only when no workspace is chosen).
+
 ```bash
 S=skills/cubemx-hal-stm32f303disco/scripts
 ```
@@ -41,11 +43,11 @@ S=skills/cubemx-hal-stm32f303disco/scripts
 | 0 help | `bash $S/help.sh [--en]` | - |
 | 1 setup | `bash $S/check_tools.sh <board> [--ws <workspace>]` | `missing/bad=0` |
 | 2 create | `bash $S/new_app.sh <board> <app> [<workspace>\|""] [template]` | `REGEN: PASS`, `Created ...` |
-| 2 regenerate (after a .ioc change) | `bash $S/regen.sh apps/<app>` | `REGEN: PASS` |
-| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh apps/<app> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
-| 3 build | `bash $S/build.sh apps/<app> [--clean] [--allow-warnings]` | `BUILD: PASS` |
+| 2 regenerate (after a .ioc change) | `bash $S/regen.sh <app folder>` | `REGEN: PASS` |
+| 2d open in IDE (run by new_app) | `bash $S/open_ide.sh <app folder> [--no-open]` - VS Code + the toolchain extension, on the same project as the scripts | `IDE: READY` |
+| 3 build | `bash $S/build.sh <app folder> [--clean] [--allow-warnings]` | `BUILD: PASS` |
 | 4 connect (read-only) | `bash $S/discover.sh <board> [--serial <sn>]` | `IDENTITY: PASS` |
-| 5 flash (ask first) | `bash $S/flash.sh apps/<app> --yes [--elf <file>]` | `FLASH: PASS` |
+| 5 flash (ask first) | `bash $S/flash.sh <app folder> --yes [--elf <file>]` | `FLASH: PASS` |
 | 16 clean | `bash $S/clean.sh [--apps] [--yes]` | `CLEAN: done` |
 
 Board: `stm32f3-discovery`. Templates: `hello-world`, `blink`, `push-to-light`. `mx/` is generated

@@ -13,7 +13,7 @@ order; do not start a stage until the previous gate passed. **Windows + Git Bash
 **milestone M1**; the hardware stages (discover, flash, test) come after the key boards.
 
 ```
-1 tools ─► 2 project + VS Code ─► 3 code ─► 4 build ─► (5 flash, 6 test: planned) ─► 7 clean
+1 tools ─► 2 project + VS Code ─► 2e code ─► 3 build ─► (4 connect, 5 flash, 6 test: planned) ─► 16 clean
 check_tools  new_app    src/board  build.sh                                     clean.sh
              regen      src/func
              open_ide
@@ -27,6 +27,26 @@ build, flash and debug with the vendor extension's buttons) - or let you run the
 not clear. On the IDE path, stop after stage 2d and run scripts only when asked ("build it", "test
 it"); never overwrite files the developer is editing. Both paths share the app folder and build
 outputs, so switching is always possible: on the script path re-run the gates from Stage 3.
+
+## Main path (script path)
+
+<!-- main-path -->
+The whole automated flow, in order, from the repository root. Board id `stm32n6570-dk`; `<app>` is the
+folder `new_app.sh` prints (in this PC's apps workspace). Other templates: replace `blink`.
+
+```bash
+S=skills/cubemx-hal-stm32n6570dk/scripts
+bash $S/check_tools.sh stm32n6570-dk                         # 1 tools:   line with missing/bad=0
+bash $S/new_app.sh stm32n6570-dk my-app "" blink --no-open   # 2 create:  "Created <app>" (prints the app folder)
+bash $S/build.sh <app>                                       # 3 build:   BUILD: PASS
+```
+
+Stages 4-6 (connect, flash, test) have no scripts in this skill yet: the path ends at the build.
+
+A stage passed only when its gate line is printed. Exit code 10 with an `ACTION:` line means: stop,
+relay it to the developer, and re-run the same command after they acted - never add `--yes` on
+your own. The sections below explain these stages; IDE handoff, debug, unit tests, tool updates
+and clean are optional.
 
 ## Milestones, stage numbers and developer actions
 
@@ -64,10 +84,13 @@ Repo layout this skill needs:
 <repo>/lib/func/                              shared C logic layer, copied into every app's src/func
 <repo>/boards/<id>/README.md                  board hardware (tool-independent)
 <repo>/boards/<id>/cubemx-hal-stm32n6570dk/   board profile: board.env, README (verification log)
-<repo>/apps/                                  apps workspace when working inside the repo
+<repo>/apps/                                  apps workspace only when this PC has none chosen
 ```
 
-Workspace `$N6_WS`: `<repo>/apps` inside the repo checkout, otherwise `./apps`. Board profiles:
+Workspace `$N6_WS` (set it to override): this PC's apps workspace, chosen once with `lib/fw_workspace.sh` and saved in `~/.fw-skills.env`
+(for example `C:/fw-ws`); `<repo>/apps` is used only when none is chosen. In every later command use
+the app path that `new_app.sh` prints (`<workspace>/<app>`).
+Board profiles:
 `<project>/boards/<id>/cubemx-hal-stm32n6570dk/` first, then `<repo>/boards` (override
 `N6_BOARDS_DIR`). STM32CubeMX: `C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeMX`
 (override `CUBEMX_HOME`); its firmware repository comes from CubeMX's own settings.
@@ -137,7 +160,9 @@ an `IDE: extension` WARN or a tool update is announced.
 
 ## Stage 2 - Create the project
 
-1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app> [<workspace>] [template]`
+1. **Create:** `bash "$SKILL/scripts/new_app.sh" <board-id> <app> [<workspace>|""] [template] [--no-open]`
+   - Example with a template and no IDE window (the empty `""` keeps this PC's workspace):
+     `bash "$SKILL/scripts/new_app.sh" <board-id> my-app "" blink --no-open`
    - **Workspace (once per PC):** exit 10 `ACTION: CHOOSE` = no apps workspace chosen for this PC
      and `apps/` is in a synced folder or too long. Ask the developer (outside the synced folder,
      e.g. `C:/fw-ws` - recommended - or keep `apps/`), run `bash <repo>/lib/fw_workspace.sh set <dir>`,
